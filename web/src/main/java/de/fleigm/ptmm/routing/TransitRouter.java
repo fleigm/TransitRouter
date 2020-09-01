@@ -65,27 +65,8 @@ public class TransitRouter {
   public TransitRouter(GraphHopper graphHopper, PMap hints) {
     this.locationIndex = (LocationIndexTree) graphHopper.getLocationIndex();
 
-    if (hints.has("vehicle"))
-      throw new IllegalArgumentException("MapMatching hints may no longer contain a vehicle, use the profile parameter instead, see core/#1958");
-    if (hints.has("weighting"))
-      throw new IllegalArgumentException("MapMatching hints may no longer contain a weighting, use the profile parameter instead, see core/#1958");
-
-    if (graphHopper.getProfiles().isEmpty()) {
-      throw new IllegalArgumentException("No profiles found, you need to configure at least one profile to use map matching");
-    }
-    if (!hints.has("profile")) {
-      throw new IllegalArgumentException("You need to specify a profile to perform map matching");
-    }
     String profileStr = hints.getString("profile", "");
     Profile profile = graphHopper.getProfile(profileStr);
-    if (profile == null) {
-      List<Profile> profiles = graphHopper.getProfiles();
-      List<String> profileNames = new ArrayList<>(profiles.size());
-      for (Profile p : profiles) {
-        profileNames.add(p.getName());
-      }
-      throw new IllegalArgumentException("Could not find profile '" + profileStr + "', choose one of: " + profileNames);
-    }
 
     // Convert heading penalty [s] into U-turn penalty [m]
     // The heading penalty is automatically taken into account by GraphHopper routing,
@@ -93,7 +74,6 @@ public class TransitRouter {
     // We use that mechanism to softly enforce a heading for each map-matching state.
     // We want to consistently use the same parameter for our own objective function (independent of the routing),
     // which has meters as unit, not seconds.
-
     final double PENALTY_CONVERSION_VELOCITY = 5;  // [m/s]
     final double headingTimePenalty = hints.getDouble(Parameters.Routing.HEADING_PENALTY, Parameters.Routing.DEFAULT_HEADING_PENALTY);
     uTurnDistancePenalty = headingTimePenalty * PENALTY_CONVERSION_VELOCITY;
@@ -133,16 +113,13 @@ public class TransitRouter {
    * This method does the actual map matching.
    * <p>
    *
-   * @param gpxList the input list with GPX points which should match to edges
-   *                of the graph specified in the constructor
+   * @param observations the input list with GPX points which should match to edges
+   *                     of the graph specified in the constructor
    */
-  public RoutingResult route(List<Observation> gpxList) {
-    // filter the entries:
-    List<Observation> filteredGPXEntries = filterGPXEntries(gpxList);
-
+  public RoutingResult route(List<Observation> observations) {
     // now find each of the entries in the graph:
     List<Collection<QueryResult>> queriesPerEntry = lookupGPXEntries(
-        filteredGPXEntries,
+        observations,
         DefaultEdgeFilter.allEdges(weighting.getFlagEncoder()));
 
     queryGraph = buildQueryGraph(queriesPerEntry);
@@ -159,16 +136,16 @@ public class TransitRouter {
     // Creates candidates from the QueryResults of all GPX entries (a candidate is basically a
     // QueryResult + direction).
     List<TimeStep<State, Observation, Path>> timeSteps = createTimeSteps(
-        filteredGPXEntries,
+        observations,
         queriesPerEntry,
         queryGraph);
 
     // Compute the most likely sequence of map matching candidates:
 
     MatchResult matchResult = computeMatchResult(
-        computeViterbiSequence(timeSteps, gpxList.size(), queryGraph),
+        computeViterbiSequence(timeSteps, observations.size(), queryGraph),
         createVirtualEdgesMap(queriesPerEntry),
-        gpxList,
+        observations,
         queryGraph);
 
     return new RoutingResult(matchResult, timeSteps);
@@ -186,28 +163,6 @@ public class TransitRouter {
 
   private EdgeExplorer createAllEdgeExplorer() {
     return queryGraph.createEdgeExplorer(DefaultEdgeFilter.allEdges(weighting.getFlagEncoder()));
-  }
-
-  /**
-   * Filters GPX entries to only those which will be used for map matching (i.e. those which
-   * are separated by at least 2 * measurementErrorSigman
-   */
-  private List<Observation> filterGPXEntries(List<Observation> gpxList) {
-    List<Observation> filtered = new ArrayList<>();
-    Observation prevEntry = null;
-    int last = gpxList.size() - 1;
-    for (int i = 0; i <= last; i++) {
-      Observation gpxEntry = gpxList.get(i);
-      if (i == 0 || i == last || distanceCalc.calcDist(
-          prevEntry.getPoint().getLat(), prevEntry.getPoint().getLon(),
-          gpxEntry.getPoint().getLat(), gpxEntry.getPoint().getLon()) > 2 * measurementErrorSigma) {
-        filtered.add(gpxEntry);
-        prevEntry = gpxEntry;
-      } else {
-        logger.debug("Filter out GPX entry: {}", i + 1);
-      }
-    }
-    return filtered;
   }
 
   /**
@@ -464,25 +419,28 @@ public class TransitRouter {
   }
 
   private RoutingAlgorithm createRoutingAlgorithm(QueryGraph queryGraph) {
-    RoutingAlgorithm router;
-    if (ch) {
-      RoutingCHGraphImpl g = new RoutingCHGraphImpl(queryGraph, weighting);
-      router = new DijkstraBidirectionCH(g) {
-        @Override
-        protected void initCollections(int size) {
-          super.initCollections(50);
-        }
-      };
-      router.setMaxVisitedNodes(maxVisitedNodes);
-    } else {
-      router = new DijkstraBidirectionRef(queryGraph, weighting, TraversalMode.NODE_BASED) {
-        @Override
-        protected void initCollections(int size) {
-          super.initCollections(50);
-        }
-      };
-      router.setMaxVisitedNodes(maxVisitedNodes);
-    }
+    return ch ? createCHRoutingAlgorithm(queryGraph) : createDijkstraRoutingAlgorithm(queryGraph);
+  }
+
+  private RoutingAlgorithm createCHRoutingAlgorithm(QueryGraph queryGraph) {
+    RoutingAlgorithm router = new DijkstraBidirectionCH(new RoutingCHGraphImpl(queryGraph, weighting)) {
+      @Override
+      protected void initCollections(int size) {
+        super.initCollections(50);
+      }
+    };
+    router.setMaxVisitedNodes(maxVisitedNodes);
+    return router;
+  }
+
+  private RoutingAlgorithm createDijkstraRoutingAlgorithm(QueryGraph queryGraph) {
+    RoutingAlgorithm router = new DijkstraBidirectionRef(queryGraph, weighting, TraversalMode.NODE_BASED) {
+      @Override
+      protected void initCollections(int size) {
+        super.initCollections(50);
+      }
+    };
+    router.setMaxVisitedNodes(maxVisitedNodes);
     return router;
   }
 
