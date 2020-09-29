@@ -48,7 +48,7 @@ public class BusFlagEncoder extends AbstractFlagEncoder {
 
   public BusFlagEncoder(int speedBits, double speedFactor, int maxTurnCosts) {
     super(speedBits, speedFactor, maxTurnCosts);
-    restrictions.addAll(Arrays.asList("motorcar", "motor_vehicle", "vehicle", "access"));
+    restrictions.addAll(Arrays.asList("bus", "psv", "motorcar", "motor_vehicle", "vehicle", "access"));
     restrictedValues.add("agricultural");
     restrictedValues.add("forestry");
     restrictedValues.add("no");
@@ -60,8 +60,7 @@ public class BusFlagEncoder extends AbstractFlagEncoder {
 
     intendedValues.add("yes");
     intendedValues.add("permissive");
-    intendedValues.add("bus");
-    intendedValues.add("busway");
+    intendedValues.add("designated");
 
     potentialBarriers.add("gate");
     potentialBarriers.add("lift_gate");
