@@ -10,6 +10,8 @@ import java.util.List;
 public class RoutingResult {
 
   private Path path;
+  private double distance;
+  private double time;
   private List<TimeStep<State, Observation, Path>> timeSteps;
 
   public Path getPath() {
@@ -18,6 +20,22 @@ public class RoutingResult {
 
   public void setPath(Path path) {
     this.path = path;
+  }
+
+  public double getDistance() {
+    return distance;
+  }
+
+  public void setDistance(double distance) {
+    this.distance = distance;
+  }
+
+  public double getTime() {
+    return time;
+  }
+
+  public void setTime(double time) {
+    this.time = time;
   }
 
   public List<TimeStep<State, Observation, Path>> getTimeSteps() {

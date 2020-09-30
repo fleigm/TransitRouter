@@ -447,28 +447,11 @@ public class TransitRouter {
 
     RoutingResult routingResult = new RoutingResult();
     routingResult.setPath(mergedPath);
+    routingResult.setDistance(distance);
+    routingResult.setTime(time);
     routingResult.setTimeSteps(timeSteps);
 
     return routingResult;
-  }
-
-  private double gpxLength(List<Observation> gpxList) {
-    if (gpxList.isEmpty()) {
-      return 0;
-    } else {
-      double gpxLength = 0;
-      Observation prevEntry = gpxList.get(0);
-      for (int i = 1; i < gpxList.size(); i++) {
-        Observation entry = gpxList.get(i);
-        gpxLength += distanceCalc.calcDist(
-            prevEntry.getPoint().lat,
-            prevEntry.getPoint().lon,
-            entry.getPoint().lat,
-            entry.getPoint().lon);
-        prevEntry = entry;
-      }
-      return gpxLength;
-    }
   }
 
   private static class MapMatchedPath extends Path {
