@@ -24,9 +24,7 @@ public class RoutingService {
         .map(Observation::new)
         .collect(Collectors.toList());
 
-    RoutingResult route = router.route(observations);
-
-    return route;
+    return router.route(observations);
   }
 
 }

@@ -12,6 +12,9 @@ public class JsonbConfiguration implements JsonbConfigCustomizer {
   @Override
   public void customize(JsonbConfig config) {
     config.withSerializers(new PointListSerializer())
+        .withSerializers(new LineStringSerializer())
+        .withSerializers(new PathSerializer())
+        .withSerializers(new EdgeIteratorStateSerializer())
         .withSerializers(new GHPointSerializer())
         .withSerializers(new ObservationSerializer())
         .withSerializers(new StateSerializer());

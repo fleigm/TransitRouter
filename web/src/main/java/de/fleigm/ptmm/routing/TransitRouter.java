@@ -39,6 +39,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -54,7 +55,7 @@ public class TransitRouter {
 
   private final Graph routingGraph;
   private final LocationIndexTree locationIndex;
-  private double measurementErrorSigma = 50.0;
+  private double measurementErrorSigma = 25.0;
   private double transitionProbabilityBeta = 2.0;
   private final int maxVisitedNodes;
   private final DistanceCalc distanceCalc = new DistancePlaneProjection();
@@ -89,24 +90,8 @@ public class TransitRouter {
       routingGraph = graphHopper.getGraphHopperStorage();
     }
     // since map matching does not support turn costs we have to disable them here explicitly
-    weighting = graphHopper.createWeighting(profile, hints, true);
+    weighting = graphHopper.createWeighting(profile, hints, false);
     this.maxVisitedNodes = hints.getInt(Parameters.Routing.MAX_VISITED_NODES, Integer.MAX_VALUE);
-  }
-
-  /**
-   * Beta parameter of the exponential distribution for modeling transition
-   * probabilities.
-   */
-  public void setTransitionProbabilityBeta(double transitionProbabilityBeta) {
-    this.transitionProbabilityBeta = transitionProbabilityBeta;
-  }
-
-  /**
-   * Standard deviation of the normal distribution [m] used for modeling the
-   * GPS error.
-   */
-  public void setMeasurementErrorSigma(double measurementErrorSigma) {
-    this.measurementErrorSigma = measurementErrorSigma;
   }
 
   /**
@@ -141,14 +126,9 @@ public class TransitRouter {
         queryGraph);
 
     // Compute the most likely sequence of map matching candidates:
+    List<SequenceState<State, Observation, Path>> viterbiSequence = computeViterbiSequence(timeSteps, queryGraph);
 
-    MatchResult matchResult = computeMatchResult(
-        computeViterbiSequence(timeSteps, observations.size(), queryGraph),
-        createVirtualEdgesMap(queriesPerEntry),
-        observations,
-        queryGraph);
-
-    return new RoutingResult(matchResult, timeSteps);
+    return computeRoutingResult(viterbiSequence, timeSteps, queryGraph);
   }
 
   private QueryGraph buildQueryGraph(List<Collection<QueryResult>> queriesPerEntry) {
@@ -288,18 +268,13 @@ public class TransitRouter {
    */
   private List<SequenceState<State, Observation, Path>> computeViterbiSequence(
       List<TimeStep<State, Observation, Path>> timeSteps,
-      int originalGpxEntriesCount,
       QueryGraph queryGraph) {
 
     final HmmProbabilities probabilities = new HmmProbabilities(measurementErrorSigma, transitionProbabilityBeta);
     final ViterbiAlgorithm<State, Observation, Path> viterbi = new ViterbiAlgorithm<>();
 
-    logger.debug("\n=============== Paths ===============");
-    int timeStepCounter = 0;
     TimeStep<State, Observation, Path> prevTimeStep = null;
-    int i = 1;
     for (TimeStep<State, Observation, Path> timeStep : timeSteps) {
-      logger.debug("\nPaths to time step {}", i++);
       computeEmissionProbabilities(timeStep, probabilities);
 
       if (prevTimeStep == null) {
@@ -316,31 +291,11 @@ public class TransitRouter {
             timeStep.transitionLogProbabilities,
             timeStep.roadPaths);
       }
-      if (viterbi.isBroken()) {
-        String likelyReasonStr = "";
-        if (prevTimeStep != null) {
-          Observation prevGPXE = prevTimeStep.observation;
-          Observation gpxe = timeStep.observation;
-          double dist = distanceCalc.calcDist(
-              prevGPXE.getPoint().lat,
-              prevGPXE.getPoint().lon,
-              gpxe.getPoint().lat,
-              gpxe.getPoint().lon);
-          if (dist > 2000) {
-            likelyReasonStr = "Too long distance to previous measurement? "
-                              + Math.round(dist) + "m, ";
-          }
-        }
 
-        throw new IllegalArgumentException("Sequence is broken for submitted track at time step "
-                                           + timeStepCounter + " (" + originalGpxEntriesCount + " points). "
-                                           + likelyReasonStr + "observation:" + timeStep.observation + ", "
-                                           + timeStep.candidates.size() + " candidates: "
-                                           + getSnappedCandidates(timeStep.candidates)
-                                           + ". If a match is expected consider increasing max_visited_nodes.");
+      if (viterbi.isBroken()) {
+        throw new IllegalArgumentException("Sequence is broken for submitted track");
       }
 
-      timeStepCounter++;
       prevTimeStep = timeStep;
     }
 
@@ -373,27 +328,7 @@ public class TransitRouter {
 
     for (State from : prevTimeStep.candidates) {
       for (State to : timeStep.candidates) {
-        // enforce heading if required:
-        if (from.isOnDirectedEdge()) {
-          // Make sure that the path starting at the "from" candidate goes through
-          // the outgoing edge.
-          queryGraph.unfavorVirtualEdgePair(
-              from.getQueryResult().getClosestNode(),
-              from.getIncomingVirtualEdge().getEdge());
-        }
-        if (to.isOnDirectedEdge()) {
-          // Make sure that the path ending at "to" candidate goes through
-          // the incoming edge.
-          queryGraph.unfavorVirtualEdgePair(
-              to.getQueryResult().getClosestNode(),
-              to.getOutgoingVirtualEdge().getEdge());
-        }
-
-        RoutingAlgorithm router = createRoutingAlgorithm(queryGraph);
-
-        final Path path = router.calcPath(
-            from.getQueryResult().getClosestNode(),
-            to.getQueryResult().getClosestNode());
+        final Path path = computePathBetweenCandidates(from, to, queryGraph);
 
         if (path.isFound()) {
           timeStep.addRoadPath(from, to, path);
@@ -402,9 +337,6 @@ public class TransitRouter {
           // but this is not reflected in the path distance. Hence, we need to adjust the
           // path distance accordingly.
           final double penalizedPathDistance = penalizedPathDistance(path, queryGraph.getUnfavoredVirtualEdges());
-
-          logger.debug("Path from: {}, to: {}, penalized path length: {}",
-              from, to, penalizedPathDistance);
 
           final double transitionLogProbability = probabilities
               .transitionLogProbability(penalizedPathDistance, linearDistance);
@@ -416,6 +348,28 @@ public class TransitRouter {
 
       }
     }
+  }
+
+  private Path computePathBetweenCandidates(State from, State to, QueryGraph queryGraph) {
+    // enforce heading if required:
+    if (from.isOnDirectedEdge()) {
+      // Make sure that the path starting at the "from" candidate goes through
+      // the outgoing edge.
+      queryGraph.unfavorVirtualEdgePair(
+          from.getQueryResult().getClosestNode(),
+          from.getIncomingVirtualEdge().getEdge());
+    }
+    if (to.isOnDirectedEdge()) {
+      // Make sure that the path ending at "to" candidate goes through
+      // the incoming edge.
+      queryGraph.unfavorVirtualEdgePair(
+          to.getQueryResult().getClosestNode(),
+          to.getOutgoingVirtualEdge().getEdge());
+    }
+
+    RoutingAlgorithm router = createRoutingAlgorithm(queryGraph);
+
+    return router.calcPath(from.getQueryResult().getClosestNode(), to.getQueryResult().getClosestNode());
   }
 
   private RoutingAlgorithm createRoutingAlgorithm(QueryGraph queryGraph) {
@@ -434,7 +388,7 @@ public class TransitRouter {
   }
 
   private RoutingAlgorithm createDijkstraRoutingAlgorithm(QueryGraph queryGraph) {
-    RoutingAlgorithm router = new DijkstraBidirectionRef(queryGraph, weighting, TraversalMode.NODE_BASED) {
+    RoutingAlgorithm router = new DijkstraBidirectionRef(queryGraph, weighting, TraversalMode.EDGE_BASED) {
       @Override
       protected void initCollections(int size) {
         super.initCollections(50);
@@ -469,10 +423,9 @@ public class TransitRouter {
     return path.getDistance() + totalPenalty;
   }
 
-  private MatchResult computeMatchResult(
+  private RoutingResult computeRoutingResult(
       List<SequenceState<State, Observation, Path>> seq,
-      Map<String, EdgeIteratorState> virtualEdgesMap,
-      List<Observation> gpxList,
+      List<TimeStep<State, Observation, Path>> timeSteps,
       QueryGraph queryGraph) {
 
     double distance = 0.0;
@@ -492,74 +445,11 @@ public class TransitRouter {
     }
     Path mergedPath = new TransitRouter.MapMatchedPath(queryGraph.getBaseGraph(), weighting, edges);
 
-    List<EdgeMatch> edgeMatches = computeEdgeMatches(seq, virtualEdgesMap);
-    MatchResult matchResult = new MatchResult(edgeMatches);
-    matchResult.setMergedPath(mergedPath);
-    matchResult.setMatchMillis(time);
-    matchResult.setMatchLength(distance);
-    matchResult.setGPXEntriesLength(gpxLength(gpxList));
-    matchResult.setGraph(queryGraph.getBaseGraph());
-    matchResult.setWeighting(weighting);
-    return matchResult;
-  }
+    RoutingResult routingResult = new RoutingResult();
+    routingResult.setPath(mergedPath);
+    routingResult.setTimeSteps(timeSteps);
 
-  private List<EdgeMatch> computeEdgeMatches(
-      List<SequenceState<State, Observation, Path>> seq,
-      Map<String, EdgeIteratorState> virtualEdgesMap) {
-    // This creates a list of directed edges (EdgeIteratorState instances turned the right way),
-    // each associated with 0 or more of the observations.
-    // These directed edges are edges of the real street graph, where nodes are intersections.
-    // So in _this_ representation, the path that you get when you just look at the edges goes from
-    // an intersection to an intersection.
-
-    // Implementation note: We have to look at both states _and_ transitions, since we can have e.g. just one state,
-    // or two states with a transition that is an empty path (observations snapped to the same node in the query graph),
-    // but these states still happen on an edge, and for this representation, we want to have that edge.
-    // (Whereas in the ResponsePath representation, we would just see an empty path.)
-
-    // Note that the result can be empty, even when the input is not. Observations can be on nodes as well as on
-    // edges, and when all observations are on the same node, we get no edge at all.
-    // But apart from that corner case, all observations that go in here are also in the result.
-
-    // (Consider totally forbidding candidate states to be snapped to a point, and make them all be on directed
-    // edges, then that corner case goes away.)
-    List<EdgeMatch> edgeMatches = new ArrayList<>();
-    List<State> states = new ArrayList<>();
-    EdgeIteratorState currentDirectedRealEdge = null;
-    for (SequenceState<State, Observation, Path> transitionAndState : seq) {
-      // transition (except before the first state)
-      if (transitionAndState.transitionDescriptor != null) {
-        for (EdgeIteratorState edge : transitionAndState.transitionDescriptor.calcEdges()) {
-          EdgeIteratorState newDirectedRealEdge = resolveToRealEdge(virtualEdgesMap, edge);
-          if (currentDirectedRealEdge != null) {
-            if (!equalEdges(currentDirectedRealEdge, newDirectedRealEdge)) {
-              EdgeMatch edgeMatch = new EdgeMatch(currentDirectedRealEdge, states);
-              edgeMatches.add(edgeMatch);
-              states = new ArrayList<>();
-            }
-          }
-          currentDirectedRealEdge = newDirectedRealEdge;
-        }
-      }
-      // state
-      if (transitionAndState.state.isOnDirectedEdge()) { // as opposed to on a node
-        EdgeIteratorState newDirectedRealEdge = resolveToRealEdge(virtualEdgesMap, transitionAndState.state.getOutgoingVirtualEdge());
-        if (currentDirectedRealEdge != null) {
-          if (!equalEdges(currentDirectedRealEdge, newDirectedRealEdge)) {
-            EdgeMatch edgeMatch = new EdgeMatch(currentDirectedRealEdge, states);
-            edgeMatches.add(edgeMatch);
-            states = new ArrayList<>();
-          }
-        }
-        currentDirectedRealEdge = newDirectedRealEdge;
-      }
-      states.add(transitionAndState.state);
-    }
-    if (currentDirectedRealEdge != null) {
-      EdgeMatch edgeMatch = new EdgeMatch(currentDirectedRealEdge, states);
-      edgeMatches.add(edgeMatch);
-    }
-    return edgeMatches;
+    return routingResult;
   }
 
   private double gpxLength(List<Observation> gpxList) {
@@ -579,89 +469,6 @@ public class TransitRouter {
       }
       return gpxLength;
     }
-  }
-
-  private boolean equalEdges(EdgeIteratorState edge1, EdgeIteratorState edge2) {
-    return edge1.getEdge() == edge2.getEdge()
-           && edge1.getBaseNode() == edge2.getBaseNode()
-           && edge1.getAdjNode() == edge2.getAdjNode();
-  }
-
-  private EdgeIteratorState resolveToRealEdge(Map<String, EdgeIteratorState> virtualEdgesMap,
-                                              EdgeIteratorState edgeIteratorState) {
-    if (queryGraph.isVirtualNode(edgeIteratorState.getBaseNode())
-        || queryGraph.isVirtualNode(edgeIteratorState.getAdjNode())) {
-      return virtualEdgesMap.get(virtualEdgesMapKey(edgeIteratorState));
-    } else {
-      return edgeIteratorState;
-    }
-  }
-
-  /**
-   * Returns a map where every virtual edge maps to its real edge with correct orientation.
-   */
-  private Map<String, EdgeIteratorState> createVirtualEdgesMap(List<Collection<QueryResult>> queriesPerEntry) {
-    EdgeExplorer explorer = createAllEdgeExplorer();
-    // TODO For map key, use the traversal key instead of string!
-    Map<String, EdgeIteratorState> virtualEdgesMap = new HashMap<>();
-    for (Collection<QueryResult> queryResults : queriesPerEntry) {
-      for (QueryResult qr : queryResults) {
-        if (queryGraph.isVirtualNode(qr.getClosestNode())) {
-          EdgeIterator iter = explorer.setBaseNode(qr.getClosestNode());
-          while (iter.next()) {
-            int node = traverseToClosestRealAdj(iter);
-            if (node == qr.getClosestEdge().getAdjNode()) {
-              virtualEdgesMap.put(virtualEdgesMapKey(iter),
-                  qr.getClosestEdge().detach(false));
-              virtualEdgesMap.put(reverseVirtualEdgesMapKey(iter),
-                  qr.getClosestEdge().detach(true));
-            } else if (node == qr.getClosestEdge().getBaseNode()) {
-              virtualEdgesMap.put(virtualEdgesMapKey(iter),
-                  qr.getClosestEdge().detach(true));
-              virtualEdgesMap.put(reverseVirtualEdgesMapKey(iter),
-                  qr.getClosestEdge().detach(false));
-            } else {
-              throw new RuntimeException();
-            }
-          }
-        }
-      }
-    }
-    return virtualEdgesMap;
-  }
-
-  private String virtualEdgesMapKey(EdgeIteratorState iter) {
-    return iter.getBaseNode() + "-" + iter.getEdge() + "-" + iter.getAdjNode();
-  }
-
-  private String reverseVirtualEdgesMapKey(EdgeIteratorState iter) {
-    return iter.getAdjNode() + "-" + iter.getEdge() + "-" + iter.getBaseNode();
-  }
-
-  private int traverseToClosestRealAdj(EdgeIteratorState edge) {
-    if (!queryGraph.isVirtualNode(edge.getAdjNode())) {
-      return edge.getAdjNode();
-    }
-    EdgeExplorer explorer = createAllEdgeExplorer();
-    EdgeIterator iter = explorer.setBaseNode(edge.getAdjNode());
-    while (iter.next()) {
-      if (iter.getAdjNode() != edge.getBaseNode()) {
-        return traverseToClosestRealAdj(iter);
-      }
-    }
-    throw new IllegalStateException("Cannot find adjacent edge " + edge);
-  }
-
-  private String getSnappedCandidates(Collection<State> candidates) {
-    String str = "";
-    for (State gpxe : candidates) {
-      if (!str.isEmpty()) {
-        str += ", ";
-      }
-      str += "distance: " + gpxe.getQueryResult().getQueryDistance() + " to "
-             + gpxe.getQueryResult().getSnappedPoint();
-    }
-    return "[" + str + "]";
   }
 
   private static class MapMatchedPath extends Path {

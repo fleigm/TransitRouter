@@ -5,6 +5,7 @@ import com.conveyal.gtfs.model.Stop;
 import com.conveyal.gtfs.model.Trip;
 import com.graphhopper.GraphHopper;
 import com.graphhopper.util.PMap;
+import com.vividsolutions.jts.geom.LineString;
 import de.fleigm.ptmm.TransitFeed;
 import de.fleigm.ptmm.routing.RoutingResult;
 import de.fleigm.ptmm.routing.RoutingService;
@@ -42,7 +43,7 @@ public class RoutingResource {
   public void init() {
     routingService = new RoutingService(
         transitFeed,
-        new TransitRouter(hopper, new PMap().putObject("profile", "bus_shortest")));
+        new TransitRouter(hopper, new PMap().putObject("profile", "bus_fastest")));
   }
 
   @GET
@@ -75,9 +76,11 @@ public class RoutingResource {
         .map(feed.stops::get)
         .collect(Collectors.toList());
 
+    LineString originalShape = feed.getTripGeometry(trip.get().trip_id);
 
     RoutingResult routingResult = routingService.routeTrip(trip.get().trip_id);
 
-    return Response.ok(new RoutingView(routingResult, stops)).build();
+    RoutingView view = new RoutingView(routingResult, stops, originalShape);
+    return Response.ok(view).build();
   }
 }

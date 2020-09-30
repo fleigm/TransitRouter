@@ -1,6 +1,5 @@
 package de.fleigm.ptmm.routing;
 
-import com.graphhopper.matching.MatchResult;
 import com.graphhopper.matching.Observation;
 import com.graphhopper.matching.State;
 import com.graphhopper.matching.util.TimeStep;
@@ -10,19 +9,22 @@ import java.util.List;
 
 public class RoutingResult {
 
-  private final MatchResult matchResult;
-  private final List<TimeStep<State, Observation, Path>> timeSteps;
+  private Path path;
+  private List<TimeStep<State, Observation, Path>> timeSteps;
 
-  public RoutingResult(MatchResult matchResult, List<TimeStep<State, Observation, Path>> timeSteps) {
-    this.matchResult = matchResult;
-    this.timeSteps = timeSteps;
+  public Path getPath() {
+    return path;
   }
 
-  public MatchResult getMatchResult() {
-    return matchResult;
+  public void setPath(Path path) {
+    this.path = path;
   }
 
   public List<TimeStep<State, Observation, Path>> getTimeSteps() {
     return timeSteps;
+  }
+
+  public void setTimeSteps(List<TimeStep<State, Observation, Path>> timeSteps) {
+    this.timeSteps = timeSteps;
   }
 }

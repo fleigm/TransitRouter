@@ -95,7 +95,7 @@ public class CreateShapeFileCommand implements Runnable {
   private List<ShapePoint> createShapeForTrip(String shapeId, String tripId) {
     RoutingResult route = routingService.routeTrip(tripId);
 
-    PointList points = route.getMatchResult().getMergedPath().calcPoints();
+    PointList points = route.getPath().calcPoints();
 
     List<ShapePoint> shapePoints = new ArrayList<>(points.getSize());
     for (int i = 0; i < points.size(); i++) {
