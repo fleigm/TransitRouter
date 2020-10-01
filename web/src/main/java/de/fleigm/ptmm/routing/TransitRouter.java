@@ -4,8 +4,6 @@ import com.bmw.hmm.SequenceState;
 import com.bmw.hmm.ViterbiAlgorithm;
 import com.graphhopper.GraphHopper;
 import com.graphhopper.config.Profile;
-import com.graphhopper.matching.EdgeMatch;
-import com.graphhopper.matching.MatchResult;
 import com.graphhopper.matching.Observation;
 import com.graphhopper.matching.State;
 import com.graphhopper.matching.util.HmmProbabilities;
@@ -19,7 +17,6 @@ import com.graphhopper.routing.ch.CHRoutingAlgorithmFactory;
 import com.graphhopper.routing.querygraph.QueryGraph;
 import com.graphhopper.routing.querygraph.VirtualEdgeIteratorState;
 import com.graphhopper.routing.util.DefaultEdgeFilter;
-import com.graphhopper.routing.util.EdgeFilter;
 import com.graphhopper.routing.util.TraversalMode;
 import com.graphhopper.routing.weighting.Weighting;
 import com.graphhopper.storage.Graph;
@@ -28,7 +25,6 @@ import com.graphhopper.storage.index.LocationIndexTree;
 import com.graphhopper.storage.index.QueryResult;
 import com.graphhopper.util.DistanceCalc;
 import com.graphhopper.util.DistancePlaneProjection;
-import com.graphhopper.util.EdgeExplorer;
 import com.graphhopper.util.EdgeIterator;
 import com.graphhopper.util.EdgeIteratorState;
 import com.graphhopper.util.GHUtility;
@@ -39,7 +35,6 @@ import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -49,35 +44,21 @@ public class TransitRouter {
 
   private final Logger logger = LoggerFactory.getLogger(getClass());
 
-  // Penalty in m for each U-turn performed at the beginning or end of a path between two
-  // subsequent candidates.
-  private final double uTurnDistancePenalty;
-
   private final Graph routingGraph;
   private final LocationIndexTree locationIndex;
-  private double measurementErrorSigma = 25.0;
-  private double transitionProbabilityBeta = 2.0;
   private final int maxVisitedNodes;
   private final DistanceCalc distanceCalc = new DistancePlaneProjection();
   private final Weighting weighting;
   private final boolean ch;
-  private QueryGraph queryGraph;
+
+  private final double candidateSearchRadius;
+  private final List<EmissionProbability> emissionProbabilityFunctions;
+  private final List<TransitionProbability> transitionProbabilityFunctions;
 
   public TransitRouter(GraphHopper graphHopper, PMap hints) {
-    this.locationIndex = (LocationIndexTree) graphHopper.getLocationIndex();
+    locationIndex = (LocationIndexTree) graphHopper.getLocationIndex();
 
-    String profileStr = hints.getString("profile", "");
-    Profile profile = graphHopper.getProfile(profileStr);
-
-    // Convert heading penalty [s] into U-turn penalty [m]
-    // The heading penalty is automatically taken into account by GraphHopper routing,
-    // for all links that we set to "unfavored" on the QueryGraph.
-    // We use that mechanism to softly enforce a heading for each map-matching state.
-    // We want to consistently use the same parameter for our own objective function (independent of the routing),
-    // which has meters as unit, not seconds.
-    final double PENALTY_CONVERSION_VELOCITY = 5;  // [m/s]
-    final double headingTimePenalty = hints.getDouble(Parameters.Routing.HEADING_PENALTY, Parameters.Routing.DEFAULT_HEADING_PENALTY);
-    uTurnDistancePenalty = headingTimePenalty * PENALTY_CONVERSION_VELOCITY;
+    Profile profile = graphHopper.getProfile(hints.getString("profile", ""));
 
     boolean disableCH = hints.getBool(Parameters.CH.DISABLE, false);
     boolean disableLM = hints.getBool(Parameters.Landmark.DISABLE, false);
@@ -91,7 +72,11 @@ public class TransitRouter {
     }
     // since map matching does not support turn costs we have to disable them here explicitly
     weighting = graphHopper.createWeighting(profile, hints, false);
-    this.maxVisitedNodes = hints.getInt(Parameters.Routing.MAX_VISITED_NODES, Integer.MAX_VALUE);
+    maxVisitedNodes = hints.getInt(Parameters.Routing.MAX_VISITED_NODES, Integer.MAX_VALUE);
+
+    candidateSearchRadius = hints.getDouble("candidate_search_radius", 25);
+    emissionProbabilityFunctions = List.of(GraphhopperEmissionProbability.create(hints));
+    transitionProbabilityFunctions = List.of(GraphhopperTransitionProbability.create(hints));
   }
 
   /**
@@ -102,12 +87,9 @@ public class TransitRouter {
    *                     of the graph specified in the constructor
    */
   public RoutingResult route(List<Observation> observations) {
-    // now find each of the entries in the graph:
-    List<Collection<QueryResult>> queriesPerEntry = lookupGPXEntries(
-        observations,
-        DefaultEdgeFilter.allEdges(weighting.getFlagEncoder()));
+    List<Collection<QueryResult>> queriesPerEntry = findCandidates(observations);
 
-    queryGraph = buildQueryGraph(queriesPerEntry);
+    QueryGraph queryGraph = buildQueryGraph(queriesPerEntry);
 
     // Different QueryResults can have the same tower node as their closest node.
     // Hence, we now dedupe the query results of each GPX entry by their closest node (#91).
@@ -118,19 +100,22 @@ public class TransitRouter {
     // routes need to be computed.
     queriesPerEntry = deduplicateQueryResultsByClosestNode(queriesPerEntry);
 
-    // Creates candidates from the QueryResults of all GPX entries (a candidate is basically a
-    // QueryResult + direction).
     List<TimeStep<State, Observation, Path>> timeSteps = createTimeSteps(
         observations,
         queriesPerEntry,
         queryGraph);
 
-    // Compute the most likely sequence of map matching candidates:
     List<SequenceState<State, Observation, Path>> viterbiSequence = computeViterbiSequence(timeSteps, queryGraph);
 
     return computeRoutingResult(viterbiSequence, timeSteps, queryGraph);
   }
 
+  /**
+   * Creates a QueryGraph containing the candidates that are represented by a virtual node.
+   *
+   * @param queriesPerEntry candidates that will be added to the QueryGraph
+   * @return a QueryGraph
+   */
   private QueryGraph buildQueryGraph(List<Collection<QueryResult>> queriesPerEntry) {
     // Add virtual nodes and edges to the graph so that candidates on edges can be represented
     // by virtual nodes.
@@ -141,24 +126,18 @@ public class TransitRouter {
     return QueryGraph.create(routingGraph, allQueryResults);
   }
 
-  private EdgeExplorer createAllEdgeExplorer() {
-    return queryGraph.createEdgeExplorer(DefaultEdgeFilter.allEdges(weighting.getFlagEncoder()));
-  }
-
   /**
    * Find the possible locations (edges) of each Observation in the graph.
    */
-  private List<Collection<QueryResult>> lookupGPXEntries(
-      List<Observation> gpxList,
-      EdgeFilter edgeFilter) {
+  private List<Collection<QueryResult>> findCandidates(List<Observation> observations) {
 
     final List<Collection<QueryResult>> gpxEntryLocations = new ArrayList<>();
-    for (Observation gpxEntry : gpxList) {
+    for (Observation observation : observations) {
       final List<QueryResult> queryResults = locationIndex.findNClosest(
-          gpxEntry.getPoint().lat,
-          gpxEntry.getPoint().lon,
-          edgeFilter,
-          measurementErrorSigma);
+          observation.getPoint().lat,
+          observation.getPoint().lon,
+          DefaultEdgeFilter.allEdges(weighting.getFlagEncoder()),
+          candidateSearchRadius);
       gpxEntryLocations.add(queryResults);
     }
     return gpxEntryLocations;
@@ -209,17 +188,8 @@ public class TransitRouter {
           List<VirtualEdgeIteratorState> virtualEdges = new ArrayList<>();
           EdgeIterator iter = queryGraph.createEdgeExplorer().setBaseNode(closestNode);
           while (iter.next()) {
-            if (!queryGraph.isVirtualEdge(iter.getEdge())) {
-              throw new RuntimeException("Virtual nodes must only have virtual edges "
-                                         + "to adjacent nodes.");
-            }
             virtualEdges.add((VirtualEdgeIteratorState)
                 queryGraph.getEdgeIteratorState(iter.getEdge(), iter.getAdjNode()));
-          }
-          if (virtualEdges.size() != 2) {
-            throw new RuntimeException("Each virtual node must have exactly 2 "
-                                       + "virtual edges (reverse virtual edges are not returned by the "
-                                       + "EdgeIterator");
           }
 
           // Create a directed candidate for each of the two possible directions through
@@ -270,12 +240,11 @@ public class TransitRouter {
       List<TimeStep<State, Observation, Path>> timeSteps,
       QueryGraph queryGraph) {
 
-    final HmmProbabilities probabilities = new HmmProbabilities(measurementErrorSigma, transitionProbabilityBeta);
     final ViterbiAlgorithm<State, Observation, Path> viterbi = new ViterbiAlgorithm<>();
 
     TimeStep<State, Observation, Path> prevTimeStep = null;
     for (TimeStep<State, Observation, Path> timeStep : timeSteps) {
-      computeEmissionProbabilities(timeStep, probabilities);
+      computeEmissionProbabilities(timeStep, queryGraph);
 
       if (prevTimeStep == null) {
         viterbi.startWithInitialObservation(
@@ -283,7 +252,7 @@ public class TransitRouter {
             timeStep.candidates,
             timeStep.emissionLogProbabilities);
       } else {
-        computeTransitionProbabilities(prevTimeStep, timeStep, probabilities, queryGraph);
+        computeTransitionProbabilities(prevTimeStep, timeStep, queryGraph);
         viterbi.nextStep(
             timeStep.observation,
             timeStep.candidates,
@@ -304,20 +273,21 @@ public class TransitRouter {
 
   private void computeEmissionProbabilities(
       TimeStep<State, Observation, Path> timeStep,
-      HmmProbabilities probabilities) {
+      QueryGraph queryGraph) {
 
     for (State candidate : timeStep.candidates) {
-      // road distance difference in meters
-      final double distance = candidate.getQueryResult().getQueryDistance();
-      timeStep.addEmissionLogProbability(candidate,
-          probabilities.emissionLogProbability(distance));
+      double emissionProbability = 0;
+      for (EmissionProbability f : emissionProbabilityFunctions) {
+        emissionProbability += f.calc(timeStep, candidate, queryGraph);
+      }
+
+      timeStep.addEmissionLogProbability(candidate, emissionProbability);
     }
   }
 
   private void computeTransitionProbabilities(
       TimeStep<State, Observation, Path> prevTimeStep,
       TimeStep<State, Observation, Path> timeStep,
-      HmmProbabilities probabilities,
       QueryGraph queryGraph) {
 
     final double linearDistance = distanceCalc.calcDist(
@@ -333,13 +303,11 @@ public class TransitRouter {
         if (path.isFound()) {
           timeStep.addRoadPath(from, to, path);
 
-          // The router considers unfavored virtual edges using edge penalties
-          // but this is not reflected in the path distance. Hence, we need to adjust the
-          // path distance accordingly.
-          final double penalizedPathDistance = penalizedPathDistance(path, queryGraph.getUnfavoredVirtualEdges());
+          double transitionLogProbability = 0;
+          for (TransitionProbability f : transitionProbabilityFunctions) {
+            transitionLogProbability += f.calc(prevTimeStep, timeStep, from, to, path, linearDistance, queryGraph);
+          }
 
-          final double transitionLogProbability = probabilities
-              .transitionLogProbability(penalizedPathDistance, linearDistance);
           timeStep.addTransitionLogProbability(from, to, transitionLogProbability);
         } else {
           logger.debug("No path found for from: {}, to: {}", from, to);
@@ -396,31 +364,6 @@ public class TransitRouter {
     };
     router.setMaxVisitedNodes(maxVisitedNodes);
     return router;
-  }
-
-  /**
-   * Returns the path length plus a penalty if the starting/ending edge is unfavored.
-   */
-  private double penalizedPathDistance(
-      Path path,
-      Set<EdgeIteratorState> penalizedVirtualEdges) {
-
-    double totalPenalty = 0;
-
-    // Unfavored edges in the middle of the path should not be penalized because we are
-    // only concerned about the direction at the start/end.
-    final List<EdgeIteratorState> edges = path.calcEdges();
-    if (!edges.isEmpty()) {
-      if (penalizedVirtualEdges.contains(edges.get(0))) {
-        totalPenalty += uTurnDistancePenalty;
-      }
-    }
-    if (edges.size() > 1) {
-      if (penalizedVirtualEdges.contains(edges.get(edges.size() - 1))) {
-        totalPenalty += uTurnDistancePenalty;
-      }
-    }
-    return path.getDistance() + totalPenalty;
   }
 
   private RoutingResult computeRoutingResult(

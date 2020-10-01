@@ -14,6 +14,8 @@ public class RoutingView {
   public final LineString originalShape;
   public final List<TimeStepView> timeSteps;
   public final List<Stop> stops;
+  public final double distance;
+  public final double time;
 
   public RoutingView(RoutingResult result, List<Stop> stops, LineString originalShape) {
     this.shape = result.getPath();
@@ -24,5 +26,7 @@ public class RoutingView {
 
     this.stops = stops;
     this.originalShape = originalShape;
+    this.distance = result.getDistance();
+    this.time = result.getTime();
   }
 }

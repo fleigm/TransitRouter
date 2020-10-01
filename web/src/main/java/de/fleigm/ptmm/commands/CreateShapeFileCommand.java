@@ -3,14 +3,15 @@ package de.fleigm.ptmm.commands;
 import com.conveyal.gtfs.model.ShapePoint;
 import com.graphhopper.GraphHopper;
 import com.graphhopper.config.Profile;
+import com.graphhopper.matching.Observation;
 import com.graphhopper.reader.osm.GraphHopperOSM;
 import com.graphhopper.routing.util.EncodingManager;
 import com.graphhopper.util.PMap;
 import com.graphhopper.util.PointList;
+import com.graphhopper.util.shapes.GHPoint;
 import de.fleigm.ptmm.TransitFeed;
 import de.fleigm.ptmm.routing.BusFlagEncoder;
 import de.fleigm.ptmm.routing.RoutingResult;
-import de.fleigm.ptmm.routing.RoutingService;
 import de.fleigm.ptmm.routing.TransitRouter;
 import org.mapdb.Fun;
 import picocli.CommandLine;
@@ -35,7 +36,6 @@ public class CreateShapeFileCommand implements Runnable {
 
   private TransitFeed feed;
   private GraphHopper graphHopper;
-  private RoutingService routingService;
   private TransitRouter transitRouter;
 
   @Override
@@ -49,7 +49,6 @@ public class CreateShapeFileCommand implements Runnable {
     graphHopper = createGraphHopper();
     feed = new TransitFeed(entryCommand.gtfsFile);
     transitRouter = new TransitRouter(graphHopper, new PMap().putObject("profile", "bus_shortest"));
-    routingService = new RoutingService(feed, transitRouter);
   }
 
   private GraphHopper createGraphHopper() {
@@ -93,7 +92,13 @@ public class CreateShapeFileCommand implements Runnable {
   }
 
   private List<ShapePoint> createShapeForTrip(String shapeId, String tripId) {
-    RoutingResult route = routingService.routeTrip(tripId);
+    List<Observation> observations = feed.getOrderedStopsForTrip(tripId)
+        .stream()
+        .map(stop -> new GHPoint(stop.stop_lat, stop.stop_lon))
+        .map(Observation::new)
+        .collect(Collectors.toList());
+
+    RoutingResult route = transitRouter.route(observations);
 
     PointList points = route.getPath().calcPoints();
 
