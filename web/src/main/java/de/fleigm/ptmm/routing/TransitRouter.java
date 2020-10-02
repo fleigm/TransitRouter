@@ -6,7 +6,6 @@ import com.graphhopper.GraphHopper;
 import com.graphhopper.config.Profile;
 import com.graphhopper.matching.Observation;
 import com.graphhopper.matching.State;
-import com.graphhopper.matching.util.HmmProbabilities;
 import com.graphhopper.matching.util.TimeStep;
 import com.graphhopper.routing.DijkstraBidirectionCH;
 import com.graphhopper.routing.DijkstraBidirectionRef;
@@ -38,9 +37,9 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 public class TransitRouter {
+  private static final String DEFAULT_PROFILE = "bus_shortest";
 
   private final Logger logger = LoggerFactory.getLogger(getClass());
 
@@ -58,7 +57,7 @@ public class TransitRouter {
   public TransitRouter(GraphHopper graphHopper, PMap hints) {
     locationIndex = (LocationIndexTree) graphHopper.getLocationIndex();
 
-    Profile profile = graphHopper.getProfile(hints.getString("profile", ""));
+    Profile profile = graphHopper.getProfile(hints.getString("profile", DEFAULT_PROFILE));
 
     boolean disableCH = hints.getBool(Parameters.CH.DISABLE, false);
     boolean disableLM = hints.getBool(Parameters.Landmark.DISABLE, false);

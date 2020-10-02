@@ -6,14 +6,12 @@
           <v-route-list @select="fetchRouting"></v-route-list>
         </div>
       </v-card>
-      <v-card header="Trips">
-        <div class="h-96 overflow-y-scroll">
-
-        </div>
+      <v-card header="Options">
       </v-card>
     </el-aside>
     <el-main>
-      <div class="w-full h-full">
+      <div class="w-full h-full flex flex-col">
+        <options-editor></options-editor>
         <v-transit-map :routing-result="routingResult"></v-transit-map>
       </div>
     </el-main>
@@ -21,13 +19,14 @@
 </template>
 
 <script>
-import axios from 'axios'
+import TransitRouter from "./TransitRouter";
 import VRouteList from "./RouteList";
 import VTransitMap from "./TransitMap";
+import OptionsEditor from "./OptionsEditor";
 
 export default {
   name: "Index",
-  components: {VTransitMap, VRouteList},
+  components: {VTransitMap, VRouteList, OptionsEditor},
   data() {
     return {
       routingResult: null,
@@ -37,7 +36,7 @@ export default {
 
   methods: {
     fetchRouting(routeId) {
-      this.$http.get(`routing/${routeId}`)
+      TransitRouter.computeRouting(routeId)
           .then(({data}) => {
             this.routingResult = data;
           })

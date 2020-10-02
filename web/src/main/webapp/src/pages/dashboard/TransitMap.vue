@@ -1,9 +1,9 @@
 <template>
   <div class="h-full w-full">
-    <div>
-      <el-checkbox v-model="showShape">show shape</el-checkbox>
-      <el-checkbox v-model="showOriginalShape">show original shape</el-checkbox>
-      <el-checkbox v-model="showStops">show stops</el-checkbox>
+    <div class="">
+      <el-checkbox v-model="options.showShape">show shape</el-checkbox>
+      <el-checkbox v-model="options.showOriginalShape">show original shape</el-checkbox>
+      <el-checkbox v-model="options.showStops">show stops</el-checkbox>
     </div>
     <l-map
         class=""
@@ -16,37 +16,7 @@
       <l-tile-layer :url="url"/>
 
       <template v-if="routingResult">
-        <l-animated-polyline v-if="showShape"
-                             :lat-lngs="routingResult.shape"
-                             :options="{'delay': 2400}"
-        ></l-animated-polyline>
-
-        <l-animated-polyline v-if="showOriginalShape"
-                             :lat-lngs="routingResult.originalShape"
-                             :options="{'delay': 2400, 'color': '#000'}"
-        ></l-animated-polyline>
-
-        <template v-for="timeStep in routingResult.timeSteps">
-          <l-circle v-for="candidate in timeStep.candidates"
-                    :key="candidate.id"
-                    :radius="1"
-                    :lat-lng="candidate.state.position">
-            <l-popup>
-              <pre>{{ candidate }}</pre>
-            </l-popup>
-          </l-circle>
-        </template>
-
-        <l-circle v-if="showStops"
-                  v-for="stop in routingResult.stops"
-                  :key="stop.id"
-                  color="red"
-                  :radius="2"
-                  :lat-lng="[stop.stop_lat, stop.stop_lon]">
-          <l-popup>
-            <pre>{{ stop }}</pre>
-          </l-popup>
-        </l-circle>
+        <routing-result :routing-result="routingResult" :options="options"></routing-result>
       </template>
 
     </l-map>
@@ -54,9 +24,10 @@
 </template>
 
 <script>
+import RoutingResult from "./RoutingResult";
 export default {
   name: "v-transit-map",
-
+  components: {RoutingResult},
   props: {
     routingResult: {
       type: Object
@@ -69,9 +40,11 @@ export default {
       zoom: 14,
       center: [47.9959, 7.85222],
       bounds: null,
-      showShape: true,
-      showOriginalShape: true,
-      showStops: true,
+      options: {
+        showShape: true,
+        showOriginalShape: true,
+        showStops: true,
+      },
     }
   },
 

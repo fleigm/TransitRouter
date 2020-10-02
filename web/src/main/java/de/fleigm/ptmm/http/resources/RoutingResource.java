@@ -5,6 +5,7 @@ import com.conveyal.gtfs.model.Stop;
 import com.conveyal.gtfs.model.Trip;
 import com.graphhopper.GraphHopper;
 import com.graphhopper.matching.Observation;
+import com.graphhopper.util.Helper;
 import com.graphhopper.util.PMap;
 import com.graphhopper.util.shapes.GHPoint;
 import com.vividsolutions.jts.geom.LineString;
@@ -28,7 +29,11 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -88,9 +93,25 @@ public class RoutingResource {
         .map(Observation::new)
         .collect(Collectors.toList());
 
-    RoutingResult routingResult = transitRouter.route(observations);
+    PMap params = convertQueryParams(uriInfo.getQueryParameters());
+
+    TransitRouter router = new TransitRouter(hopper, params);
+
+    RoutingResult routingResult = router.route(observations);
 
     RoutingView view = new RoutingView(routingResult, stops, originalShape);
+
     return Response.ok(view).build();
+  }
+
+  private PMap convertQueryParams(MultivaluedMap<String, String> queryParameters) {
+    PMap m = new PMap();
+    for (Map.Entry<String, List<String>> e : queryParameters.entrySet()) {
+      // ignore multi value parameters
+      if (e.getValue().size() == 1) {
+        m.putObject(Helper.camelCaseToUnderScore(e.getKey()), Helper.toObject(e.getValue().get(0)));
+      }
+    }
+    return m;
   }
 }
