@@ -14,22 +14,16 @@
                          :options="{'delay': 2400, 'color': '#000'}"
     ></l-animated-polyline>
 
-    <template v-for="timeStep in routingResult.timeSteps">
-      <l-circle v-for="candidate in timeStep.candidates"
-                :key="candidate.id"
-                :radius="1"
-                :lat-lng="candidate.state.position">
-        <l-popup>
-          <pre>{{ candidate }}</pre>
-        </l-popup>
-      </l-circle>
-    </template>
+    <l-circle v-for="candidate in routingResult.candidates"
+              :radius="1"
+              :lat-lng="candidate">
+    </l-circle>
 
     <l-circle v-if="options.showStops"
               v-for="stop in routingResult.stops"
               :key="stop.id"
               color="red"
-              :radius="2"
+              :radius="1"
               :lat-lng="[stop.stop_lat, stop.stop_lon]">
       <l-popup>
         <pre>{{ stop }}</pre>

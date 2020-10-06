@@ -4,6 +4,7 @@ import com.graphhopper.matching.Observation;
 import com.graphhopper.matching.State;
 import com.graphhopper.matching.util.TimeStep;
 import com.graphhopper.routing.Path;
+import com.graphhopper.util.shapes.GHPoint;
 
 import java.util.List;
 
@@ -12,7 +13,8 @@ public class RoutingResult {
   private Path path;
   private double distance;
   private double time;
-  private List<TimeStep<State, Observation, Path>> timeSteps;
+  private List<Observation> observations;
+  private List<GHPoint> candidates;
 
   public Path getPath() {
     return path;
@@ -38,11 +40,19 @@ public class RoutingResult {
     this.time = time;
   }
 
-  public List<TimeStep<State, Observation, Path>> getTimeSteps() {
-    return timeSteps;
+  public List<Observation> getObservations() {
+    return observations;
   }
 
-  public void setTimeSteps(List<TimeStep<State, Observation, Path>> timeSteps) {
-    this.timeSteps = timeSteps;
+  public void setObservations(List<Observation> observations) {
+    this.observations = observations;
+  }
+
+  public List<GHPoint> getCandidates() {
+    return candidates;
+  }
+
+  public void setCandidates(List<GHPoint> candidates) {
+    this.candidates = candidates;
   }
 }

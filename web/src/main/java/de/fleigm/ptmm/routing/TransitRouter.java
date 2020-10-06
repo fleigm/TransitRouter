@@ -37,6 +37,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class TransitRouter {
   private static final String DEFAULT_PROFILE = "bus_shortest";
@@ -391,7 +392,13 @@ public class TransitRouter {
     routingResult.setPath(mergedPath);
     routingResult.setDistance(distance);
     routingResult.setTime(time);
-    routingResult.setTimeSteps(timeSteps);
+    routingResult.setObservations(timeSteps.stream().map(t -> t.observation).collect(Collectors.toList()));
+    routingResult.setCandidates(
+        timeSteps.stream()
+            .flatMap(t -> t.candidates.stream())
+            .map(State::getQueryResult)
+            .map(QueryResult::getSnappedPoint)
+            .collect(Collectors.toList()));
 
     return routingResult;
   }

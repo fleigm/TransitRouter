@@ -12,26 +12,21 @@ import com.vividsolutions.jts.geom.LineString;
 import de.fleigm.ptmm.TransitFeed;
 import de.fleigm.ptmm.routing.RoutingResult;
 import de.fleigm.ptmm.routing.TransitRouter;
-import de.fleigm.ptmm.http.views.RoutingView;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
-import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.LinkedList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -99,10 +94,19 @@ public class RoutingResource {
 
     RoutingResult routingResult = router.route(observations);
 
-    RoutingView view = new RoutingView(routingResult, stops, originalShape);
+    Map<String, Object> view = new HashMap<>();
+    view.put("time", routingResult.getTime());
+    view.put("distance", routingResult.getDistance());
+    view.put("shape", routingResult.getPath());
+    view.put("observations", routingResult.getObservations());
+    view.put("candidates", routingResult.getCandidates());
+    view.put("originalShape", originalShape);
+    view.put("stops", stops);
 
     return Response.ok(view).build();
   }
+
+
 
   private PMap convertQueryParams(MultivaluedMap<String, String> queryParameters) {
     PMap m = new PMap();
