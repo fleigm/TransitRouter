@@ -2,28 +2,33 @@ package de.fleigm.ptmm.commands;
 
 import com.conveyal.gtfs.model.ShapePoint;
 import com.graphhopper.GraphHopper;
-import com.graphhopper.config.Profile;
 import com.graphhopper.matching.Observation;
-import com.graphhopper.reader.osm.GraphHopperOSM;
-import com.graphhopper.routing.util.EncodingManager;
 import com.graphhopper.util.PMap;
 import com.graphhopper.util.PointList;
+import com.graphhopper.util.StopWatch;
 import com.graphhopper.util.shapes.GHPoint;
 import de.fleigm.ptmm.TransitFeed;
-import de.fleigm.ptmm.routing.BusFlagEncoder;
+import de.fleigm.ptmm.cdi.Producers;
 import de.fleigm.ptmm.routing.RoutingResult;
 import de.fleigm.ptmm.routing.TransitRouter;
 import org.mapdb.Fun;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
-import java.util.function.Function;
+import java.util.LongSummaryStatistics;
+import java.util.concurrent.ConcurrentNavigableMap;
 import java.util.stream.Collectors;
+import java.util.stream.LongStream;
+import java.util.stream.Stream;
 
 @Command(name = "generate", description = "generate missing shape files")
 public class CreateShapeFileCommand implements Runnable {
+  private static final Logger logger = LoggerFactory.getLogger(CreateShapeFileCommand.class);
 
   @CommandLine.ParentCommand
   EntryCommand entryCommand;
@@ -37,34 +42,37 @@ public class CreateShapeFileCommand implements Runnable {
   private TransitFeed feed;
   private GraphHopper graphHopper;
   private TransitRouter transitRouter;
+  private ConcurrentNavigableMap<Fun.Tuple2<String, Integer>, ShapePoint> shapePoints;
 
   @Override
   public void run() {
+    StopWatch stopWatch = new StopWatch();
+
+    logger.info("Start initialization.");
+    stopWatch.start();
     init();
+    stopWatch.stop();
+    logger.info("Finished initialization. ({} ms)", stopWatch.getMillis());
+
+    logger.info("Start shape generation.");
+    stopWatch.start();
     createShapes();
+    stopWatch.stop();
+    logger.info("Finished shape generation. ({} ms)", stopWatch.getMillis());
+
+    logger.info("Writing new gtfs feed.");
+    stopWatch.start();
     saveGtfsFeed();
+    stopWatch.stop();
+    logger.info("Finished new gtfs feed. ({} ms)", stopWatch.getMillis());
   }
 
   private void init() {
-    graphHopper = createGraphHopper();
-    feed = new TransitFeed(entryCommand.gtfsFile);
+    Producers producers = new Producers();
+    graphHopper = producers.graphHopper(entryCommand.osmFile, entryCommand.tempFolder, entryCommand.clean);
+    feed = producers.transitFeed(entryCommand.gtfsFile);
     transitRouter = new TransitRouter(graphHopper, new PMap().putObject("profile", "bus_shortest"));
-  }
-
-  private GraphHopper createGraphHopper() {
-    GraphHopper graphHopper = new GraphHopperOSM()
-        .forServer()
-        .setGraphHopperLocation(entryCommand.tempFolder)
-        .setEncodingManager(EncodingManager.create(new BusFlagEncoder()))
-        .setProfiles(
-            new Profile("bus_fastest").setVehicle("bus").setWeighting("fastest"),
-            new Profile("bus_shortest").setVehicle("bus").setWeighting("shortest"));
-
-    graphHopper.setDataReaderFile(entryCommand.osmFile);
-
-    graphHopper.importOrLoad();
-
-    return graphHopper;
+    this.shapePoints = feed.internal().shape_points;
   }
 
   private void saveGtfsFeed() {
@@ -72,23 +80,35 @@ public class CreateShapeFileCommand implements Runnable {
   }
 
   private void createShapes() {
-    feed.internal().trips.keySet()
-        .stream()
-        .limit(100)
-        .forEach(id -> createAndSetShapeForTrip(id, id));
+    logger.info("Generate shapes for {} trips", feed.trips().size());
+    StopWatch stopWatch = new StopWatch();
+    LongSummaryStatistics statistics = new LongSummaryStatistics();
+
+    for (String id : feed.trips().keySet()) {
+      stopWatch.start();
+      createAndSetShapeForTrip(id, id);
+      stopWatch.stop();
+      logger.debug("Shape generation for trip {} took {}ms", id, stopWatch.getMillis());
+      statistics.accept(stopWatch.getMillis());
+    }
+
+    logger.info("count: {} \ntotal duration: {}ms \navg duration: {}ms \nmin duration {}ms \nmax duration {}ms",
+        statistics.getCount(),
+        statistics.getSum(),
+        statistics.getAverage(),
+        statistics.getMin(),
+        statistics.getMax());
+
   }
 
   private void createAndSetShapeForTrip(String shapeId, String tripId) {
-    List<ShapePoint> shapePoints = createShapeForTrip(shapeId, tripId);
+    List<ShapePoint> shape = createShapeForTrip(shapeId, tripId);
 
-    feed.internal().trips.get(tripId).shape_id = shapeId;
+    feed.trips().get(tripId).shape_id = shapeId;
 
-    feed.internal().shape_points.putAll(
-        shapePoints.stream()
-            .collect(
-                Collectors.toMap(
-                    shapePoint -> new Fun.Tuple2<>(shapeId, shapePoint.shape_pt_sequence),
-                    Function.identity())));
+    for (ShapePoint shapePoint : shape) {
+      this.shapePoints.put(new Fun.Tuple2<>(shapeId, shapePoint.shape_pt_sequence), shapePoint);
+    }
   }
 
   private List<ShapePoint> createShapeForTrip(String shapeId, String tripId) {
