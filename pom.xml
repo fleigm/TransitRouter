@@ -10,6 +10,7 @@
     <modules>
         <module>core</module>
         <module>web</module>
+        <module>cli</module>
     </modules>
     <packaging>pom</packaging>
 

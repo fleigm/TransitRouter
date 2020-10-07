@@ -3957,12 +3957,6 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
-//
-//
-//
-//
-//
-//
 /* harmony default export */ __webpack_exports__["default"] = ({
   props: ['routingResult', 'options']
 });
@@ -80220,18 +80214,8 @@ var render = function() {
           })
         : _vm._e(),
       _vm._v(" "),
-      _vm._l(_vm.routingResult.timeSteps, function(timeStep) {
-        return _vm._l(timeStep.candidates, function(candidate) {
-          return _c(
-            "l-circle",
-            {
-              key: candidate.id,
-              attrs: { radius: 1, "lat-lng": candidate.state.position }
-            },
-            [_c("l-popup", [_c("pre", [_vm._v(_vm._s(candidate))])])],
-            1
-          )
-        })
+      _vm._l(_vm.routingResult.candidates, function(candidate) {
+        return _c("l-circle", { attrs: { radius: 1, "lat-lng": candidate } })
       }),
       _vm._v(" "),
       _vm._l(_vm.routingResult.stops, function(stop) {
@@ -80242,7 +80226,7 @@ var render = function() {
                 key: stop.id,
                 attrs: {
                   color: "red",
-                  radius: 2,
+                  radius: 1,
                   "lat-lng": [stop.stop_lat, stop.stop_lon]
                 }
               },

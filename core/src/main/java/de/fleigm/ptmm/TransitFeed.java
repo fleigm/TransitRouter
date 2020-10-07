@@ -1,23 +1,12 @@
 package de.fleigm.ptmm;
 
 import com.conveyal.gtfs.GTFSFeed;
-import com.conveyal.gtfs.model.Agency;
-import com.conveyal.gtfs.model.FeedInfo;
-import com.conveyal.gtfs.model.Frequency;
 import com.conveyal.gtfs.model.Route;
 import com.conveyal.gtfs.model.Stop;
-import com.conveyal.gtfs.model.Transfer;
 import com.conveyal.gtfs.model.Trip;
-import io.quarkus.runtime.Startup;
-import org.eclipse.microprofile.config.inject.ConfigProperty;
-import org.mapdb.BTreeMap;
-import org.mapdb.Fun;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
 import java.util.List;
 import java.util.Map;
-import java.util.NavigableSet;
 import java.util.stream.Collectors;
 
 /**

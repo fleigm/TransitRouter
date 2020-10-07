@@ -1,4 +1,4 @@
-package de.fleigm.ptmm.cdi;
+package de.fleigm.ptmm.http;
 
 import com.graphhopper.GraphHopper;
 import com.graphhopper.config.Profile;
@@ -8,12 +8,9 @@ import com.graphhopper.util.PMap;
 import com.graphhopper.util.Parameters;
 import de.fleigm.ptmm.TransitFeed;
 import de.fleigm.ptmm.routing.BusFlagEncoder;
-import de.fleigm.ptmm.routing.TransitRouter;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
-import picocli.CommandLine;
 
 import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.inject.Default;
 import javax.enterprise.inject.Produces;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -22,32 +19,9 @@ import java.nio.file.Path;
 @ApplicationScoped
 public class Producers {
 
-  @Cli
-  @Produces
-  public TransitFeed transitFeedFromCli(CommandLine.ParseResult parseResult) {
-    if (!parseResult.hasMatchedOption("--gtfs-file")) {
-      throw new RuntimeException("Missing gtfs feed argument");
-    }
-
-    String filePath = parseResult.matchedOption("--gtfs-file").getValue();
-
-    return new TransitFeed(filePath);
-  }
-
-  @Default
   @Produces
   public TransitFeed transitFeed(@ConfigProperty(name = "routing.gtfs.feed-file") String filePath) {
     return new TransitFeed(filePath);
-  }
-
-  @Cli
-  @Produces
-  public GraphHopper graphHopperFromCli(CommandLine.ParseResult parseResult) {
-    String osmFile = parseResult.matchedOption("--osm-file").getValue();
-    String storagePath = parseResult.matchedOptionValue("--temp", "gh");
-    boolean cleanTemporaryFiles = parseResult.matchedOptionValue("c", false);
-
-    return graphHopper(osmFile, storagePath, cleanTemporaryFiles);
   }
 
   @Produces
