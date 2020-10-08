@@ -33,17 +33,6 @@ import java.util.stream.Collectors;
 public class CreateShapeFileCommand implements Runnable {
   private static final Logger logger = LoggerFactory.getLogger(CreateShapeFileCommand.class);
 
-  @Option(
-      names = {"-o", "--osm-file"},
-      paramLabel = "OSM_FILE",
-      description = "OSM file")
-  String osmFile;
-
-  @Option(
-      names = {"-g", "--gtfs-file"},
-      paramLabel = "GTFS_FILE",
-      description = "GTFS file")
-  String gtfsFile;
 
   @Option(
       names = {"-t", "--temp"},
@@ -60,8 +49,20 @@ public class CreateShapeFileCommand implements Runnable {
 
   @Parameters(
       index = "0",
+      paramLabel = "OSM_FILE",
+      description = "OSM file")
+  String osmFile;
+
+  @Parameters(
+      index = "1",
+      paramLabel = "GTFS_FILE",
+      description = "GTFS file")
+  String gtfsFile;
+
+  @Parameters(
+      index = "2",
       paramLabel = "GENERATED_GTFS_FILE",
-      description = "Specifies where the generated gtfs feed is stored.")
+      description = "new GTFS file with generated shapes")
   String generatedGtfsFile;
 
   private TransitFeed feed;
