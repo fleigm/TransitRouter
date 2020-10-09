@@ -1,6 +1,7 @@
 package de.fleigm.ptmm.cli;
 
 import com.conveyal.gtfs.model.ShapePoint;
+import com.conveyal.gtfs.model.Trip;
 import com.graphhopper.GraphHopper;
 import com.graphhopper.config.Profile;
 import com.graphhopper.matching.Observation;
@@ -24,6 +25,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.LongSummaryStatistics;
 import java.util.concurrent.ConcurrentNavigableMap;
@@ -46,6 +48,13 @@ public class CreateShapeFileCommand implements Runnable {
       paramLabel = "CLEAN",
       description = "Clean temporary files.")
   boolean clean;
+
+  @Option(
+      names = {"-D", "--drop"},
+      paramLabel = "DROP_SHAPES",
+      description = "Drop already existing shapes."
+  )
+  boolean dropExistingShapes;
 
   @Parameters(
       index = "0",
@@ -96,8 +105,14 @@ public class CreateShapeFileCommand implements Runnable {
   private void init() {
     graphHopper = loadGraphHopper(osmFile, tempFolder, clean);
     feed = new TransitFeed(gtfsFile);
-    transitRouter = new TransitRouter(graphHopper, new PMap().putObject("profile", "bus_shortest"));
+
+    PMap transitRouterOptions = new PMap()
+        .putObject("profile", "bus_shortest")
+        .putObject("candidate_search_radius", 50);
+    transitRouter = new TransitRouter(graphHopper, transitRouterOptions);
+
     this.shapePoints = feed.internal().shape_points;
+    this.shapePoints.clear();
   }
 
   private GraphHopper loadGraphHopper(String osmFile, String storagePath, boolean cleanTemporaryFiles) {
@@ -131,44 +146,31 @@ public class CreateShapeFileCommand implements Runnable {
   }
 
   private void createShapes() {
-    logger.info("Generate shapes for {} trips", feed.trips().size());
-    StopWatch stopWatch = new StopWatch();
-    LongSummaryStatistics statistics = new LongSummaryStatistics();
+    List<Trip> busTrips = getBusTrips();
 
-    stopWatch.start();
+    logger.info("Generate shapes for {} trips", busTrips.size());
 
-    feed.trips()
-        .keySet()
-        .parallelStream()
-        .forEach(id -> createAndSetShapeForTrip(id, id));
-
-    stopWatch.stop();
-    statistics.accept(stopWatch.getMillis());
-
-    /*for (String id : feed.trips().keySet()) {
-      stopWatch.start();
-      createAndSetShapeForTrip(id, id);
-      stopWatch.stop();
-      logger.info("Shape generation for trip {} took {}ms", id, stopWatch.getMillis());
-      statistics.accept(stopWatch.getMillis());
-    }*/
-
-    logger.info("count: {} \ntotal duration: {}ms \navg duration: {}ms \nmin duration {}ms \nmax duration {}ms",
-        statistics.getCount(),
-        statistics.getSum(),
-        statistics.getAverage(),
-        statistics.getMin(),
-        statistics.getMax());
-
+    busTrips.parallelStream().forEach(this::createAndSetShapeForTrip);
   }
 
-  private void createAndSetShapeForTrip(String shapeId, String tripId) {
-    List<ShapePoint> shape = createShapeForTrip(shapeId, tripId);
+  private List<Trip> getBusTrips() {
+    HashSet<String> busRoutes = feed.routes().values().stream()
+        .filter(route -> route.route_type == 3)
+        .map(route -> route.route_id)
+        .collect(Collectors.toCollection(HashSet::new));
 
-    feed.trips().get(tripId).shape_id = shapeId;
+    return feed.trips().values().stream()
+        .filter(trip -> busRoutes.contains(trip.route_id))
+        .collect(Collectors.toList());
+  }
+
+  private void createAndSetShapeForTrip(Trip trip) {
+    List<ShapePoint> shape = createShapeForTrip(trip.trip_id, trip.trip_id);
+
+    trip.shape_id = trip.trip_id;
 
     for (ShapePoint shapePoint : shape) {
-      this.shapePoints.put(new Fun.Tuple2<>(shapeId, shapePoint.shape_pt_sequence), shapePoint);
+      this.shapePoints.put(new Fun.Tuple2<>(trip.shape_id, shapePoint.shape_pt_sequence), shapePoint);
     }
   }
 
