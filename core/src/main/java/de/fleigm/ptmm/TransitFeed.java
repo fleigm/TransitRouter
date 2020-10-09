@@ -33,6 +33,12 @@ public class TransitFeed {
     return feed.routes;
   }
 
+  public Map<String, Route> busRoutes() {
+    return feed.routes.entrySet().stream()
+        .filter(entry -> entry.getValue().route_type == 3)
+        .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+  }
+
   public Map<String, Trip> trips() {
     return feed.trips;
   }

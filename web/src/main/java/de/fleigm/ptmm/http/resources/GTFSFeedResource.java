@@ -23,7 +23,7 @@ public class GTFSFeedResource {
   @Path("routes")
   @Produces(MediaType.APPLICATION_JSON)
   public Response routes() {
-    return Response.ok(feed.routes().values()).build();
+    return Response.ok(feed.busRoutes().values()).build();
   }
 
   @GET
