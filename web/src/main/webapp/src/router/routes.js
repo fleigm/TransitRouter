@@ -1,4 +1,5 @@
 import Dashboard from '../pages/dashboard/Index'
+import CandidateFinder from "../pages/CandidateFinder";
 
 const routes = [
     {
@@ -6,9 +7,9 @@ const routes = [
         name: 'Dashboard',
         component: Dashboard,
     }, {
-        path: '/test',
-        name: 'Test',
-        component: Dashboard,
+        path: '/candidate-finder',
+        name: 'Candidate Finder',
+        component: CandidateFinder,
     }
 ]
 

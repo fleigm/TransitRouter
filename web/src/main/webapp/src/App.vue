@@ -4,6 +4,7 @@
       <el-container class="">
         <h1>Public Transit Map Matching</h1>
       </el-container>
+      <v-navigation></v-navigation>
     </el-header>
     <el-container class="flex-1">
       <router-view></router-view>

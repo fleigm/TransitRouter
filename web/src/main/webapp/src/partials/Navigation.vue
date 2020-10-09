@@ -1,5 +1,5 @@
 <template>
-  <el-menu router :default-active="$route.path">
+  <el-menu router :default-active="$route.path" mode="horizontal">
     <template v-for="(rule, index) in $router.options.routes">
       <el-submenu v-if="rule.children && rule.children.length > 0"
                   :key="index"

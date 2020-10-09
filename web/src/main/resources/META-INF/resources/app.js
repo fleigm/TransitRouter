@@ -3561,6 +3561,7 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
 
 /* harmony default export */ __webpack_exports__["default"] = ({
   name: "App",
@@ -3755,6 +3756,80 @@ __webpack_require__.r(__webpack_exports__);
 //
 /* harmony default export */ __webpack_exports__["default"] = ({
   name: "v-spinner"
+});
+
+/***/ }),
+
+/***/ "./node_modules/babel-loader/lib/index.js?!./node_modules/vue-loader/lib/index.js?!./src/pages/CandidateFinder.vue?vue&type=script&lang=js&":
+/*!************************************************************************************************************************************************************!*\
+  !*** ./node_modules/babel-loader/lib??ref--4-0!./node_modules/vue-loader/lib??vue-loader-options!./src/pages/CandidateFinder.vue?vue&type=script&lang=js& ***!
+  \************************************************************************************************************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+/* harmony default export */ __webpack_exports__["default"] = ({
+  name: "v-candidate-finder",
+  data: function data() {
+    return {
+      url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+      zoom: 14,
+      center: [47.9959, 7.85222],
+      bounds: null,
+      candidates: []
+    };
+  },
+  methods: {
+    findCandidates: function findCandidates(event) {
+      var _this = this;
+
+      console.log(event);
+      this.$http("candidates", {
+        params: {
+          lat: event.latlng.lat,
+          lon: event.latlng.lng,
+          radius: 25
+        }
+      }).then(function (_ref) {
+        var data = _ref.data;
+        _this.candidates = data;
+      });
+    },
+    zoomUpdated: function zoomUpdated(zoom) {
+      this.zoom = zoom;
+    },
+    centerUpdated: function centerUpdated(center) {
+      this.center = center;
+    },
+    boundsUpdated: function boundsUpdated(bounds) {
+      this.bounds = bounds;
+    }
+  }
 });
 
 /***/ }),
@@ -79801,7 +79876,9 @@ var render = function() {
         [
           _c("el-container", {}, [
             _c("h1", [_vm._v("Public Transit Map Matching")])
-          ])
+          ]),
+          _vm._v(" "),
+          _c("v-navigation")
         ],
         1
       ),
@@ -79910,6 +79987,60 @@ var render = function() {
         attrs: { cx: "50", cy: "50", r: "20", fill: "none" }
       })
     ])
+  ])
+}
+var staticRenderFns = []
+render._withStripped = true
+
+
+
+/***/ }),
+
+/***/ "./node_modules/vue-loader/lib/loaders/templateLoader.js?!./node_modules/vue-loader/lib/index.js?!./src/pages/CandidateFinder.vue?vue&type=template&id=1ea073d6&":
+/*!****************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/vue-loader/lib??vue-loader-options!./src/pages/CandidateFinder.vue?vue&type=template&id=1ea073d6& ***!
+  \****************************************************************************************************************************************************************************************************/
+/*! exports provided: render, staticRenderFns */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "render", function() { return render; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "staticRenderFns", function() { return staticRenderFns; });
+var render = function() {
+  var _vm = this
+  var _h = _vm.$createElement
+  var _c = _vm._self._c || _h
+  return _c("el-container", [
+    _c(
+      "div",
+      { staticClass: "h-full w-full" },
+      [
+        _c(
+          "l-map",
+          {
+            attrs: { zoom: _vm.zoom, center: _vm.center, bounds: _vm.bounds },
+            on: {
+              click: _vm.findCandidates,
+              "update:center": _vm.centerUpdated,
+              "update:zoom": _vm.zoomUpdated,
+              "update:bounds": _vm.boundsUpdated
+            }
+          },
+          [
+            _c("l-tile-layer", { attrs: { url: _vm.url } }),
+            _vm._v(" "),
+            _vm._l(_vm.candidates, function(candidate) {
+              return _c("l-circle", {
+                attrs: { radius: 1, "lat-lng": candidate }
+              })
+            })
+          ],
+          2
+        )
+      ],
+      1
+    )
   ])
 }
 var staticRenderFns = []
@@ -80368,7 +80499,13 @@ var render = function() {
   var _c = _vm._self._c || _h
   return _c(
     "el-menu",
-    { attrs: { router: "", "default-active": _vm.$route.path } },
+    {
+      attrs: {
+        router: "",
+        "default-active": _vm.$route.path,
+        mode: "horizontal"
+      }
+    },
     [
       _vm._l(_vm.$router.options.routes, function(rule, index) {
         return [
@@ -108818,6 +108955,75 @@ var fetchTrips = function fetchTrips(routeId) {
 
 /***/ }),
 
+/***/ "./src/pages/CandidateFinder.vue":
+/*!***************************************!*\
+  !*** ./src/pages/CandidateFinder.vue ***!
+  \***************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _CandidateFinder_vue_vue_type_template_id_1ea073d6___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./CandidateFinder.vue?vue&type=template&id=1ea073d6& */ "./src/pages/CandidateFinder.vue?vue&type=template&id=1ea073d6&");
+/* harmony import */ var _CandidateFinder_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./CandidateFinder.vue?vue&type=script&lang=js& */ "./src/pages/CandidateFinder.vue?vue&type=script&lang=js&");
+/* empty/unused harmony star reexport *//* harmony import */ var _node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../node_modules/vue-loader/lib/runtime/componentNormalizer.js */ "./node_modules/vue-loader/lib/runtime/componentNormalizer.js");
+
+
+
+
+
+/* normalize component */
+
+var component = Object(_node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_2__["default"])(
+  _CandidateFinder_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__["default"],
+  _CandidateFinder_vue_vue_type_template_id_1ea073d6___WEBPACK_IMPORTED_MODULE_0__["render"],
+  _CandidateFinder_vue_vue_type_template_id_1ea073d6___WEBPACK_IMPORTED_MODULE_0__["staticRenderFns"],
+  false,
+  null,
+  null,
+  null
+  
+)
+
+/* hot reload */
+if (false) { var api; }
+component.options.__file = "src/pages/CandidateFinder.vue"
+/* harmony default export */ __webpack_exports__["default"] = (component.exports);
+
+/***/ }),
+
+/***/ "./src/pages/CandidateFinder.vue?vue&type=script&lang=js&":
+/*!****************************************************************!*\
+  !*** ./src/pages/CandidateFinder.vue?vue&type=script&lang=js& ***!
+  \****************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _node_modules_babel_loader_lib_index_js_ref_4_0_node_modules_vue_loader_lib_index_js_vue_loader_options_CandidateFinder_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../node_modules/babel-loader/lib??ref--4-0!../../node_modules/vue-loader/lib??vue-loader-options!./CandidateFinder.vue?vue&type=script&lang=js& */ "./node_modules/babel-loader/lib/index.js?!./node_modules/vue-loader/lib/index.js?!./src/pages/CandidateFinder.vue?vue&type=script&lang=js&");
+/* empty/unused harmony star reexport */ /* harmony default export */ __webpack_exports__["default"] = (_node_modules_babel_loader_lib_index_js_ref_4_0_node_modules_vue_loader_lib_index_js_vue_loader_options_CandidateFinder_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__["default"]); 
+
+/***/ }),
+
+/***/ "./src/pages/CandidateFinder.vue?vue&type=template&id=1ea073d6&":
+/*!**********************************************************************!*\
+  !*** ./src/pages/CandidateFinder.vue?vue&type=template&id=1ea073d6& ***!
+  \**********************************************************************/
+/*! exports provided: render, staticRenderFns */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_CandidateFinder_vue_vue_type_template_id_1ea073d6___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!../../node_modules/vue-loader/lib??vue-loader-options!./CandidateFinder.vue?vue&type=template&id=1ea073d6& */ "./node_modules/vue-loader/lib/loaders/templateLoader.js?!./node_modules/vue-loader/lib/index.js?!./src/pages/CandidateFinder.vue?vue&type=template&id=1ea073d6&");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "render", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_CandidateFinder_vue_vue_type_template_id_1ea073d6___WEBPACK_IMPORTED_MODULE_0__["render"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "staticRenderFns", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_CandidateFinder_vue_vue_type_template_id_1ea073d6___WEBPACK_IMPORTED_MODULE_0__["staticRenderFns"]; });
+
+
+
+/***/ }),
+
 /***/ "./src/pages/dashboard/Index.vue":
 /*!***************************************!*\
   !*** ./src/pages/dashboard/Index.vue ***!
@@ -109409,15 +109615,17 @@ window.Router = router;
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _pages_dashboard_Index__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../pages/dashboard/Index */ "./src/pages/dashboard/Index.vue");
+/* harmony import */ var _pages_CandidateFinder__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../pages/CandidateFinder */ "./src/pages/CandidateFinder.vue");
+
 
 var routes = [{
   path: '/',
   name: 'Dashboard',
   component: _pages_dashboard_Index__WEBPACK_IMPORTED_MODULE_0__["default"]
 }, {
-  path: '/test',
-  name: 'Test',
-  component: _pages_dashboard_Index__WEBPACK_IMPORTED_MODULE_0__["default"]
+  path: '/candidate-finder',
+  name: 'Candidate Finder',
+  component: _pages_CandidateFinder__WEBPACK_IMPORTED_MODULE_1__["default"]
 }];
 /* harmony default export */ __webpack_exports__["default"] = (routes);
 
