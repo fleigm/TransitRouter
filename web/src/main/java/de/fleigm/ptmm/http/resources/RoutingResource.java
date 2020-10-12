@@ -47,7 +47,7 @@ public class RoutingResource {
 
   @PostConstruct
   public void init() {
-    transitRouter = new TransitRouter(hopper, new PMap().putObject("profile", "bus_fastest"));
+    transitRouter = new TransitRouter(hopper, new PMap().putObject("profile", "bus_custom_shortest"));
   }
 
   @GET

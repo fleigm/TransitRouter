@@ -5,13 +5,13 @@ import com.conveyal.gtfs.model.Trip;
 import com.graphhopper.GraphHopper;
 import com.graphhopper.config.Profile;
 import com.graphhopper.matching.Observation;
-import com.graphhopper.reader.osm.GraphHopperOSM;
 import com.graphhopper.routing.util.EncodingManager;
 import com.graphhopper.util.PMap;
 import com.graphhopper.util.PointList;
 import com.graphhopper.util.shapes.GHPoint;
 import de.fleigm.ptmm.TransitFeed;
 import de.fleigm.ptmm.routing.BusFlagEncoder;
+import de.fleigm.ptmm.routing.CustomGraphHopper;
 import de.fleigm.ptmm.routing.RoutingResult;
 import de.fleigm.ptmm.routing.TransitRouter;
 import org.mapdb.Fun;
@@ -27,7 +27,6 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
-import java.util.LongSummaryStatistics;
 import java.util.concurrent.ConcurrentNavigableMap;
 import java.util.stream.Collectors;
 
@@ -107,8 +106,8 @@ public class CreateShapeFileCommand implements Runnable {
     feed = new TransitFeed(gtfsFile);
 
     PMap transitRouterOptions = new PMap()
-        .putObject("profile", "bus_shortest")
-        .putObject("candidate_search_radius", 50);
+        .putObject("profile", "bus_custom_shortest")
+        .putObject("candidate_search_radius", 25);
     transitRouter = new TransitRouter(graphHopper, transitRouterOptions);
 
     this.shapePoints = feed.internal().shape_points;
@@ -126,12 +125,13 @@ public class CreateShapeFileCommand implements Runnable {
 
     PMap busFlagEncoderOptions = new PMap().putObject(com.graphhopper.util.Parameters.Routing.TURN_COSTS, true);
 
-    GraphHopper graphHopper = new GraphHopperOSM()
+    GraphHopper graphHopper = new CustomGraphHopper()
         .forServer()
         .setGraphHopperLocation(storagePath)
         .setEncodingManager(EncodingManager.create(new BusFlagEncoder(busFlagEncoderOptions)))
         .setProfiles(
             new Profile("bus_fastest").setVehicle("bus").setWeighting("fastest").setTurnCosts(true),
+            new Profile("bus_custom_shortest").setVehicle("bus").setWeighting("custom_shortest").setTurnCosts(true),
             new Profile("bus_shortest").setVehicle("bus").setWeighting("shortest").setTurnCosts(true));
 
     graphHopper.setDataReaderFile(osmFile);
