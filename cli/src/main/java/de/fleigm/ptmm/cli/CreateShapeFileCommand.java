@@ -27,6 +27,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentNavigableMap;
 import java.util.stream.Collectors;
 
@@ -111,7 +112,6 @@ public class CreateShapeFileCommand implements Runnable {
     transitRouter = new TransitRouter(graphHopper, transitRouterOptions);
 
     this.shapePoints = feed.internal().shape_points;
-    this.shapePoints.clear();
   }
 
   private GraphHopper loadGraphHopper(String osmFile, String storagePath, boolean cleanTemporaryFiles) {
@@ -148,9 +148,19 @@ public class CreateShapeFileCommand implements Runnable {
   private void createShapes() {
     List<Trip> busTrips = getBusTrips();
 
+    // remove bus shapes
+    for (Trip busTrip : busTrips) {
+      shapePoints.subMap(new Fun.Tuple2(busTrip.shape_id, null), new Fun.Tuple2(busTrip.shape_id, Fun.HI)).clear();
+      busTrip.shape_id = busTrip.trip_id;
+    }
+
     logger.info("Generate shapes for {} trips", busTrips.size());
 
     busTrips.parallelStream().forEach(this::createAndSetShapeForTrip);
+
+    // reinsert trips otherwise the changes wont be stored in the file
+    Map<String, Trip> trips = feed.internal().trips;
+    busTrips.forEach(trip -> trips.replace(trip.trip_id, trip));
   }
 
   private List<Trip> getBusTrips() {
@@ -165,13 +175,13 @@ public class CreateShapeFileCommand implements Runnable {
   }
 
   private void createAndSetShapeForTrip(Trip trip) {
-    List<ShapePoint> shape = createShapeForTrip(trip.trip_id, trip.trip_id);
-
     trip.shape_id = trip.trip_id;
+    List<ShapePoint> shape = createShapeForTrip(trip.shape_id, trip.trip_id);
 
     for (ShapePoint shapePoint : shape) {
       this.shapePoints.put(new Fun.Tuple2<>(trip.shape_id, shapePoint.shape_pt_sequence), shapePoint);
     }
+
   }
 
   private List<ShapePoint> createShapeForTrip(String shapeId, String tripId) {
