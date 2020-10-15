@@ -2,12 +2,12 @@ package de.fleigm.ptmm.http;
 
 import com.graphhopper.GraphHopper;
 import com.graphhopper.config.Profile;
-import com.graphhopper.reader.osm.GraphHopperOSM;
 import com.graphhopper.routing.util.EncodingManager;
 import com.graphhopper.util.PMap;
 import com.graphhopper.util.Parameters;
 import de.fleigm.ptmm.TransitFeed;
 import de.fleigm.ptmm.routing.BusFlagEncoder;
+import de.fleigm.ptmm.routing.CustomGraphHopper;
 import io.quarkus.runtime.Startup;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
@@ -45,7 +45,7 @@ public class Producers {
 
     PMap busFlagEncoderOptions = new PMap().putObject(Parameters.Routing.TURN_COSTS, true);
 
-    GraphHopper graphHopper = new GraphHopperOSM()
+    GraphHopper graphHopper = new CustomGraphHopper()
         .forServer()
         .setGraphHopperLocation(storagePath)
         .setEncodingManager(EncodingManager.create(new BusFlagEncoder(busFlagEncoderOptions)))
