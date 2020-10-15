@@ -39,18 +39,41 @@ public class TransitFeed {
         .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
   }
 
+  public Map<String, Trip> getTripsForRoute(Route route) {
+    return feed.trips.values().stream()
+        .filter(trip -> trip.route_id.equals(route.route_id))
+        .collect(Collectors.toMap(trip -> trip.trip_id, trip -> trip));
+  }
+
   public Map<String, Trip> trips() {
     return feed.trips;
   }
 
-  public List<String> getOrderedStopIdsForTrip(String tripId) {
-    return feed.getOrderedStopListForTrip(tripId);
+  public List<String> getOrderedStopIdsForTrip(Trip trip) {
+    return feed.getOrderedStopListForTrip(trip.trip_id);
+  }
+
+  public List<Stop> getOrderedStopsForTrip(Trip trip) {
+    return getOrderedStopsForTrip(trip.trip_id);
   }
 
   public List<Stop> getOrderedStopsForTrip(String tripId) {
     return feed.getOrderedStopListForTrip(tripId)
         .stream()
         .map(feed.stops::get)
+        .collect(Collectors.toList());
+  }
+
+  public List<Pattern> findPatterns(Route route) {
+    List<Trip> trips = trips().values().stream()
+        .filter(trip -> trip.route_id.equals(route.route_id))
+        .collect(Collectors.toList());
+
+    return trips.stream()
+        .collect(Collectors.groupingBy(this::getOrderedStopsForTrip))
+        .entrySet()
+        .stream()
+        .map(pattern -> new Pattern(route, pattern.getKey(), pattern.getValue()))
         .collect(Collectors.toList());
   }
 }

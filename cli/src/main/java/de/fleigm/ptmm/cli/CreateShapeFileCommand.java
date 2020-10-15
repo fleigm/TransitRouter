@@ -1,19 +1,20 @@
 package de.fleigm.ptmm.cli;
 
+import com.conveyal.gtfs.model.Route;
 import com.conveyal.gtfs.model.ShapePoint;
 import com.conveyal.gtfs.model.Trip;
 import com.graphhopper.GraphHopper;
 import com.graphhopper.config.Profile;
-import com.graphhopper.matching.Observation;
 import com.graphhopper.routing.util.EncodingManager;
 import com.graphhopper.util.PMap;
-import com.graphhopper.util.PointList;
-import com.graphhopper.util.shapes.GHPoint;
+import de.fleigm.ptmm.Shape;
+import de.fleigm.ptmm.ShapeGenerator;
 import de.fleigm.ptmm.TransitFeed;
+import de.fleigm.ptmm.Pattern;
 import de.fleigm.ptmm.routing.BusFlagEncoder;
 import de.fleigm.ptmm.routing.CustomGraphHopper;
-import de.fleigm.ptmm.routing.RoutingResult;
 import de.fleigm.ptmm.routing.TransitRouter;
+import de.fleigm.ptmm.util.StopWatch;
 import org.mapdb.Fun;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,12 +25,8 @@ import picocli.CommandLine.Parameters;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.ConcurrentNavigableMap;
-import java.util.stream.Collectors;
 
 @Command(name = "generate", description = "generate missing shape files")
 public class CreateShapeFileCommand implements Runnable {
@@ -77,6 +74,7 @@ public class CreateShapeFileCommand implements Runnable {
   private TransitFeed feed;
   private GraphHopper graphHopper;
   private TransitRouter transitRouter;
+  private ShapeGenerator shapeGenerator;
   private ConcurrentNavigableMap<Fun.Tuple2<String, Integer>, ShapePoint> shapePoints;
 
   @Override
@@ -110,6 +108,7 @@ public class CreateShapeFileCommand implements Runnable {
         .putObject("profile", "bus_custom_shortest")
         .putObject("candidate_search_radius", 25);
     transitRouter = new TransitRouter(graphHopper, transitRouterOptions);
+    shapeGenerator = new ShapeGenerator(feed, transitRouter);
 
     this.shapePoints = feed.internal().shape_points;
   }
@@ -146,61 +145,46 @@ public class CreateShapeFileCommand implements Runnable {
   }
 
   private void createShapes() {
-    List<Trip> busTrips = getBusTrips();
-
-    // remove bus shapes
-    for (Trip busTrip : busTrips) {
-      shapePoints.subMap(new Fun.Tuple2(busTrip.shape_id, null), new Fun.Tuple2(busTrip.shape_id, Fun.HI)).clear();
-      busTrip.shape_id = busTrip.trip_id;
-    }
-
-    logger.info("Generate shapes for {} trips", busTrips.size());
-
-    busTrips.parallelStream().forEach(this::createAndSetShapeForTrip);
-
-    // reinsert trips otherwise the changes wont be stored in the file
-    Map<String, Trip> trips = feed.internal().trips;
-    busTrips.forEach(trip -> trips.replace(trip.trip_id, trip));
+    feed.busRoutes()
+        .values()
+        .parallelStream()
+        .forEach(this::createShapesForRoute);
   }
 
-  private List<Trip> getBusTrips() {
-    HashSet<String> busRoutes = feed.routes().values().stream()
-        .filter(route -> route.route_type == 3)
-        .map(route -> route.route_id)
-        .collect(Collectors.toCollection(HashSet::new));
+  private void createShapesForRoute(Route route) {
+    List<Pattern> patterns = feed.findPatterns(route);
 
-    return feed.trips().values().stream()
-        .filter(trip -> busRoutes.contains(trip.route_id))
-        .collect(Collectors.toList());
+    patterns.forEach(this::createShapeForPattern);
+
+    int totalTrips = patterns.stream()
+        .mapToInt(pattern -> pattern.trips().size())
+        .sum();
+
+    logger.info("Generated shapes for route {}:\n\t route_id: {} \t trips: {} \t shapes: {}",
+        route.route_short_name,
+        route.route_id,
+        totalTrips,
+        patterns.size());
   }
 
-  private void createAndSetShapeForTrip(Trip trip) {
-    trip.shape_id = trip.trip_id;
-    List<ShapePoint> shape = createShapeForTrip(trip.shape_id, trip.trip_id);
+  private void createShapeForPattern(Pattern pattern) {
+    String shapeId = pattern.trips().get(0).trip_id;
+    Shape shape = shapeGenerator.generate(pattern);
+    List<ShapePoint> shapePoints = shape.convertToShapePoints(shapeId);
 
-    for (ShapePoint shapePoint : shape) {
-      this.shapePoints.put(new Fun.Tuple2<>(trip.shape_id, shapePoint.shape_pt_sequence), shapePoint);
+    for (Trip trip : pattern.trips()) {
+      deleteOldShape(trip);
+      trip.shape_id = shapeId;
+      feed.internal().trips.replace(trip.trip_id, trip);
     }
 
+    for (ShapePoint shapePoint : shapePoints) {
+      this.shapePoints.put(new Fun.Tuple2<>(shapeId, shapePoint.shape_pt_sequence), shapePoint);
+    }
   }
 
-  private List<ShapePoint> createShapeForTrip(String shapeId, String tripId) {
-    List<Observation> observations = feed.getOrderedStopsForTrip(tripId)
-        .stream()
-        .map(stop -> new GHPoint(stop.stop_lat, stop.stop_lon))
-        .map(Observation::new)
-        .collect(Collectors.toList());
-
-    RoutingResult route = transitRouter.route(observations);
-
-    PointList points = route.getPath().calcPoints();
-
-    List<ShapePoint> shapePoints = new ArrayList<>(points.getSize());
-    for (int i = 0; i < points.size(); i++) {
-      shapePoints.add(new ShapePoint(shapeId, points.getLat(i), points.getLon(i), i, 0.0));
-    }
-
-    return shapePoints;
-
+  private void deleteOldShape(Trip trip) {
+    shapePoints.subMap(new Fun.Tuple2(trip.shape_id, null), new Fun.Tuple2(trip.shape_id, Fun.HI)).clear();
+    trip.shape_id = null;
   }
 }

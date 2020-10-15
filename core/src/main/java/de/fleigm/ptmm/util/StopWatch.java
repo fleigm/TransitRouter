@@ -1,4 +1,4 @@
-package de.fleigm.ptmm.cli;
+package de.fleigm.ptmm.util;
 
 public class StopWatch {
   private long lastTime;
