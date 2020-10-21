@@ -1,7 +1,7 @@
 <template>
   <div>
     <l-animated-polyline v-if="options.showShape"
-                         :lat-lngs="routingResult.shape"
+                         :lat-lngs="routingResult.generatedShape"
                          :options="{'delay': 2400}">
       <l-popup>
         <div>Distance: {{ routingResult.distance }}</div>
@@ -21,7 +21,7 @@
 
     <l-circle v-if="options.showStops"
               v-for="stop in routingResult.stops"
-              :key="stop.id"
+              :key="stop.stop_id"
               color="red"
               :radius="1"
               :lat-lng="[stop.stop_lat, stop.stop_lon]">
@@ -33,7 +33,23 @@
 </template>
 
 <script>
+const defaultOptions = {
+  showOriginalShape: true,
+  showShape: true,
+  showStops: true,
+}
+
 export default {
-  props: ['routingResult', 'options']
+  name: 'v-routing-result',
+  props: {
+    routingResult: {
+      type: Object,
+      required: true,
+    },
+    options: {
+      type: Object,
+      default: () => defaultOptions
+    }
+  }
 }
 </script>

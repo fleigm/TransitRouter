@@ -63,7 +63,7 @@ export default {
 
   computed: {
     endpoint() {
-      return 'eval/' + this.name
+      return `eval/${this.name}/trips`
     }
   }
 }

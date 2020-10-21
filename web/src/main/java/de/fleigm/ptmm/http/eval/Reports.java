@@ -2,6 +2,7 @@ package de.fleigm.ptmm.http.eval;
 
 import de.fleigm.ptmm.eval.Report;
 import de.fleigm.ptmm.util.StopWatch;
+import io.quarkus.cache.CacheResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,8 +17,10 @@ public class Reports {
   private final Map<String, Report> reports = new HashMap<>();
 
 
+  @CacheResult(cacheName = "report-cache")
   public Report get(String name) {
-    return reports.computeIfAbsent(name, this::loadReport);
+    //return reports.computeIfAbsent(name, this::loadReport);
+    return Report.read("../../../" + name + "/gtfs.generated.fullreport.tsv");
   }
 
   private Report loadReport(String name) {

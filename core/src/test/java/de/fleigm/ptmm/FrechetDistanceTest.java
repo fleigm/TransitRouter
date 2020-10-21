@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 ;
 
@@ -44,6 +45,45 @@ class FrechetDistanceTest {
     for (int i = 0; i < entries.size(); i++) {
       assertEquals(entries.get(i).df, FrechetDistance.compute(originalShapes.get(i), generatedShapes.get(i)), TEST_DELTA);
     }
+  }
+
+  @Test
+  void asd() throws IOException {
+    List<Double> values = Files.lines(Paths.get("../../eval/stuttgart_generated.fullreport.tsv"))
+        .map(s -> s.split("\t"))
+        .map(strings -> Double.parseDouble(strings[1]))
+        .collect(Collectors.toList());
+
+    double acc0 = 0;
+    double acc10 = 0;
+    double acc20 = 0;
+    double acc40 = 0;
+    double acc80 = 0;
+    for (Double value : values) {
+      if (value <= 0.00001) {
+        acc0++;
+      }
+      if (value <= 0.1) {
+        acc10++;
+      }
+      if (value <= 0.2) {
+        acc20++;
+      }
+      if (value <= 0.4) {
+        acc40++;
+      }
+      if (value <= 0.8) {
+        acc80++;
+      }
+    }
+
+    acc0 /= values.size();
+    acc10 /= values.size();
+    acc20 /= values.size();
+    acc40 /= values.size();
+    acc80 /= values.size();
+
+    assertNotNull(values);
   }
 
   private PointList convert(LineString lineString) {

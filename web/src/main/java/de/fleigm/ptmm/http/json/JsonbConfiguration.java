@@ -1,6 +1,5 @@
 package de.fleigm.ptmm.http.json;
 
-import de.fleigm.ptmm.http.json.PointListSerializer;
 import io.quarkus.jsonb.JsonbConfigCustomizer;
 
 import javax.inject.Singleton;
@@ -17,6 +16,7 @@ public class JsonbConfiguration implements JsonbConfigCustomizer {
         .withSerializers(new EdgeIteratorStateSerializer())
         .withSerializers(new GHPointSerializer())
         .withSerializers(new ObservationSerializer())
-        .withSerializers(new StateSerializer());
+        .withSerializers(new StateSerializer())
+        .withSerializers(new ViewSerializer());
   }
 }

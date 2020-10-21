@@ -97,7 +97,7 @@ public class RoutingResource {
     Map<String, Object> view = new HashMap<>();
     view.put("time", routingResult.getTime());
     view.put("distance", routingResult.getDistance());
-    view.put("shape", routingResult.getPath());
+    view.put("generatedShape", routingResult.getPath());
     view.put("observations", routingResult.getObservations());
     view.put("candidates", routingResult.getCandidates());
     view.put("originalShape", originalShape);
