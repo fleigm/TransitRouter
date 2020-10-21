@@ -4,6 +4,12 @@ public class StopWatch {
   private long lastTime;
   private long elapsedTime;
 
+  public static StopWatch createAndStart() {
+    StopWatch stopWatch = new StopWatch();
+    stopWatch.start();
+    return stopWatch;
+  }
+
 
   public void start() {
     elapsedTime = 0;
