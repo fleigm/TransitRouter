@@ -17,6 +17,10 @@ module.exports = {
                 '128': '24rem',
             }
         },
+        container: {
+            center: true,
+            padding: '2rem'
+        },
     },
     variants: {},
     plugins: [],
