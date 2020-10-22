@@ -2,27 +2,30 @@
   <v-resource :endpoint="endpoint" :page-size="15">
     <div
         slot-scope="{page, searchQuery, loading, getPage, search, sortBy}">
-      <el-table :data="page.data"
+      <el-table v-loading="loading"
+                :data="page.data"
                 size="small"
                 stripe
-                @sort-change="({prop, order}) => sortBy(prop, order)">
+                :fit="true"
+                @sort-change="({prop, order}) => sortBy(prop, order)"
+                highlight-current-row
+                @current-change="showDetails">
         <el-table-column prop="tripId"
                          label="Trip"
-                         width="300"
+        ></el-table-column>
+        <el-table-column prop="route"
+                         label="Route"
         ></el-table-column>
         <el-table-column prop="an"
                          label="A_n"
-                         width="100"
                          sortable="custom"
         ></el-table-column>
         <el-table-column prop="al"
                          label="A_l"
-                         width="100"
                          sortable="custom"
         ></el-table-column>
         <el-table-column prop="avgFd"
                          label="avg FD"
-                         widht="100"
                          sortable="custom"
         ></el-table-column>
         <el-table-column
@@ -49,6 +52,11 @@
             @current-change="getPage">
         </el-pagination>
       </div>
+      <el-dialog :visible.sync="showDetailsModal" width="80%" top="5vh">
+        <div class="w-full" style="height: 80vh;" v-loading="loadingDetails">
+          <v-routing-map :route="details" v-if="details"></v-routing-map>
+        </div>
+      </el-dialog>
     </div>
   </v-resource>
 </template>
@@ -64,6 +72,27 @@ export default {
   computed: {
     endpoint() {
       return `eval/${this.name}/trips`
+    }
+  },
+
+  data() {
+    return {
+      showDetailsModal: false,
+      details: null,
+      loadingDetails: false,
+    }
+  },
+
+  methods: {
+    showDetails(entry) {
+      this.showDetailsModal = true;
+      this.loadingDetails = true
+      this.$http
+          .get('eval/stuttgart/trips/' + entry.tripId)
+          .then(({data}) => {
+            this.loadingDetails = false;
+            this.details = data;
+          })
     }
   }
 }

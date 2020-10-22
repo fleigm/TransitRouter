@@ -18,6 +18,7 @@ export default {
       type: Array,
       default: () => [47.9959, 7.85222],
     },
+    bounds: {},
     zoom: {
       type: Number,
       default: 14,
@@ -27,7 +28,6 @@ export default {
   data() {
     return {
       url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-      bounds: null,
     }
   },
 }

@@ -107,9 +107,17 @@ public class EvaluationResource {
       }
     }
 
-    List<ReportEntry> entries = entriesMatchingSearch.stream()
+    TransitFeed transitFeed = transitFeedService.get("../../../" + name + "/gtfs.generated.zip");
+
+    List<View> entries = entriesMatchingSearch.stream()
         .skip(paged.getOffset())
         .limit(paged.getLimit())
+        .map(entry -> new View()
+            .add("tripId", entry.tripId())
+            .add("an", entry.an())
+            .add("al", entry.al())
+            .add("avgFd", entry.avgFd())
+            .add("route", transitFeed.getRouteForTrip(entry.tripId()).route_short_name))
         .collect(Collectors.toList());
 
     var page = Page.builder()

@@ -2,7 +2,7 @@
   <div>
     <l-animated-polyline v-if="options.showShape"
                          :lat-lngs="routingResult.generatedShape"
-                         :options="{'delay': 2400}">
+                         :options="{'delay': 2400, fillOpacity: 0.5, opacity: 0.5}">
       <l-popup>
         <div>Distance: {{ routingResult.distance }}</div>
         <div>Time: {{ routingResult.time }}</div>
@@ -11,7 +11,7 @@
 
     <l-animated-polyline v-if="options.showOriginalShape"
                          :lat-lngs="routingResult.originalShape"
-                         :options="{'delay': 2400, 'color': '#000'}"
+                         :options="{'delay': 2400, 'color': '#000', fillOpacity: 0.5, opacity: 0.5}"
     ></l-animated-polyline>
 
     <l-circle v-for="candidate in routingResult.candidates"
@@ -20,8 +20,8 @@
     </l-circle>
 
     <l-circle v-if="options.showStops"
-              v-for="stop in routingResult.stops"
-              :key="stop.stop_id"
+              v-for="(stop, i) in routingResult.stops"
+              :key="i"
               color="red"
               :radius="1"
               :lat-lng="[stop.stop_lat, stop.stop_lon]">

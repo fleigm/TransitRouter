@@ -45,6 +45,10 @@ public class TransitFeed {
         .collect(Collectors.toMap(trip -> trip.trip_id, trip -> trip));
   }
 
+  public Route getRouteForTrip(String tripId) {
+    return feed.routes.get(feed.trips.get(tripId).route_id);
+  }
+
   public Map<String, Trip> trips() {
     return feed.trips;
   }
