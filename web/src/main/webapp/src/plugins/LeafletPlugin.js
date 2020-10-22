@@ -1,4 +1,5 @@
-import 'leaflet/dist/leaflet.css'
+import 'leaflet/dist/leaflet.css';
+import 'leaflet-polylineoffset';
 import {LCircle, LMap, LMarker, LPolyline, LPopup, LTileLayer} from "vue2-leaflet";
 import AnimatedPolyline from "../components/AnimatedPolyline";
 
