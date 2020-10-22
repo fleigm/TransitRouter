@@ -7,9 +7,7 @@
                 size="small"
                 stripe
                 :fit="true"
-                @sort-change="({prop, order}) => sortBy(prop, order)"
-                highlight-current-row
-                @current-change="showDetails">
+                @sort-change="({prop, order}) => sortBy(prop, order)">
         <el-table-column prop="tripId"
                          label="Trip"
         ></el-table-column>
@@ -40,6 +38,9 @@
                      @change="search(searchQuery)">
             </div>
           </template>
+          <template slot-scope="scope">
+            <el-button size="mini" @click="showDetails(scope.row)" type="text" circle icon="el-icon-map-location"></el-button>
+          </template>
         </el-table-column>
       </el-table>
       <div class="flex justify-center w-full py-2">
@@ -53,9 +54,12 @@
         </el-pagination>
       </div>
       <el-dialog :visible.sync="showDetailsModal" width="80%" top="5vh">
-        <div class="w-full" style="height: 80vh;" v-loading="loadingDetails">
-          <v-routing-map :route="details" v-if="details"></v-routing-map>
-        </div>
+          <template #title v-if="details">
+            <span>{{ details.trip.trip_id }} - {{ details.route.route_short_name }}</span>
+          </template>
+          <div class="w-full" style="height: 80vh;" v-loading="loadingDetails">
+            <v-routing-map :route="details" v-if="details"></v-routing-map>
+          </div>
       </el-dialog>
     </div>
   </v-resource>

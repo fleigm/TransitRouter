@@ -9,15 +9,16 @@
                          :options="{'delay': 2400, 'color': '#000', offset: 2}"
     ></l-animated-polyline>
 
-    <l-circle v-for="(stop, i) in route.stops"
+    <l-circle-marker v-for="(stop, i) in route.stops"
               :key="i"
               color="red"
-              :radius="1"
+              :radius="2"
               :lat-lng="[stop.stop_lat, stop.stop_lon]">
-      <l-popup>
+      <l-tooltip>
+        <span>Stop # {{ i }}</span>
         <pre>{{ stop }}</pre>
-      </l-popup>
-    </l-circle>
+      </l-tooltip>
+    </l-circle-marker>
   </v-map>
 </template>
 

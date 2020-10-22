@@ -1,6 +1,8 @@
 package de.fleigm.ptmm.http.eval;
 
+import com.conveyal.gtfs.model.Route;
 import com.conveyal.gtfs.model.Stop;
+import com.conveyal.gtfs.model.Trip;
 import com.vividsolutions.jts.geom.LineString;
 import de.fleigm.ptmm.TransitFeed;
 import de.fleigm.ptmm.eval.Report;
@@ -138,12 +140,15 @@ public class EvaluationResource {
     TransitFeed originalFeed = transitFeedService.get("../../../" + name + "/gtfs.original.zip");
     TransitFeed generatedFeed = transitFeedService.get("../../../" + name + "/gtfs.generated.zip");
 
+    Trip trip = generatedFeed.internal().trips.get(tripId);
+    Route route = generatedFeed.getRouteForTrip(tripId);
     List<Stop> stops = originalFeed.getOrderedStopsForTrip(tripId);
     LineString originalShape = originalFeed.internal().getTripGeometry(tripId);
     LineString generatedShape = generatedFeed.internal().getTripGeometry(tripId);
 
     return new View()
-        .add("tripId", tripId)
+        .add("trip", trip)
+        .add("route", route)
         .add("stops", stops)
         .add("originalShape", originalShape)
         .add("generatedShape", generatedShape);
