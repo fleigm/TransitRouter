@@ -5,9 +5,9 @@ import com.conveyal.gtfs.model.Stop;
 import com.conveyal.gtfs.model.Trip;
 import com.vividsolutions.jts.geom.LineString;
 import de.fleigm.ptmm.TransitFeed;
+import de.fleigm.ptmm.eval.Evaluation;
 import de.fleigm.ptmm.eval.Report;
 import de.fleigm.ptmm.eval.ReportEntry;
-import de.fleigm.ptmm.http.TransitFeedService;
 import de.fleigm.ptmm.http.pagination.Page;
 import de.fleigm.ptmm.http.pagination.Paged;
 import de.fleigm.ptmm.http.sort.SortQuery;
@@ -32,19 +32,17 @@ import java.util.stream.Collectors;
 @Path("eval/{name}")
 public class EvaluationResource {
 
-  @Inject
-  Reports reports;
-
-  @Inject
-  TransitFeedService transitFeedService;
-
   @PathParam("name")
   String name;
+
+  @Inject
+  EvaluationService evaluationService;
 
   @GET
   @Produces(MediaType.APPLICATION_JSON)
   public Response get() {
-    Report report = reports.get(name);
+    Evaluation evaluation = evaluationService.get(name);
+    Report report = evaluation.report();
 
     ReportEntry highestAvgFd = report.entries()
         .stream()
@@ -89,7 +87,8 @@ public class EvaluationResource {
       @QueryParam("search") @DefaultValue("") String search,
       @QueryParam("sort") @DefaultValue("") String sort) {
 
-    Report report = reports.get(name);
+    Evaluation evaluation = evaluationService.get(name);
+    Report report = evaluation.report();
 
     List<ReportEntry> entriesMatchingSearch = report.entries();
     if (!search.isBlank()) {
@@ -109,7 +108,7 @@ public class EvaluationResource {
       }
     }
 
-    TransitFeed transitFeed = transitFeedService.get("../../../" + name + "/gtfs.generated.zip");
+    TransitFeed transitFeed = evaluation.generatedTransitFeed();
 
     List<View> entries = entriesMatchingSearch.stream()
         .skip(paged.getOffset())
@@ -137,8 +136,9 @@ public class EvaluationResource {
   @Path("trips/{tripId}")
   @Produces(MediaType.APPLICATION_JSON)
   public View getDetails(@PathParam("tripId") String tripId) {
-    TransitFeed originalFeed = transitFeedService.get("../../../" + name + "/gtfs.original.zip");
-    TransitFeed generatedFeed = transitFeedService.get("../../../" + name + "/gtfs.generated.zip");
+    Evaluation evaluation = evaluationService.get(name);
+    TransitFeed originalFeed = evaluation.originalTransitFeed();
+    TransitFeed generatedFeed = evaluation.generatedTransitFeed();
 
     Trip trip = generatedFeed.internal().trips.get(tripId);
     Route route = generatedFeed.getRouteForTrip(tripId);
