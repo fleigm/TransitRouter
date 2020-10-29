@@ -40,7 +40,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 public class TransitRouter {
-  private static final String DEFAULT_PROFILE = "bus_shortest";
+  private static final String DEFAULT_PROFILE = "bus_custom_shortest";
 
   private final Logger logger = LoggerFactory.getLogger(getClass());
 

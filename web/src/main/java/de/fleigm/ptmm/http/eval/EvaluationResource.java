@@ -12,11 +12,14 @@ import de.fleigm.ptmm.http.pagination.Page;
 import de.fleigm.ptmm.http.pagination.Paged;
 import de.fleigm.ptmm.http.sort.SortQuery;
 import de.fleigm.ptmm.http.views.View;
+import org.jboss.resteasy.annotations.providers.multipart.MultipartForm;
 
 import javax.inject.Inject;
 import javax.ws.rs.BeanParam;
+import javax.ws.rs.Consumes;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
+import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -29,18 +32,24 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@Path("eval/{name}")
+@Path("eval")
 public class EvaluationResource {
-
-  @PathParam("name")
-  String name;
 
   @Inject
   EvaluationService evaluationService;
 
-  @GET
+  @POST
+  @Consumes(MediaType.MULTIPART_FORM_DATA)
   @Produces(MediaType.APPLICATION_JSON)
-  public Response get() {
+  public Response create(@MultipartForm CreateEvaluationRequest request) {
+    evaluationService.createEvaluation(request);
+    return Response.ok().build();
+  }
+
+  @GET
+  @Path("{name}")
+  @Produces(MediaType.APPLICATION_JSON)
+  public Response get(@PathParam("name") String name) {
     Evaluation evaluation = evaluationService.get(name);
     Report report = evaluation.report();
 
@@ -66,11 +75,11 @@ public class EvaluationResource {
         .add("highestAvgFd", new View()
             .add("tripId", highestAvgFd.tripId)
             .add("avgFd", highestAvgFd.avgFd)
-            .add("details", getDetails(highestAvgFd.tripId)))
+            .add("details", getDetails(name, highestAvgFd.tripId)))
         .add("lowestAvgFd", new View()
             .add("tripId", lowestAvgFd.tripId)
             .add("avgFd", lowestAvgFd.avgFd)
-            .add("details", getDetails(lowestAvgFd.tripId)))
+            .add("details", getDetails(name, lowestAvgFd.tripId)))
         .add("averageAvgFd", averageAvgFd)
         .add("accuracies", accuracies);
 
@@ -79,9 +88,10 @@ public class EvaluationResource {
 
 
   @GET
-  @Path("trips")
+  @Path("{name}/trips")
   @Produces(MediaType.APPLICATION_JSON)
   public Response getTrips(
+      @PathParam("name") String name,
       @Context UriInfo uriInfo,
       @BeanParam Paged paged,
       @QueryParam("search") @DefaultValue("") String search,
@@ -133,9 +143,9 @@ public class EvaluationResource {
   }
 
   @GET
-  @Path("trips/{tripId}")
+  @Path("{name}/trips/{tripId}")
   @Produces(MediaType.APPLICATION_JSON)
-  public View getDetails(@PathParam("tripId") String tripId) {
+  public View getDetails(@PathParam("name") String name, @PathParam("tripId") String tripId) {
     Evaluation evaluation = evaluationService.get(name);
     TransitFeed originalFeed = evaluation.originalTransitFeed();
     TransitFeed generatedFeed = evaluation.generatedTransitFeed();

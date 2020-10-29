@@ -8,6 +8,7 @@ import com.graphhopper.util.Parameters;
 import de.fleigm.ptmm.TransitFeed;
 import de.fleigm.ptmm.routing.BusFlagEncoder;
 import de.fleigm.ptmm.routing.CustomGraphHopper;
+import de.fleigm.ptmm.routing.TransitRouter;
 import io.quarkus.runtime.Startup;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
@@ -59,5 +60,10 @@ public class Producers {
     graphHopper.importOrLoad();
 
     return graphHopper;
+  }
+
+  @Produces
+  public TransitRouter transitRouter(GraphHopper graphHopper) {
+    return new TransitRouter(graphHopper, new PMap());
   }
 }
