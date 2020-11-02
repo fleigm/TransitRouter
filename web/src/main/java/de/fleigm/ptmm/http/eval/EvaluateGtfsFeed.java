@@ -1,22 +1,35 @@
 package de.fleigm.ptmm.http.eval;
 
+import de.fleigm.ptmm.eval.Evaluation;
 import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.FileUtils;
 
-import java.io.OutputStream;
+import java.io.File;
+import java.io.InputStream;
 import java.util.function.Function;
 
+@Slf4j
 public class EvaluateGtfsFeed implements Function<EvaluationProcess, EvaluationProcess> {
 
   @SneakyThrows
   @Override
   public EvaluationProcess apply(EvaluationProcess evaluationProcess) {
-    String original = evaluationProcess.getPath() + "gtfs.original";
-    String generated = evaluationProcess.getPath() + "gtfs.generated";
-    String command = String.format("%sshapevl -m 3 -f %s -g %s %s", evaluationProcess.getBaseFolder(), evaluationProcess.getPath(), original, generated);
+    String original = evaluationProcess.getPath() + Evaluation.ORIGINAL_GTFS_FOLDER;
+    String generated = evaluationProcess.getPath() + Evaluation.GENERATED_GTFS_FOLDER;
+    String command = String.format("%sshapevl -m 3 -f %s -g %s %s",
+        evaluationProcess.getBaseFolder(),
+        evaluationProcess.getPath(),
+        original,
+        generated);
 
     Process process = Runtime.getRuntime().exec(command);
 
-    OutputStream outputStream = process.getOutputStream();
+    try (InputStream evalOutput = process.getInputStream()) {
+      FileUtils.copyInputStreamToFile(
+          evalOutput,
+          new File(evaluationProcess.getPath() + Evaluation.SHAPEVL_OUTPUT));
+    }
 
     return evaluationProcess;
   }

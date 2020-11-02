@@ -1,15 +1,19 @@
 package de.fleigm.ptmm;
 
+import de.fleigm.ptmm.eval.Evaluation;
 import de.fleigm.ptmm.http.eval.CreateEvaluationRequest;
 import de.fleigm.ptmm.http.eval.EvaluationProcess;
 import de.fleigm.ptmm.http.eval.EvaluationService;
 import io.quarkus.test.junit.QuarkusTest;
 import org.apache.commons.io.FileUtils;
+import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.junit.jupiter.api.Test;
 
 import javax.inject.Inject;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
@@ -22,6 +26,14 @@ public class EvaluationIntegrationTest {
 
   @Inject
   EvaluationService evaluationService;
+
+  @ConfigProperty(name = "evaluation.folder")
+  String evaluationFolder;
+
+  //@AfterEach
+  void cleanUp() throws IOException {
+    FileUtils.deleteDirectory(Paths.get(evaluationFolder, "test").toFile());
+  }
 
   @Test
   void asd() {
@@ -36,7 +48,7 @@ public class EvaluationIntegrationTest {
   }
 
   @Test
-  void qwe() throws IOException, ExecutionException, InterruptedException {
+  void happy_path() throws IOException, ExecutionException, InterruptedException {
     File testFeed = new File(getClass().getClassLoader().getResource("test_feed.zip").getFile());
 
     CreateEvaluationRequest request = CreateEvaluationRequest.builder()
@@ -51,5 +63,12 @@ public class EvaluationIntegrationTest {
     assertTrue(evaluation.isDone());
     assertFalse(evaluation.isCompletedExceptionally());
 
+    assertTrue(Files.isDirectory(Paths.get(evaluationProcess.getPath())));
+    assertTrue(Files.isDirectory(Paths.get(evaluationProcess.getPath() + Evaluation.ORIGINAL_GTFS_FOLDER)));
+    assertTrue(Files.isDirectory(Paths.get(evaluationProcess.getPath() + Evaluation.GENERATED_GTFS_FOLDER)));
+    assertTrue(Files.exists(Paths.get(evaluationProcess.getPath() + Evaluation.ORIGINAL_GTFS_FEED)));
+    assertTrue(Files.exists(Paths.get(evaluationProcess.getPath() + Evaluation.GENERATED_GTFS_FEED)));
+    assertTrue(Files.exists(Paths.get(evaluationProcess.getPath() + Evaluation.GTFS_FULL_REPORT)));
+    assertTrue(Files.exists(Paths.get(evaluationProcess.getPath() + Evaluation.SHAPEVL_OUTPUT)));
   }
 }

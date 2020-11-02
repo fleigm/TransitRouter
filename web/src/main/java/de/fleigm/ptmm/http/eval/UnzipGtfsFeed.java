@@ -1,5 +1,6 @@
 package de.fleigm.ptmm.http.eval;
 
+import de.fleigm.ptmm.eval.Evaluation;
 import de.fleigm.ptmm.util.Unzip;
 import lombok.SneakyThrows;
 
@@ -11,12 +12,12 @@ public class UnzipGtfsFeed implements Function<EvaluationProcess, EvaluationProc
   @Override
   public EvaluationProcess apply(EvaluationProcess evaluationProcess) {
     Unzip.apply(
-        evaluationProcess.getPath() + "gtfs.original.zip",
-        evaluationProcess.getPath() + "gtfs.original");
+        evaluationProcess.getPath() + Evaluation.ORIGINAL_GTFS_FEED,
+        evaluationProcess.getPath() + Evaluation.ORIGINAL_GTFS_FOLDER);
 
     Unzip.apply(
-        evaluationProcess.getPath() + "gtfs.generated.zip",
-        evaluationProcess.getPath() + "gtfs.generated");
+        evaluationProcess.getPath() + Evaluation.GENERATED_GTFS_FEED,
+        evaluationProcess.getPath() + Evaluation.GENERATED_GTFS_FOLDER);
 
     return evaluationProcess;
   }

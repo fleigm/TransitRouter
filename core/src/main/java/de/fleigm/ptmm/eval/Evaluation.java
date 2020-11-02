@@ -1,27 +1,11 @@
 package de.fleigm.ptmm.eval;
 
-import de.fleigm.ptmm.TransitFeed;
-
 public class Evaluation {
-  private Report report;
-  private TransitFeed originalTransitFeed;
-  private TransitFeed generatedTransitFeed;
 
-  public Evaluation(Report report, TransitFeed originalTransitFeed, TransitFeed generatedTransitFeed) {
-    this.report = report;
-    this.originalTransitFeed = originalTransitFeed;
-    this.generatedTransitFeed = generatedTransitFeed;
-  }
-
-  public Report report() {
-    return report;
-  }
-
-  public TransitFeed originalTransitFeed() {
-    return originalTransitFeed;
-  }
-
-  public TransitFeed generatedTransitFeed() {
-    return generatedTransitFeed;
-  }
+  public static final String ORIGINAL_GTFS_FEED = "gtfs.original.zip";
+  public static final String ORIGINAL_GTFS_FOLDER = "gtfs.original";
+  public static final String GENERATED_GTFS_FEED = "gtfs.generated.zip";
+  public static final String GENERATED_GTFS_FOLDER = "gtfs.generated";
+  public static final String GTFS_FULL_REPORT = "gtfs.generated.fullreport.tsv";
+  public static final String SHAPEVL_OUTPUT = "shapevl.output.txt";
 }

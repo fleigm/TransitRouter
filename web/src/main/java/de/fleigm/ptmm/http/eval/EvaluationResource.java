@@ -5,7 +5,7 @@ import com.conveyal.gtfs.model.Stop;
 import com.conveyal.gtfs.model.Trip;
 import com.vividsolutions.jts.geom.LineString;
 import de.fleigm.ptmm.TransitFeed;
-import de.fleigm.ptmm.eval.Evaluation;
+import de.fleigm.ptmm.eval.EvaluationResult;
 import de.fleigm.ptmm.eval.Report;
 import de.fleigm.ptmm.eval.ReportEntry;
 import de.fleigm.ptmm.http.pagination.Page;
@@ -50,8 +50,8 @@ public class EvaluationResource {
   @Path("{name}")
   @Produces(MediaType.APPLICATION_JSON)
   public Response get(@PathParam("name") String name) {
-    Evaluation evaluation = evaluationService.get(name);
-    Report report = evaluation.report();
+    EvaluationResult evaluationResult = evaluationService.get(name);
+    Report report = evaluationResult.report();
 
     ReportEntry highestAvgFd = report.entries()
         .stream()
@@ -97,8 +97,8 @@ public class EvaluationResource {
       @QueryParam("search") @DefaultValue("") String search,
       @QueryParam("sort") @DefaultValue("") String sort) {
 
-    Evaluation evaluation = evaluationService.get(name);
-    Report report = evaluation.report();
+    EvaluationResult evaluationResult = evaluationService.get(name);
+    Report report = evaluationResult.report();
 
     List<ReportEntry> entriesMatchingSearch = report.entries();
     if (!search.isBlank()) {
@@ -118,7 +118,7 @@ public class EvaluationResource {
       }
     }
 
-    TransitFeed transitFeed = evaluation.generatedTransitFeed();
+    TransitFeed transitFeed = evaluationResult.generatedTransitFeed();
 
     List<View> entries = entriesMatchingSearch.stream()
         .skip(paged.getOffset())
@@ -146,9 +146,9 @@ public class EvaluationResource {
   @Path("{name}/trips/{tripId}")
   @Produces(MediaType.APPLICATION_JSON)
   public View getDetails(@PathParam("name") String name, @PathParam("tripId") String tripId) {
-    Evaluation evaluation = evaluationService.get(name);
-    TransitFeed originalFeed = evaluation.originalTransitFeed();
-    TransitFeed generatedFeed = evaluation.generatedTransitFeed();
+    EvaluationResult evaluationResult = evaluationService.get(name);
+    TransitFeed originalFeed = evaluationResult.originalTransitFeed();
+    TransitFeed generatedFeed = evaluationResult.generatedTransitFeed();
 
     Trip trip = generatedFeed.internal().trips.get(tripId);
     Route route = generatedFeed.getRouteForTrip(tripId);

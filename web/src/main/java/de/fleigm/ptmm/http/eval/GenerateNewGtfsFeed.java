@@ -8,6 +8,7 @@ import de.fleigm.ptmm.Pattern;
 import de.fleigm.ptmm.Shape;
 import de.fleigm.ptmm.ShapeGenerator;
 import de.fleigm.ptmm.TransitFeed;
+import de.fleigm.ptmm.eval.Evaluation;
 import de.fleigm.ptmm.routing.TransitRouter;
 import lombok.Value;
 import org.mapdb.Fun;
@@ -24,7 +25,7 @@ public class GenerateNewGtfsFeed implements Function<EvaluationProcess, Evaluati
 
   @Override
   public EvaluationProcess apply(EvaluationProcess evaluationProcess) {
-    TransitFeed transitFeed = new TransitFeed(evaluationProcess.getPath() + "gtfs.original.zip");
+    TransitFeed transitFeed = new TransitFeed(evaluationProcess.getPath() + Evaluation.ORIGINAL_GTFS_FEED);
     TransitRouter transitRouter = new TransitRouter(graphHopper, new PMap());
     ShapeGenerator shapeGenerator = new ShapeGenerator(transitFeed, transitRouter);
 
@@ -35,7 +36,7 @@ public class GenerateNewGtfsFeed implements Function<EvaluationProcess, Evaluati
         .map(pattern -> new PatternWitShape(pattern, shapeGenerator.generate(pattern)))
         .forEach(patternWitShape -> store(patternWitShape, transitFeed));
 
-    transitFeed.internal().toFile(evaluationProcess.getPath() + "gtfs.generated.zip");
+    transitFeed.internal().toFile(evaluationProcess.getPath() + Evaluation.GENERATED_GTFS_FEED);
 
     return evaluationProcess;
   }
