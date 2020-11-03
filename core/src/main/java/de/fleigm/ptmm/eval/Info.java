@@ -7,6 +7,8 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.Map;
 
 @Data
 @Builder
@@ -21,4 +23,13 @@ public class Info {
   private LocalDateTime createdAt;
   private String path;
   private Status status;
+
+  @Builder.Default
+  private Map<String, Object> statistics = new HashMap<>();
+
+  public Info addStatistic(String key, Object value) {
+    statistics.put(key, value);
+
+    return this;
+  }
 }

@@ -40,12 +40,22 @@
 import VAccuracyChart from "./AccuracyChart";
 import VRoutingResult from "../dashboard/RoutingResult";
 import VMap from "../../components/Map";
+
 export default {
   name: "v-summary-card",
+
   components: {VMap, VRoutingResult, VAccuracyChart},
+
+  props: {
+    name: {
+      type: String,
+      required: true
+    }
+  },
+
   data() {
     return {
-      fetch: this.$http.get('eval/stuttgart'),
+      fetch: this.$http.get(`eval/${this.name}`),
     }
   }
 }

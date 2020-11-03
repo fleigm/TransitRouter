@@ -91,8 +91,12 @@ export default {
     showDetails(entry) {
       this.showDetailsModal = true;
       this.loadingDetails = true
+
+      const name = this.$route.params.name;
+      const tripId = entry.tripId;
+
       this.$http
-          .get('eval/stuttgart/trips/' + entry.tripId)
+          .get(`eval/${name}/trips/${tripId}`)
           .then(({data}) => {
             this.loadingDetails = false;
             this.details = data;

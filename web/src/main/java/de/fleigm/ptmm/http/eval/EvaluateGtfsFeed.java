@@ -1,6 +1,7 @@
 package de.fleigm.ptmm.http.eval;
 
 import de.fleigm.ptmm.eval.Evaluation;
+import de.fleigm.ptmm.util.StopWatch;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
@@ -23,6 +24,8 @@ public class EvaluateGtfsFeed implements Function<EvaluationProcess, EvaluationP
         original,
         generated);
 
+    StopWatch stopWatch = StopWatch.createAndStart();
+
     Process process = Runtime.getRuntime().exec(command);
 
     try (InputStream evalOutput = process.getInputStream()) {
@@ -30,6 +33,10 @@ public class EvaluateGtfsFeed implements Function<EvaluationProcess, EvaluationP
           evalOutput,
           new File(evaluationProcess.getPath() + Evaluation.SHAPEVL_OUTPUT));
     }
+
+    stopWatch.stop();
+
+    evaluationProcess.getInfo().addStatistic("executionTime.evaluation", stopWatch.getMillis());
 
     return evaluationProcess;
   }

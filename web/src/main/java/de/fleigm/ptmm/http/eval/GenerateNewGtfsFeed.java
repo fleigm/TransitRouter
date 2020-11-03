@@ -10,11 +10,13 @@ import de.fleigm.ptmm.ShapeGenerator;
 import de.fleigm.ptmm.TransitFeed;
 import de.fleigm.ptmm.eval.Evaluation;
 import de.fleigm.ptmm.routing.TransitRouter;
+import de.fleigm.ptmm.util.StopWatch;
 import lombok.Value;
 import org.mapdb.Fun;
 
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 
 @Dependent
@@ -29,14 +31,28 @@ public class GenerateNewGtfsFeed implements Function<EvaluationProcess, Evaluati
     TransitRouter transitRouter = new TransitRouter(graphHopper, new PMap());
     ShapeGenerator shapeGenerator = new ShapeGenerator(transitFeed, transitRouter);
 
+    AtomicInteger trips = new AtomicInteger(0);
+    AtomicInteger generatedShapes = new AtomicInteger(0);
+
+    StopWatch stopWatch = StopWatch.createAndStart();
+
     transitFeed.busRoutes()
         .values()
         .parallelStream()
         .flatMap(route -> transitFeed.findPatterns(route).stream())
         .map(pattern -> new PatternWitShape(pattern, shapeGenerator.generate(pattern)))
+        .peek(patternWitShape -> generatedShapes.getAndIncrement())
+        .peek(patternWitShape -> trips.getAndAdd(patternWitShape.pattern.trips().size()))
         .forEach(patternWitShape -> store(patternWitShape, transitFeed));
 
     transitFeed.internal().toFile(evaluationProcess.getPath() + Evaluation.GENERATED_GTFS_FEED);
+
+    stopWatch.stop();
+
+    evaluationProcess.getInfo()
+        .addStatistic("trips", trips.intValue())
+        .addStatistic("generatedShapes", generatedShapes.intValue())
+        .addStatistic("executionTime.shapeGeneration", stopWatch.getMillis());
 
     return evaluationProcess;
   }

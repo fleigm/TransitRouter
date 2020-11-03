@@ -48,6 +48,7 @@ public class EvaluationResource {
   @Produces(MediaType.APPLICATION_JSON)
   public Response create(@MultipartForm CreateEvaluationRequest request) {
     evaluationService.createEvaluation(request);
+
     return Response.ok().build();
   }
 

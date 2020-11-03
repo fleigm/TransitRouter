@@ -72,7 +72,12 @@ public class EvaluationService {
     return CompletableFuture.supplyAsync(() -> new EvaluationProcess(info, baseFolder))
         .thenApply(generateNewGtfsFeed)
         .thenApply(new UnzipGtfsFeed())
-        .thenApply(new EvaluateGtfsFeed());
+        .thenApply(new EvaluateGtfsFeed())
+        .thenApply(new GenerateQuickStats())
+        .thenApply(evaluationProcess -> {
+          evaluationRepository.save(evaluationProcess.getInfo());
+          return evaluationProcess;
+        });
             /*.handle((evaluationProcess, throwable) -> {
               log.warn("Could not finish evaluation process.", throwable);
               return evaluationProcess;
