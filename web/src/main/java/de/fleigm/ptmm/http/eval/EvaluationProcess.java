@@ -1,14 +1,19 @@
 package de.fleigm.ptmm.http.eval;
 
+import de.fleigm.ptmm.eval.Info;
 import lombok.Value;
 
 @Value
 public class EvaluationProcess {
-  String name;
+  Info info;
 
   String baseFolder;
 
+  public String getName() {
+    return info.getName();
+  }
+
   public String getPath() {
-    return baseFolder + name + "/";
+    return baseFolder + info.getName() + "/";
   }
 }

@@ -7,6 +7,7 @@ import de.fleigm.ptmm.http.eval.EvaluationService;
 import io.quarkus.test.junit.QuarkusTest;
 import org.apache.commons.io.FileUtils;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import javax.inject.Inject;
@@ -30,7 +31,7 @@ public class EvaluationIntegrationTest {
   @ConfigProperty(name = "evaluation.folder")
   String evaluationFolder;
 
-  //@AfterEach
+  @BeforeEach
   void cleanUp() throws IOException {
     FileUtils.deleteDirectory(Paths.get(evaluationFolder, "test").toFile());
   }
@@ -70,5 +71,6 @@ public class EvaluationIntegrationTest {
     assertTrue(Files.exists(Paths.get(evaluationProcess.getPath() + Evaluation.GENERATED_GTFS_FEED)));
     assertTrue(Files.exists(Paths.get(evaluationProcess.getPath() + Evaluation.GTFS_FULL_REPORT)));
     assertTrue(Files.exists(Paths.get(evaluationProcess.getPath() + Evaluation.SHAPEVL_OUTPUT)));
+    assertTrue(Files.exists(Paths.get(evaluationProcess.getPath() + Evaluation.INFO_FILE)));
   }
 }

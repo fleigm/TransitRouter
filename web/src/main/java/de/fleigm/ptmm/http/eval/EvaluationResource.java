@@ -5,7 +5,9 @@ import com.conveyal.gtfs.model.Stop;
 import com.conveyal.gtfs.model.Trip;
 import com.vividsolutions.jts.geom.LineString;
 import de.fleigm.ptmm.TransitFeed;
+import de.fleigm.ptmm.eval.EvaluationRepository;
 import de.fleigm.ptmm.eval.EvaluationResult;
+import de.fleigm.ptmm.eval.Info;
 import de.fleigm.ptmm.eval.Report;
 import de.fleigm.ptmm.eval.ReportEntry;
 import de.fleigm.ptmm.http.pagination.Page;
@@ -38,12 +40,26 @@ public class EvaluationResource {
   @Inject
   EvaluationService evaluationService;
 
+  @Inject
+  EvaluationRepository evaluationRepository;
+
   @POST
   @Consumes(MediaType.MULTIPART_FORM_DATA)
   @Produces(MediaType.APPLICATION_JSON)
   public Response create(@MultipartForm CreateEvaluationRequest request) {
     evaluationService.createEvaluation(request);
     return Response.ok().build();
+  }
+
+  @GET
+  @Produces(MediaType.APPLICATION_JSON)
+  public Response index() {
+    List<Info> evaluations = evaluationRepository.all()
+        .stream()
+        .sorted(Comparator.comparing(Info::getCreatedAt))
+        .collect(Collectors.toList());
+
+    return Response.ok(evaluations).build();
   }
 
   @GET
