@@ -9,6 +9,7 @@ import LeafletPlugin from "./plugins/LeafletPlugin";
 import HttpPlugin from "./plugins/HttpPlugin"
 import EventPlugin from "./plugins/EventPlugin";
 import Components from './components'
+import Filters from './filters'
 import App from './App'
 
 Vue.use(VueRouter)
@@ -17,6 +18,7 @@ Vue.use(HttpPlugin)
 Vue.use(EventPlugin)
 Vue.use(LeafletPlugin)
 Vue.use(Components)
+Vue.use(Filters)
 
 
 
