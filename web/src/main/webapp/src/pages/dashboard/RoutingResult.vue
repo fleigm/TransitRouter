@@ -14,7 +14,8 @@
                          :options="{'delay': 2400, 'color': '#000', fillOpacity: 0.5, opacity: 0.5}"
     ></l-animated-polyline>
 
-    <l-circle v-for="candidate in routingResult.candidates"
+    <l-circle v-for="(candidate, i) in routingResult.candidates"
+              :key="i"
               :radius="1"
               :lat-lng="candidate">
     </l-circle>

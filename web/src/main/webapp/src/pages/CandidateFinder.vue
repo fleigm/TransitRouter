@@ -12,7 +12,8 @@
           @update:bounds="boundsUpdated">
         <l-tile-layer :url="url"/>
 
-        <l-circle v-for="candidate in candidates"
+        <l-circle v-for="(candidate, i) in candidates"
+                  :key="i"
                   :radius="1"
                   :lat-lng="candidate"
         ></l-circle>
