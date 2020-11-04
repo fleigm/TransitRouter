@@ -31,6 +31,9 @@ public class EvaluationService {
   GenerateNewGtfsFeed generateNewGtfsFeed;
 
   @Inject
+  EvaluateGtfsFeed evaluateGtfsFeed;
+
+  @Inject
   EvaluationRepository evaluationRepository;
 
   @CacheResult(cacheName = "evaluation-result-cache")
@@ -72,7 +75,7 @@ public class EvaluationService {
     return CompletableFuture.supplyAsync(() -> new EvaluationProcess(info, baseFolder))
         .thenApply(generateNewGtfsFeed)
         .thenApply(new UnzipGtfsFeed())
-        .thenApply(new EvaluateGtfsFeed())
+        .thenApply(evaluateGtfsFeed)
         .thenApply(new GenerateQuickStats())
         .thenApply(evaluationProcess -> {
           evaluationRepository.save(evaluationProcess.getInfo());
