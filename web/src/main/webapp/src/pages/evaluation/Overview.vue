@@ -9,36 +9,63 @@
               <router-link :to="{name: 'evaluation.view', params: {name: evaluation.name}}">
                 {{ evaluation.name }}
               </router-link>
-              <span>{{ evaluation.datetime }}</span>
+              <span>{{ evaluation.createdAt | fromNow }}</span>
             </div>
           </template>
           <div class="flex p-2 gap-8">
-            <div>
+            <div class="w-1/2">
               <div class="flex justify-center gap-4">
-                <v-metric :value="evaluation.statistics['highestAvgFd.value']" class="text-red-400"
+                <v-metric :value="evaluation.statistics['highestAvgFd.value'] | number('0.00')"
+                          class="text-red-400"
                           title="Highest avgFd"
-                          unit="m"></v-metric>
-                <v-metric :value="evaluation.statistics['lowestAvgFd.value']" class="text-green-400"
+                          unit="m"
+                ></v-metric>
+                <v-metric :value="evaluation.statistics['lowestAvgFd.value'] | number('0.00')"
+                          class="text-green-400"
                           title="Lowest avgFd"
-                          unit="m"></v-metric>
-                <v-metric :value="evaluation.statistics['averagedAvgFd']" class="" title="Average avgFd"
-                          unit="m"></v-metric>
+                          unit="m"
+                ></v-metric>
+                <v-metric :value="evaluation.statistics['averagedAvgFd'] | number('0.00')"
+                          class=""
+                          title="Average avgFd"
+                          unit="m"
+                ></v-metric>
               </div>
-              <v-accuracy-chart :accuracies="evaluation.statistics['accuracy']" :height="200"
+              <v-accuracy-chart :accuracies="evaluation.statistics['accuracy']"
+                                :height="200"
                                 :width="300"></v-accuracy-chart>
             </div>
-            <div>
+            <div class="w-1/2">
+              <div class="flex justify-center gap-4">
+                <v-metric :value="evaluation.parameters.alpha" title="alpha"></v-metric>
+                <v-metric :value="evaluation.parameters.beta" title="beta"></v-metric>
+                <v-metric :value="evaluation.parameters.candidateSearchRadius" title="csr"></v-metric>
+                <v-metric :value="evaluation.parameters.uTurnDistancePenalty" title="uturn penalty"></v-metric>
+              </div>
+
+              <div class="flex justify-center gap-4">
+                <v-metric :value="evaluation.parameters.profile" title="Profile"></v-metric>
+              </div>
+
               <div class="flex justify-center gap-4">
                 <v-metric :value="evaluation.statistics.trips" title="Trips"></v-metric>
                 <v-metric :value="evaluation.statistics.generatedShapes" title="Shapes"></v-metric>
               </div>
 
-              <!--<div class="flex justify-center gap-4">
-                <v-metric title="Total" :value="evaluation.statistics.execution_times.total" unit="s"></v-metric>
-                <v-metric title="Shape generation" :value="evaluation.statistics.execution_times.shape_generation"
-                          unit="s"></v-metric>
-                <v-metric title="Evaluation" :value="evaluation.statistics.execution_times.evaluation" unit="s"></v-metric>
-              </div>-->
+              <div class="flex justify-center gap-4">
+                <v-metric :value="123"
+                          title="Total"
+                          unit="s"
+                ></v-metric>
+                <v-metric :value="123"
+                          title="Shape generation"
+                          unit="s"
+                ></v-metric>
+                <v-metric :value="123"
+                          title="Evaluation"
+                          unit="s"
+                ></v-metric>
+              </div>
             </div>
           </div>
         </v-card>
