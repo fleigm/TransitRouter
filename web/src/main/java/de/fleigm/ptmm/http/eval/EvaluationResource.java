@@ -17,6 +17,7 @@ import de.fleigm.ptmm.http.views.View;
 import org.jboss.resteasy.annotations.providers.multipart.MultipartForm;
 
 import javax.inject.Inject;
+import javax.validation.Valid;
 import javax.ws.rs.BeanParam;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DefaultValue;
@@ -46,7 +47,7 @@ public class EvaluationResource {
   @POST
   @Consumes(MediaType.MULTIPART_FORM_DATA)
   @Produces(MediaType.APPLICATION_JSON)
-  public Response create(@MultipartForm CreateEvaluationRequest request) {
+  public Response create(@MultipartForm @Valid CreateEvaluationRequest request) {
     evaluationService.createEvaluation(request);
 
     return Response.ok().build();
@@ -57,7 +58,7 @@ public class EvaluationResource {
   public Response index() {
     List<Info> evaluations = evaluationRepository.all()
         .stream()
-        .sorted(Comparator.comparing(Info::getCreatedAt))
+        .sorted(Comparator.comparing(Info::getCreatedAt).reversed())
         .collect(Collectors.toList());
 
     return Response.ok(evaluations).build();

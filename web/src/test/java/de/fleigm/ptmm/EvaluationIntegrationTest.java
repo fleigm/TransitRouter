@@ -37,11 +37,16 @@ public class EvaluationIntegrationTest {
   }
 
   @Test
-  void asd() {
+  void endpoint_happy_path() {
     String resourceAsStream = getClass().getClassLoader().getResource("test_feed.zip").getFile();
     given()
         .multiPart("feed", new File(resourceAsStream))
-        .multiPart("name", "test")
+        .multiPart("name", "endpoint_happy_path")
+        .multiPart("profile", "bus_custom_shortest")
+        .multiPart("alpha", 25)
+        .multiPart("candidateSearchRadius", 25)
+        .multiPart("beta", 2.0)
+        .multiPart("uTurnDistancePenalty", 1500)
         .when()
         .post("eval")
         .then()
@@ -53,8 +58,13 @@ public class EvaluationIntegrationTest {
     File testFeed = new File(getClass().getClassLoader().getResource("test_feed.zip").getFile());
 
     CreateEvaluationRequest request = CreateEvaluationRequest.builder()
-        .name("test")
+        .name("happy_path")
         .gtfsFeed(FileUtils.openInputStream(testFeed))
+        .alpha(25.0)
+        .candidateSearchRadius(25.0)
+        .beta(2.0)
+        .uTurnDistancePenalty(1500.0)
+        .profile("bus_custom_shortest")
         .build();
 
     CompletableFuture<EvaluationProcess> evaluation = evaluationService.createEvaluation(request);
