@@ -5,6 +5,7 @@ import com.conveyal.gtfs.model.Route;
 import com.conveyal.gtfs.model.Stop;
 import com.conveyal.gtfs.model.Trip;
 
+import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -21,8 +22,14 @@ public class TransitFeed {
    this(GTFSFeed.fromFile(file));
   }
 
+
+
   public TransitFeed(GTFSFeed gtfsFeed) {
     this.feed = gtfsFeed;
+  }
+
+  public TransitFeed(Path gtfsFeed) {
+    this(gtfsFeed.toString());
   }
 
   public GTFSFeed internal() {

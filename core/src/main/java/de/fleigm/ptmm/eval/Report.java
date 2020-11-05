@@ -17,6 +17,10 @@ public class Report {
     this.accuracies = computeAccuracies(entries);
   }
 
+  public static Report read(Path path) {
+    return read(path.toString());
+  }
+
   public static Report read(String file) {
     try {
       List<ReportEntry> entries = Files.lines(Path.of(file))

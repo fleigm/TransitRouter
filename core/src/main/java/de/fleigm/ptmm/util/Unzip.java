@@ -4,11 +4,15 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
 public final class Unzip {
 
+  public static void apply(Path source, Path destination) throws IOException {
+    apply(source.toString(), destination.toString());
+  }
   public static void apply(String source, String destination) throws IOException {
     byte[] buffer = new byte[1024];
     File destDir = new File(destination);

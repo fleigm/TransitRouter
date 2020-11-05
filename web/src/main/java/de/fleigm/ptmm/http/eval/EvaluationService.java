@@ -28,15 +28,21 @@ public class EvaluationService {
 
   @ConfigProperty(name = "evaluation.folder")
   String baseFolder;
+  @Inject
+  EvaluationRepository evaluationRepository;
 
   @Inject
   GenerateNewGtfsFeed generateNewGtfsFeed;
 
   @Inject
+  UnzipGtfsFeed unzipGtfsFeed;
+
+  @Inject
   EvaluateGtfsFeed evaluateGtfsFeed;
 
   @Inject
-  EvaluationRepository evaluationRepository;
+  GenerateQuickStats generateQuickStats;
+
 
   @CacheResult(cacheName = "evaluation-result-cache")
   public EvaluationResult get(String name) {
@@ -47,7 +53,7 @@ public class EvaluationService {
     return new EvaluationResult(report, originalTransitFeed, generatedTransitFeed);
   }
 
-  public CompletableFuture<EvaluationProcess> createEvaluation(CreateEvaluationRequest request) {
+  public CompletableFuture<Info> createEvaluation(CreateEvaluationRequest request) {
 
     if (Files.exists(Path.of(baseFolder, request.getName()))) {
       throw new IllegalArgumentException("duplicate evaluation name");
@@ -75,19 +81,24 @@ public class EvaluationService {
 
     evaluationRepository.save(info);
 
-    return CompletableFuture.supplyAsync(() -> new EvaluationProcess(info, baseFolder))
-        .thenApply(generateNewGtfsFeed)
-        .thenApply(new UnzipGtfsFeed())
-        .thenApply(evaluateGtfsFeed)
-        .thenApply(new GenerateQuickStats())
-        .thenApply(evaluationProcess -> {
-          evaluationRepository.save(evaluationProcess.getInfo());
-          return evaluationProcess;
-        });
-            /*.handle((evaluationProcess, throwable) -> {
-              log.warn("Could not finish evaluation process.", throwable);
-              return evaluationProcess;
-            });*/
+    return CompletableFuture
+        .runAsync(() -> generateNewGtfsFeed.accept(info))
+        .thenRun(() -> unzipGtfsFeed.accept(info))
+        .thenRun(() -> evaluateGtfsFeed.accept(info))
+        .thenRun(() -> generateQuickStats.accept(info))
+        .whenCompleteAsync((unused, throwable) -> finishEvaluationProcess(info, throwable))
+        .thenApply(unused -> info);
 
+  }
+
+  private void finishEvaluationProcess(Info info, Throwable throwable) {
+    if (throwable == null) {
+      log.warn("Evaluation failed!", throwable);
+      info.setStatus(Status.FAILED);
+    } else {
+      info.setStatus(Status.FINISHED);
+    }
+
+    evaluationRepository.save(info);
   }
 }

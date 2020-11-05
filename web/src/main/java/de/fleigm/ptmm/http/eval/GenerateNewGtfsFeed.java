@@ -9,26 +9,40 @@ import de.fleigm.ptmm.Shape;
 import de.fleigm.ptmm.ShapeGenerator;
 import de.fleigm.ptmm.TransitFeed;
 import de.fleigm.ptmm.eval.Evaluation;
+import de.fleigm.ptmm.eval.Info;
 import de.fleigm.ptmm.routing.TransitRouter;
 import de.fleigm.ptmm.util.StopWatch;
 import lombok.Value;
+import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.mapdb.Fun;
 
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.Function;
+import java.util.function.Consumer;
 
 @Dependent
-public class GenerateNewGtfsFeed implements Function<EvaluationProcess, EvaluationProcess> {
+public class GenerateNewGtfsFeed implements Consumer<Info> {
+
+  private final GraphHopper graphHopper;
+  private final String evaluationFolder;
 
   @Inject
-  GraphHopper graphHopper;
+  public GenerateNewGtfsFeed(GraphHopper graphHopper,
+                             @ConfigProperty(name = "evaluation.folder") String evaluationFolder) {
+    this.graphHopper = graphHopper;
+    this.evaluationFolder = evaluationFolder;
+  }
 
   @Override
-  public EvaluationProcess apply(EvaluationProcess evaluationProcess) {
-    TransitFeed transitFeed = new TransitFeed(evaluationProcess.getPath() + Evaluation.ORIGINAL_GTFS_FEED);
-    TransitRouter transitRouter = new TransitRouter(graphHopper, new PMap());
+  public void accept(Info info) {
+    TransitFeed transitFeed = new TransitFeed(info.fullPath(evaluationFolder).resolve(Evaluation.ORIGINAL_GTFS_FEED));
+    TransitRouter transitRouter = new TransitRouter(graphHopper, new PMap()
+        .putObject("profile", info.getParameters().getProfile())
+        .putObject("measurement_error_sigma", info.getParameters().getAlpha())
+        .putObject("candidate_search_radius", info.getParameters().getCandidateSearchRadius())
+        .putObject("beta", info.getParameters().getBeta())
+        .putObject("u_turn_distance_penalty", info.getParameters().getUTurnDistancePenalty()));
     ShapeGenerator shapeGenerator = new ShapeGenerator(transitFeed, transitRouter);
 
     AtomicInteger trips = new AtomicInteger(0);
@@ -45,16 +59,13 @@ public class GenerateNewGtfsFeed implements Function<EvaluationProcess, Evaluati
         .peek(patternWitShape -> trips.getAndAdd(patternWitShape.pattern.trips().size()))
         .forEach(patternWitShape -> store(patternWitShape, transitFeed));
 
-    transitFeed.internal().toFile(evaluationProcess.getPath() + Evaluation.GENERATED_GTFS_FEED);
+    transitFeed.internal().toFile(info.fullPath(evaluationFolder).resolve(Evaluation.GENERATED_GTFS_FEED).toString());
 
     stopWatch.stop();
 
-    evaluationProcess.getInfo()
-        .addStatistic("trips", trips.intValue())
+    info.addStatistic("trips", trips.intValue())
         .addStatistic("generatedShapes", generatedShapes.intValue())
         .addStatistic("executionTime.shapeGeneration", stopWatch.getMillis());
-
-    return evaluationProcess;
   }
 
   private void store(PatternWitShape patternWitShape, TransitFeed transitFeed) {

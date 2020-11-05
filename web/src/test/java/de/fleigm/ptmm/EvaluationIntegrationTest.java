@@ -1,8 +1,8 @@
 package de.fleigm.ptmm;
 
 import de.fleigm.ptmm.eval.Evaluation;
+import de.fleigm.ptmm.eval.Info;
 import de.fleigm.ptmm.http.eval.CreateEvaluationRequest;
-import de.fleigm.ptmm.http.eval.EvaluationProcess;
 import de.fleigm.ptmm.http.eval.EvaluationService;
 import io.quarkus.test.junit.QuarkusTest;
 import org.apache.commons.io.FileUtils;
@@ -33,7 +33,7 @@ public class EvaluationIntegrationTest {
 
   @BeforeEach
   void cleanUp() throws IOException {
-    FileUtils.deleteDirectory(Paths.get(evaluationFolder, "test").toFile());
+    FileUtils.deleteDirectory(Paths.get(evaluationFolder, "happy_path").toFile());
   }
 
   @Test
@@ -67,20 +67,20 @@ public class EvaluationIntegrationTest {
         .profile("bus_custom_shortest")
         .build();
 
-    CompletableFuture<EvaluationProcess> evaluation = evaluationService.createEvaluation(request);
+    CompletableFuture<Info> evaluation = evaluationService.createEvaluation(request);
 
-    EvaluationProcess evaluationProcess = evaluation.get();
+    Info info = evaluation.get();
 
     assertTrue(evaluation.isDone());
     assertFalse(evaluation.isCompletedExceptionally());
 
-    assertTrue(Files.isDirectory(Paths.get(evaluationProcess.getPath())));
-    assertTrue(Files.isDirectory(Paths.get(evaluationProcess.getPath() + Evaluation.ORIGINAL_GTFS_FOLDER)));
-    assertTrue(Files.isDirectory(Paths.get(evaluationProcess.getPath() + Evaluation.GENERATED_GTFS_FOLDER)));
-    assertTrue(Files.exists(Paths.get(evaluationProcess.getPath() + Evaluation.ORIGINAL_GTFS_FEED)));
-    assertTrue(Files.exists(Paths.get(evaluationProcess.getPath() + Evaluation.GENERATED_GTFS_FEED)));
-    assertTrue(Files.exists(Paths.get(evaluationProcess.getPath() + Evaluation.GTFS_FULL_REPORT)));
-    assertTrue(Files.exists(Paths.get(evaluationProcess.getPath() + Evaluation.SHAPEVL_OUTPUT)));
-    assertTrue(Files.exists(Paths.get(evaluationProcess.getPath() + Evaluation.INFO_FILE)));
+    assertTrue(Files.isDirectory(info.fullPath(evaluationFolder)));
+    assertTrue(Files.isDirectory(info.fullPath(evaluationFolder).resolve(Evaluation.ORIGINAL_GTFS_FOLDER)));
+    assertTrue(Files.isDirectory(info.fullPath(evaluationFolder).resolve(Evaluation.GENERATED_GTFS_FOLDER)));
+    assertTrue(Files.exists(info.fullPath(evaluationFolder).resolve(Evaluation.ORIGINAL_GTFS_FEED)));
+    assertTrue(Files.exists(info.fullPath(evaluationFolder).resolve(Evaluation.GENERATED_GTFS_FEED)));
+    assertTrue(Files.exists(info.fullPath(evaluationFolder).resolve(Evaluation.GTFS_FULL_REPORT)));
+    assertTrue(Files.exists(info.fullPath(evaluationFolder).resolve(Evaluation.SHAPEVL_OUTPUT)));
+    assertTrue(Files.exists(info.fullPath(evaluationFolder).resolve(Evaluation.INFO_FILE)));
   }
 }

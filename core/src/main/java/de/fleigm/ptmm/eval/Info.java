@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
+import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
@@ -21,7 +22,6 @@ public class Info {
   private String name;
   private Parameters parameters;
   private LocalDateTime createdAt;
-  private String path;
   private Status status;
 
   @Builder.Default
@@ -31,5 +31,9 @@ public class Info {
     statistics.put(key, value);
 
     return this;
+  }
+
+  public Path fullPath(String evaluationFolder) {
+    return Path.of(evaluationFolder, name);
   }
 }
