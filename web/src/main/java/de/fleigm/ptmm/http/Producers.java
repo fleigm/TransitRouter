@@ -22,7 +22,7 @@ import java.nio.file.Path;
 public class Producers {
 
   @Produces
-  @Startup
+  //@Startup
   @ApplicationScoped
   public TransitFeed transitFeed(@ConfigProperty(name = "routing.gtfs.feed-file") String filePath) {
     return new TransitFeed(filePath);

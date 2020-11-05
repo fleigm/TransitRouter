@@ -17,6 +17,8 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.util.concurrent.CompletableFuture;
 
@@ -46,7 +48,8 @@ public class EvaluationService {
   }
 
   public CompletableFuture<EvaluationProcess> createEvaluation(CreateEvaluationRequest request) {
-    if (evaluationRepository.find(request.getName()).isPresent()) {
+
+    if (Files.exists(Path.of(baseFolder, request.getName()))) {
       throw new IllegalArgumentException("duplicate evaluation name");
     }
 
