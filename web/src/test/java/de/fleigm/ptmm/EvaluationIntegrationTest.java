@@ -2,6 +2,7 @@ package de.fleigm.ptmm;
 
 import de.fleigm.ptmm.eval.Evaluation;
 import de.fleigm.ptmm.eval.Info;
+import de.fleigm.ptmm.eval.Status;
 import de.fleigm.ptmm.http.eval.CreateEvaluationRequest;
 import de.fleigm.ptmm.http.eval.EvaluationService;
 import io.quarkus.test.junit.QuarkusTest;
@@ -19,8 +20,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
 import static io.restassured.RestAssured.given;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 @QuarkusTest
 public class EvaluationIntegrationTest {
@@ -73,6 +73,8 @@ public class EvaluationIntegrationTest {
 
     assertTrue(evaluation.isDone());
     assertFalse(evaluation.isCompletedExceptionally());
+
+    assertEquals(Status.FINISHED, info.getStatus());
 
     assertTrue(Files.isDirectory(info.fullPath(evaluationFolder)));
     assertTrue(Files.isDirectory(info.fullPath(evaluationFolder).resolve(Evaluation.ORIGINAL_GTFS_FOLDER)));

@@ -93,10 +93,10 @@ public class EvaluationService {
 
   private void finishEvaluationProcess(Info info, Throwable throwable) {
     if (throwable == null) {
+      info.setStatus(Status.FINISHED);
+    } else {
       log.warn("Evaluation failed!", throwable);
       info.setStatus(Status.FAILED);
-    } else {
-      info.setStatus(Status.FINISHED);
     }
 
     evaluationRepository.save(info);
