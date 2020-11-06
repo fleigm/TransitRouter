@@ -8,7 +8,7 @@
         <groupId>de.fleigm.ptmm</groupId>
         <version>1.0-SNAPSHOT</version>
     </parent>
-    <artifactId>web</artifactId>
+    <artifactId>backend</artifactId>
     <version>1.0-SNAPSHOT</version>
 
     <build>
@@ -52,16 +52,9 @@
 
     <dependencies>
         <dependency>
-            <groupId>de.fleigm.ptmm</groupId>
-            <artifactId>core</artifactId>
-            <scope>compile</scope>
-        </dependency>
-
-        <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
         </dependency>
-
 
         <dependency>
             <groupId>com.graphhopper</groupId>

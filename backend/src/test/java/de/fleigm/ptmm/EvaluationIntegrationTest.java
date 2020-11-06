@@ -8,7 +8,6 @@ import de.fleigm.ptmm.http.eval.EvaluationService;
 import io.quarkus.test.junit.QuarkusTest;
 import org.apache.commons.io.FileUtils;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import javax.inject.Inject;
@@ -31,13 +30,23 @@ public class EvaluationIntegrationTest {
   @ConfigProperty(name = "evaluation.folder")
   String evaluationFolder;
 
-  @BeforeEach
+  //@BeforeEach
   void cleanUp() throws IOException {
     FileUtils.deleteDirectory(Paths.get(evaluationFolder, "happy_path").toFile());
   }
 
+  private void deleteFolder(String name) {
+    try {
+      FileUtils.deleteDirectory(Paths.get(evaluationFolder, name).toFile());
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
   @Test
   void endpoint_happy_path() {
+    deleteFolder("endpoint_happy_path");
+
     String resourceAsStream = getClass().getClassLoader().getResource("test_feed.zip").getFile();
     given()
         .multiPart("feed", new File(resourceAsStream))
@@ -55,6 +64,8 @@ public class EvaluationIntegrationTest {
 
   @Test
   void happy_path() throws IOException, ExecutionException, InterruptedException {
+    deleteFolder("happy_path");
+
     File testFeed = new File(getClass().getClassLoader().getResource("test_feed.zip").getFile());
 
     CreateEvaluationRequest request = CreateEvaluationRequest.builder()
