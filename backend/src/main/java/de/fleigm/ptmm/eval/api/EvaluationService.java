@@ -1,4 +1,4 @@
-package de.fleigm.ptmm.http.eval;
+package de.fleigm.ptmm.eval.api;
 
 import de.fleigm.ptmm.TransitFeed;
 import de.fleigm.ptmm.eval.Evaluation;
@@ -8,6 +8,10 @@ import de.fleigm.ptmm.eval.Info;
 import de.fleigm.ptmm.eval.Parameters;
 import de.fleigm.ptmm.eval.Report;
 import de.fleigm.ptmm.eval.Status;
+import de.fleigm.ptmm.eval.process.EvaluateGtfsFeed;
+import de.fleigm.ptmm.eval.process.GenerateNewGtfsFeed;
+import de.fleigm.ptmm.eval.process.GenerateQuickStats;
+import de.fleigm.ptmm.eval.process.UnzipGtfsFeed;
 import io.quarkus.cache.CacheResult;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;

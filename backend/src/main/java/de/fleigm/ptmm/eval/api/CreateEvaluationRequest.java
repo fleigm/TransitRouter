@@ -1,4 +1,4 @@
-package de.fleigm.ptmm.http.eval;
+package de.fleigm.ptmm.eval.api;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

@@ -1,4 +1,4 @@
-package de.fleigm.ptmm.http.eval;
+package de.fleigm.ptmm.eval.api;
 
 import com.conveyal.gtfs.model.Route;
 import com.conveyal.gtfs.model.Stop;
@@ -36,7 +36,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Path("eval")
-public class EvaluationResource {
+public class EvaluationController {
 
   @Inject
   EvaluationService evaluationService;

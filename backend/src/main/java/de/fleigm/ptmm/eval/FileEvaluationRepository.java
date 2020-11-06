@@ -1,8 +1,5 @@
-package de.fleigm.ptmm.http.eval;
+package de.fleigm.ptmm.eval;
 
-import de.fleigm.ptmm.eval.EvaluationRepository;
-import de.fleigm.ptmm.eval.EvaluationResult;
-import de.fleigm.ptmm.eval.Info;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 import javax.annotation.PostConstruct;

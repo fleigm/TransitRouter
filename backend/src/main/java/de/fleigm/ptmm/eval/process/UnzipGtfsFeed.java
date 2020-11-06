@@ -1,4 +1,4 @@
-package de.fleigm.ptmm.http.eval;
+package de.fleigm.ptmm.eval.process;
 
 import de.fleigm.ptmm.eval.Evaluation;
 import de.fleigm.ptmm.eval.Info;

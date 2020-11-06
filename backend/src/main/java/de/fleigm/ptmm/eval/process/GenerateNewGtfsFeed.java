@@ -1,4 +1,4 @@
-package de.fleigm.ptmm.http.eval;
+package de.fleigm.ptmm.eval.process;
 
 import com.conveyal.gtfs.model.ShapePoint;
 import com.conveyal.gtfs.model.Trip;
