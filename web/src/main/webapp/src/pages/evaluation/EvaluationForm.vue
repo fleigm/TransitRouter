@@ -49,6 +49,8 @@
 
 <script>
 import {Helper} from "../../Helper";
+import UploadProgressNotification from "./UploadProgressNotification";
+import Vue from 'vue'
 
 export default {
   name: "v-evaluation-form",
@@ -97,9 +99,6 @@ export default {
         uTurnDistancePenalty: 1500,
         feed: null
       },
-      event: {
-        progress: 0,
-      }
     }
   },
 
@@ -122,39 +121,58 @@ export default {
     },
 
     sendRequest() {
+      const createdEvaluationRequest = Vue.observable({
+        formData: Helper.copyObject(this.formData),
+        progress: 0,
+        request: null,
+      });
+
+      createdEvaluationRequest.request = this.$http.post('eval', this.buildFormData(), {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        },
+        onUploadProgress: function (progressEvent) {
+          createdEvaluationRequest.progress = parseInt(Math.round((progressEvent.loaded * 100) / progressEvent.total));
+        }
+      }).then(this.sendSuccessNotification);
+
+      this.resetForm();
+
+      const uploadNotification = this.$notify({
+        title: 'Uploading GTFS feed',
+        message: this.$createElement(UploadProgressNotification, {
+          props: {
+            event: createdEvaluationRequest
+          }
+        }),
+        type: 'info',
+        duration: 0,
+        position: 'bottom-right'
+      });
+      createdEvaluationRequest.request.finally(() => {
+        uploadNotification.close();
+      });
+
+      this.$events.$emit('evaluation:createdRequest', createdEvaluationRequest)
+    },
+
+    buildFormData() {
       const formData = new FormData();
       for (const [key, value] of Object.entries(this.formData)) {
         formData.append(key, value);
       }
-      formData.set('feed', this.formData.feed.raw)
+      formData.set('feed', this.formData.feed.raw);
+      return formData;
+    },
 
-      const createdEvaluationRequest = {
-        formData: Helper.copyObject(this.formData),
-        progress: 0,
-        request: null,
-      }
-
-      this.event = createdEvaluationRequest;
-
-      createdEvaluationRequest.request = this.$http.post('eval', formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data'
-        }, onUploadProgress: function (progressEvent) {
-          createdEvaluationRequest.progress = parseInt(Math.round((progressEvent.loaded * 100) / progressEvent.total));
-        }
-      }).then(() => {
-        this.$notify({
-          title: 'Upload complete',
-          message: 'Your upload was successful and the evaluation process has started.',
-          type: 'success',
-          position: "bottom-right"
-        })
-      });
-
-      this.resetForm();
-
-      this.$events.$emit('evaluation:createdRequest', createdEvaluationRequest)
-    }
-  }
+    sendSuccessNotification() {
+      this.$notify({
+        title: 'Upload complete',
+        message: 'Your upload was successful and the evaluation process has started.',
+        type: 'success',
+        position: "bottom-right"
+      })
+    },
+  },
 }
 </script>
