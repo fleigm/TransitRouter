@@ -1,49 +1,25 @@
-### current issues:
-- quarkus:dev does not parse arguments correctly -> see https://github.com/quarkusio/quarkus/pull/10170
-- cannot run project from intellij -> see https://github.com/quarkusio/quarkus/issues/10147
+# Public Transit Map Matching
 
-until those are fixed use `java -jar target/web-1.0-SNAPSHOT-runner.jar` to start the project
+This repo is for my bachelor thesis and project at the chair of algorithms and datastructures at the university of Freiburg.
 
----
+The goal of this project is to automatically generate shape files for bus routes of a GTFS feeds and evaluate the quality of the generated shapes against a ground truth.
 
+## Setup:
 
-The project is currently located in the _web_ subfolder.
-In the future there will be two separate projects for the cli and the web application.
+- osm file for Baden-Württemberg: [download](http://download.geofabrik.de/europe/germany/baden-wuerttemberg-latest.osm.pbf)
+- GTFS Feed Stuttgart: [download](https://www.openvvs.de/dataset/e66f03e4-79f2-41d0-90f1-166ca609e491/resource/bfbb59c7-767c-4bca-bbb2-d8d32a3e0378/download/vvs_gtfs.zip)
 
-## build and run
-
-`cd web`
-
-### Compile project
-`./mvnw clean package`
-
-### Build docker container
-`sudo docker build -f src/main/docker/Dockerfile.jvm -t michael-fleig-project .`
-
-### Run project via docker
-`
-sudo docker run -i --rm -p 8080:8080 
--v ~/uni/bachelor/project/files:/var/ptmm 
---name michael-fleig-project
-michael-fleig-project 
---osm-file="/var/ptmm/freiburg-regbez-latest.osm.pbf" 
---gtfs-file="/var/ptmm/VAGFR.zip"
-`
-### Run project via terminal
-`java -jar target/web-1.0-SNAPSHOT-runner.jar`
-
-### Options and commands
-
-- generate <generated_gtfs_file>: creates a gtfs feed with the generated shapes
-- web: starts a web application to view generated shapes on a map. The osm graph and gtfs feed will be loaded on the 
-first request so this might take a while.
-The web app can be reached via localhost:8080
-
-- --osm-file: path to the osm file
-- --gtfs-file: path to the gtfs file
-
-
-### Build web app 
-`cd web/src/webapp`
-
-`npm run prod|dev|watch`
+ Set the correct paths in **backend/src/main/resources/application.properties**
+ 
+ ## Development
+ run `npm run watch` inside the frontend module. The compiled code is copied into the backend resource folder automatically.
+ 
+ run `.\mvnw quarkus:dev` in the root folder
+ 
+ ## Docker
+ 
+ `sudo docker build -f backend/src/main/docker/Dockerfile.jvm -t <name> .`
+ 
+ `
+ sudo docker run -i --rm -p 8080:8080 --name <name> <name>`
+ 
