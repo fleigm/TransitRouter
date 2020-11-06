@@ -44,7 +44,6 @@ export default {
 
   computed: {
     bounds() {
-      console.log("changed");
       return L.latLngBounds(this.route.generatedShape)
     }
   },

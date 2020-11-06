@@ -11,5 +11,5 @@ public interface EvaluationRepository {
 
   Optional<Info> find(String name);
 
-  EvaluationResult findEvaluationResult(String name);
+  Optional<EvaluationResult> findEvaluationResult(String name);
 }

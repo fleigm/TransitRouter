@@ -1,5 +1,7 @@
 package de.fleigm.ptmm.eval;
 
+import de.fleigm.ptmm.TransitFeed;
+import io.quarkus.cache.CacheResult;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 import javax.annotation.PostConstruct;
@@ -15,13 +17,15 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 @ApplicationScoped
 public class FileEvaluationRepository implements EvaluationRepository {
+  private List<Info> evaluations = new ArrayList<>();
+
   @ConfigProperty(name = "evaluation.folder")
   String evaluationBasePath;
-  private List<Info> evaluations = new ArrayList<>();
 
   @PostConstruct
   public void init() {
@@ -58,8 +62,30 @@ public class FileEvaluationRepository implements EvaluationRepository {
   }
 
   @Override
-  public EvaluationResult findEvaluationResult(String name) {
-    return null;
+  @CacheResult(cacheName = "evaluation-result-cache")
+  public Optional<EvaluationResult> findEvaluationResult(String name) {
+    if (find(name).isEmpty()) {
+      return Optional.empty();
+    }
+
+    CompletableFuture<TransitFeed> originalTransitFeedSupplier = CompletableFuture.supplyAsync(() ->
+        new TransitFeed(evaluationBasePath + name + "/gtfs.original.zip"));
+
+    CompletableFuture<TransitFeed> generatedTransitFeedSupplier = CompletableFuture.supplyAsync(() ->
+        new TransitFeed(evaluationBasePath + name + "/gtfs.generated.zip"));
+
+    CompletableFuture<Report> reportSupplier = CompletableFuture.supplyAsync(() ->
+        Report.read(evaluationBasePath + name + "/gtfs.generated.fullreport.tsv"));
+
+    try {
+      return Optional.of(new EvaluationResult(
+          reportSupplier.get(),
+          originalTransitFeedSupplier.get(),
+          generatedTransitFeedSupplier.get()
+      ));
+    } catch (Exception e) {
+      throw new RuntimeException(String.format("Could not load evaluation result %s", name), e);
+    }
   }
 
   void writeToDisk(Info info) throws IOException {

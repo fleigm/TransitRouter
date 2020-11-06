@@ -33,7 +33,9 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Path("eval")
 public class EvaluationController {
@@ -68,42 +70,10 @@ public class EvaluationController {
   @Path("{name}")
   @Produces(MediaType.APPLICATION_JSON)
   public Response get(@PathParam("name") String name) {
-    EvaluationResult evaluationResult = evaluationService.get(name);
-    Report report = evaluationResult.report();
-
-    ReportEntry highestAvgFd = report.entries()
-        .stream()
-        .max(Comparator.comparing(ReportEntry::avgFd))
-        .get();
-
-    ReportEntry lowestAvgFd = report.entries()
-        .stream()
-        .min(Comparator.comparing(ReportEntry::avgFd))
-        .get();
-
-    double averageAvgFd = report.entries()
-        .stream()
-        .mapToDouble(ReportEntry::avgFd)
-        .average()
-        .getAsDouble();
-
-    double[] accuracies = report.accuracies();
-
-    View view = new View()
-        .add("highestAvgFd", new View()
-            .add("tripId", highestAvgFd.tripId)
-            .add("avgFd", highestAvgFd.avgFd)
-            .add("details", getDetails(name, highestAvgFd.tripId)))
-        .add("lowestAvgFd", new View()
-            .add("tripId", lowestAvgFd.tripId)
-            .add("avgFd", lowestAvgFd.avgFd)
-            .add("details", getDetails(name, lowestAvgFd.tripId)))
-        .add("averageAvgFd", averageAvgFd)
-        .add("accuracies", accuracies);
-
-    return Response.ok(view).build();
+    return evaluationRepository.find(name)
+        .map(info -> Response.ok(info).build())
+        .orElse(Response.status(Response.Status.NOT_FOUND).build());
   }
-
 
   @GET
   @Path("{name}/trips")
@@ -115,15 +85,18 @@ public class EvaluationController {
       @QueryParam("search") @DefaultValue("") String search,
       @QueryParam("sort") @DefaultValue("") String sort) {
 
-    EvaluationResult evaluationResult = evaluationService.get(name);
-    Report report = evaluationResult.report();
+    Optional<EvaluationResult> evaluationResult = evaluationRepository.findEvaluationResult(name);
 
-    List<ReportEntry> entriesMatchingSearch = report.entries();
+    if (evaluationResult.isEmpty()) {
+      return Response.status(Response.Status.NOT_FOUND).build();
+    }
+
+    Report report = evaluationResult.get().report();
+
+    Stream<ReportEntry> entries = report.entries().stream();
+
     if (!search.isBlank()) {
-      entriesMatchingSearch = report.entries()
-          .stream()
-          .filter(reportEntry -> reportEntry.tripId.contains(search))
-          .collect(Collectors.toList());
+      entries = entries.filter(reportEntry -> reportEntry.tripId.contains(search));
     }
 
     if (!sort.isBlank()) {
@@ -132,13 +105,13 @@ public class EvaluationController {
         if (SortQuery.parse(sort).order() == SortQuery.SortOrder.DESC) {
           comparator = comparator.reversed();
         }
-        entriesMatchingSearch.sort(comparator);
+        entries = entries.sorted(comparator);
       }
     }
 
-    TransitFeed transitFeed = evaluationResult.generatedTransitFeed();
+    TransitFeed transitFeed = evaluationResult.get().generatedTransitFeed();
 
-    List<View> entries = entriesMatchingSearch.stream()
+    List<View> views = entries
         .skip(paged.getOffset())
         .limit(paged.getLimit())
         .map(entry -> new View()
@@ -150,10 +123,10 @@ public class EvaluationController {
         .collect(Collectors.toList());
 
     var page = Page.builder()
-        .setData(entries)
+        .setData(views)
         .setCurrentPage(paged.getPage())
         .setPerPage(paged.getLimit())
-        .setTotal(entriesMatchingSearch.size())
+        .setTotal(views.size())
         .setUri(uriInfo.getAbsolutePath())
         .create();
 
@@ -163,10 +136,15 @@ public class EvaluationController {
   @GET
   @Path("{name}/trips/{tripId}")
   @Produces(MediaType.APPLICATION_JSON)
-  public View getDetails(@PathParam("name") String name, @PathParam("tripId") String tripId) {
-    EvaluationResult evaluationResult = evaluationService.get(name);
-    TransitFeed originalFeed = evaluationResult.originalTransitFeed();
-    TransitFeed generatedFeed = evaluationResult.generatedTransitFeed();
+  public Response getDetails(@PathParam("name") String name, @PathParam("tripId") String tripId) {
+    Optional<EvaluationResult> evaluationResult = evaluationRepository.findEvaluationResult(name);
+
+    if (evaluationResult.isEmpty()) {
+      return Response.status(Response.Status.NOT_FOUND).build();
+    }
+
+    TransitFeed originalFeed = evaluationResult.get().originalTransitFeed();
+    TransitFeed generatedFeed = evaluationResult.get().generatedTransitFeed();
 
     Trip trip = generatedFeed.internal().trips.get(tripId);
     Route route = generatedFeed.getRouteForTrip(tripId);
@@ -174,12 +152,14 @@ public class EvaluationController {
     LineString originalShape = originalFeed.internal().getTripGeometry(tripId);
     LineString generatedShape = generatedFeed.internal().getTripGeometry(tripId);
 
-    return new View()
+    View view = new View()
         .add("trip", trip)
         .add("route", route)
         .add("stops", stops)
         .add("originalShape", originalShape)
         .add("generatedShape", generatedShape);
+
+    return Response.ok(view).build();
   }
 
   private Comparator<ReportEntry> createComparator(SortQuery sortQuery) {

@@ -1,8 +1,8 @@
 import Dashboard from '../pages/dashboard/Index'
 import CandidateFinder from "../pages/CandidateFinder";
 import EvaluationIndex from '../pages/evaluation/Index';
-import EvaluationView from '../pages/evaluation/View';
-import EvaluationOverview from '../pages/evaluation/Overview';
+import EvaluationView from '../pages/evaluation/view/Index';
+import EvaluationOverview from '../pages/evaluation/overview/Index';
 
 const routes = [
     {

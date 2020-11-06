@@ -1,18 +1,14 @@
 package de.fleigm.ptmm.eval.api;
 
-import de.fleigm.ptmm.TransitFeed;
 import de.fleigm.ptmm.eval.Evaluation;
 import de.fleigm.ptmm.eval.EvaluationRepository;
-import de.fleigm.ptmm.eval.EvaluationResult;
 import de.fleigm.ptmm.eval.Info;
 import de.fleigm.ptmm.eval.Parameters;
-import de.fleigm.ptmm.eval.Report;
 import de.fleigm.ptmm.eval.Status;
 import de.fleigm.ptmm.eval.process.EvaluateGtfsFeed;
 import de.fleigm.ptmm.eval.process.GenerateNewGtfsFeed;
 import de.fleigm.ptmm.eval.process.GenerateQuickStats;
 import de.fleigm.ptmm.eval.process.UnzipGtfsFeed;
-import io.quarkus.cache.CacheResult;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
@@ -46,16 +42,6 @@ public class EvaluationService {
 
   @Inject
   GenerateQuickStats generateQuickStats;
-
-
-  @CacheResult(cacheName = "evaluation-result-cache")
-  public EvaluationResult get(String name) {
-    TransitFeed originalTransitFeed = new TransitFeed(baseFolder + name + "/gtfs.original.zip");
-    TransitFeed generatedTransitFeed = new TransitFeed(baseFolder + name + "/gtfs.generated.zip");
-    Report report = Report.read(baseFolder + name + "/gtfs.generated.fullreport.tsv");
-
-    return new EvaluationResult(report, originalTransitFeed, generatedTransitFeed);
-  }
 
   public CompletableFuture<Info> createEvaluation(CreateEvaluationRequest request) {
 
