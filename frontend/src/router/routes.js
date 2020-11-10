@@ -7,15 +7,14 @@ import EvaluationOverview from '../pages/evaluation/overview/Index';
 const routes = [
     {
         path: '/',
-        name: 'Dashboard',
+        name: 'dashboard.index',
         component: Dashboard,
     }, {
         path: '/eval',
-        name: 'evaluation.index',
         component: EvaluationIndex,
         children: [{
             path: '',
-            name: 'Overview',
+            name: 'evaluation.index',
             component: EvaluationOverview,
         }, {
             path: ':name',
@@ -24,7 +23,7 @@ const routes = [
         }]
     }, {
         path: '/candidate-finder',
-        name: 'Candidate Finder',
+        name: 'candidateFinder.index',
         component: CandidateFinder,
     }
 ]

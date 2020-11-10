@@ -1,22 +1,23 @@
 <template>
   <el-menu router :default-active="$route.path" mode="horizontal">
-    <template v-for="(rule, index) in $router.options.routes">
-      <el-submenu v-if="rule.children && rule.children.length > 0"
+    <template v-for="(route, index) in navigation">
+      <el-submenu v-if="route.children && route.children.length > 0"
                   :key="index"
-                  :index="rule.path"
+                  :index="route.page"
       >
-        <template slot="title"><i :class="rule.icon"></i>{{ rule.name }}</template>
-        <el-menu-item v-for="(child, index) in rule.children"
+        <template slot="title"><i :class="route.icon"></i>{{ route.name }}</template>
+        <el-menu-item v-for="(child, index) in route.children"
                       :key="index"
-                      :index="rule.path + '/' + child.path"
+                      :index="route.page"
         >{{ child.name }}
         </el-menu-item>
       </el-submenu>
       <el-menu-item v-else
                     :key="index"
-                    :index="rule.path"
-      ><i :class="rule.icon"></i>
-        {{ rule.name }}
+                    :index="route.page"
+                    :route="{name: route.page}"
+      ><i :class="route.icon"></i>
+        {{ route.name }}
       </el-menu-item>
     </template>
   </el-menu>
@@ -24,6 +25,23 @@
 
 <script>
 export default {
-  name: "v-navigation"
+  name: "v-navigation",
+
+  data() {
+    return {
+      navigation: [
+        {
+          name: 'Dashboard',
+          page: 'dashboard.index'
+        }, {
+          name: 'Evaluation',
+          page: 'evaluation.index'
+        }, {
+          name: 'Candidate Finder',
+          page: 'candidateFinder.index'
+        }
+      ]
+    }
+  }
 }
 </script>
