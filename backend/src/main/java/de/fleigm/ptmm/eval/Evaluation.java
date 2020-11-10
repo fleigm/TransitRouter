@@ -9,6 +9,7 @@ public class Evaluation {
   public static final String GTFS_FULL_REPORT = "gtfs.generated.fullreport.tsv";
   public static final String SHAPEVL_OUTPUT = "shapevl.output.txt";
   public static final String INFO_FILE = "info.json";
+  public static final String ERROR_LOG = "error.log";
 
 
 }

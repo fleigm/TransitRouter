@@ -96,4 +96,28 @@ public class EvaluationIntegrationTest {
     assertTrue(Files.exists(info.fullPath(evaluationFolder).resolve(Evaluation.SHAPEVL_OUTPUT)));
     assertTrue(Files.exists(info.fullPath(evaluationFolder).resolve(Evaluation.INFO_FILE)));
   }
+
+  @Test
+  void handle_failure() throws IOException, ExecutionException, InterruptedException {
+    deleteFolder("test_handle_failure");
+
+    File testFeed = new File(getClass().getClassLoader().getResource("test_feed.zip").getFile());
+
+    CreateEvaluationRequest request = CreateEvaluationRequest.builder()
+        .name("test_handle_failure")
+        .gtfsFeed(FileUtils.openInputStream(testFeed))
+        .alpha(25.0)
+        .candidateSearchRadius(25.0)
+        .beta(2.0)
+        .uTurnDistancePenalty(1500.0)
+        .profile("invalid_profile")
+        .build();
+
+    CompletableFuture<Info> evaluation = evaluationService.createEvaluation(request);
+
+    Info info = evaluation.get();
+
+    assertEquals(Status.FAILED, info.getStatus());
+    assertTrue(Files.exists(info.fullPath(evaluationFolder).resolve(Evaluation.ERROR_LOG)));
+  }
 }
