@@ -19,15 +19,7 @@ import org.jboss.resteasy.annotations.providers.multipart.MultipartForm;
 
 import javax.inject.Inject;
 import javax.validation.Valid;
-import javax.ws.rs.BeanParam;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.DefaultValue;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
+import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -74,6 +66,23 @@ public class EvaluationController {
     return evaluationRepository.find(name)
         .map(info -> Response.ok(info).build())
         .orElse(Response.status(Response.Status.NOT_FOUND).build());
+  }
+
+  @DELETE
+  @Path("{name}")
+  @Produces(MediaType.APPLICATION_JSON)
+  public Response delete(@PathParam("name") String name) {
+    Optional<Exception> result = evaluationRepository.delete(name);
+
+    if (result.isEmpty()) {
+      return Response.noContent().build();
+    }
+
+    if (result.get().getClass().equals(IllegalStateException.class)) {
+      return Response.status(Response.Status.CONFLICT).build();
+    }
+
+    return Response.serverError().build();
   }
 
   @GET

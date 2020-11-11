@@ -59,6 +59,12 @@
             </dependency>
 
             <dependency>
+                <groupId>com.oath.cyclops</groupId>
+                <artifactId>cyclops</artifactId>
+                <version>10.4.0</version>
+            </dependency>
+
+            <dependency>
                 <groupId>${quarkus.platform.group-id}</groupId>
                 <artifactId>${quarkus.platform.artifact-id}</artifactId>
                 <version>${quarkus.platform.version}</version>

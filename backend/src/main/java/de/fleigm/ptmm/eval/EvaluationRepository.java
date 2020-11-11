@@ -7,6 +7,8 @@ public interface EvaluationRepository {
 
   void save(Info info);
 
+  Optional<Exception> delete(String name);
+
   List<Info> all();
 
   Optional<Info> find(String name);

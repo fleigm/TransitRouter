@@ -1,9 +1,14 @@
 <template>
   <div class="container">
-    <el-breadcrumb separator-class="el-icon-arrow-right" class="my-8">
-      <el-breadcrumb-item :to="{ name: 'evaluation.index' }">Evaluations</el-breadcrumb-item>
-      <el-breadcrumb-item>{{ name }}</el-breadcrumb-item>
-    </el-breadcrumb>
+    <div class="flex justify-between items-center">
+      <el-breadcrumb separator-class="el-icon-arrow-right" class="my-8">
+        <el-breadcrumb-item :to="{ name: 'evaluation.index' }">Evaluations</el-breadcrumb-item>
+        <el-breadcrumb-item>{{ name }}</el-breadcrumb-item>
+      </el-breadcrumb>
+      <div>
+        <el-button plain type="danger" size="mini" @click="deleteEvaluation">Delete</el-button>
+      </div>
+    </div>
 
     <v-finished-view v-if="finished" :info="info"></v-finished-view>
     <v-failed-view v-else-if="failed" :info="info"></v-failed-view>
@@ -53,6 +58,18 @@ export default {
           })
           .finally(() => {
             this.loading = false;
+          })
+    },
+
+    deleteEvaluation() {
+      this.$http.delete(`eval/${this.name}`)
+          .then(() => {
+            this.$notify.success('Deleted evaluation ' + this.name + '.');
+            this.$router.push({name: 'evaluation.index'})
+          })
+          .catch((error) => {
+            this.$notify.error('Could not delete evaluation.');
+            console.log(error);
           })
     }
   },

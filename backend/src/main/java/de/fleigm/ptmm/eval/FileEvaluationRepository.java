@@ -2,6 +2,8 @@ package de.fleigm.ptmm.eval;
 
 import de.fleigm.ptmm.TransitFeed;
 import io.quarkus.cache.CacheResult;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.FileUtils;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 import javax.annotation.PostConstruct;
@@ -20,6 +22,7 @@ import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
+@Slf4j
 @ApplicationScoped
 public class FileEvaluationRepository implements EvaluationRepository {
   private List<Info> evaluations = new ArrayList<>();
@@ -47,6 +50,30 @@ public class FileEvaluationRepository implements EvaluationRepository {
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
+  }
+
+  @Override
+  public Optional<Exception> delete(String name) {
+    Optional<Info> info = find(name);
+
+    if (info.isEmpty()) {
+      return Optional.empty();
+    }
+    // deleting an evaluation that is still in progress would cause many errors.
+    if (info.get().getStatus() == Status.PENDING) {
+      return Optional.of(new IllegalStateException(String.format("Cannot delete pending evaluation %s.", name)));
+    }
+
+    evaluations.remove(info.get());
+
+    try {
+      FileUtils.deleteDirectory(Paths.get(evaluationBasePath, name).toFile());
+    } catch (IOException e) {
+      log.error("Could not delete evaluation folder with name {}", name, e);
+      return Optional.of(new RuntimeException(String.format("Could not delete evaluation folder with name %s", name), e));
+    }
+
+    return Optional.empty();
   }
 
   @Override
@@ -91,6 +118,7 @@ public class FileEvaluationRepository implements EvaluationRepository {
   void writeToDisk(Info info) throws IOException {
     Jsonb json = JsonbBuilder.create(new JsonbConfig().withFormatting(true));
 
+    Files.createDirectories(Paths.get(evaluationBasePath, info.getName()));
     Files.writeString(Paths.get(evaluationBasePath, info.getName(), "info.json"), json.toJson(info));
   }
 
