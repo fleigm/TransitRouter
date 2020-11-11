@@ -118,6 +118,8 @@ public class EvaluationIntegrationTest {
     Info info = evaluation.get();
 
     assertEquals(Status.FAILED, info.getStatus());
-    assertTrue(Files.exists(info.fullPath(evaluationFolder).resolve(Evaluation.ERROR_LOG)));
+    assertNotNull(info.getExtension("error.message"));
+    assertNotNull(info.getExtension("error.stackTrace"));
+    assertNotNull(info.getExtension("error.rootCause"));
   }
 }

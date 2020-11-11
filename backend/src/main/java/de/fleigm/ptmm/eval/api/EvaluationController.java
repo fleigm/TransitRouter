@@ -10,6 +10,7 @@ import de.fleigm.ptmm.eval.EvaluationResult;
 import de.fleigm.ptmm.eval.Info;
 import de.fleigm.ptmm.eval.Report;
 import de.fleigm.ptmm.eval.ReportEntry;
+import de.fleigm.ptmm.eval.Status;
 import de.fleigm.ptmm.http.pagination.Page;
 import de.fleigm.ptmm.http.pagination.Paged;
 import de.fleigm.ptmm.http.sort.SortQuery;
@@ -84,6 +85,12 @@ public class EvaluationController {
       @BeanParam Paged paged,
       @QueryParam("search") @DefaultValue("") String search,
       @QueryParam("sort") @DefaultValue("") String sort) {
+
+    Optional<Info> info = evaluationRepository.find(name);
+
+    if (info.isEmpty() || info.get().getStatus() != Status.FINISHED) {
+      return Response.status(Response.Status.NOT_FOUND).build();
+    }
 
     Optional<EvaluationResult> evaluationResult = evaluationRepository.findEvaluationResult(name);
 
