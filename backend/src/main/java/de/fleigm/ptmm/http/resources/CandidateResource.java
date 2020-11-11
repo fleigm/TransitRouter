@@ -1,17 +1,20 @@
 package de.fleigm.ptmm.http.resources;
 
 import com.graphhopper.GraphHopper;
-import com.graphhopper.matching.Observation;
+import com.graphhopper.routing.querygraph.QueryGraph;
 import com.graphhopper.routing.util.DefaultEdgeFilter;
 import com.graphhopper.routing.util.FlagEncoder;
-import com.graphhopper.storage.index.LocationIndex;
 import com.graphhopper.storage.index.LocationIndexTree;
 import com.graphhopper.storage.index.QueryResult;
+import com.graphhopper.util.EdgeIterator;
+import com.graphhopper.util.EdgeIteratorState;
+import com.graphhopper.util.FetchMode;
 import com.graphhopper.util.PMap;
+import com.graphhopper.util.PointList;
 import com.graphhopper.util.shapes.GHPoint;
-import com.graphhopper.util.shapes.GHPoint3D;
-import de.fleigm.ptmm.routing.BusFlagEncoder;
 import de.fleigm.ptmm.routing.TransitRouter;
+import lombok.AllArgsConstructor;
+import lombok.Data;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
@@ -19,8 +22,8 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Path("candidates")
 public class CandidateResource {
@@ -51,10 +54,28 @@ public class CandidateResource {
         DefaultEdgeFilter.allEdges(flagEncoder),
         radius);
 
-    //List<QueryResult> candidates = transitRouter.getCandidates(new Observation(new GHPoint(latitude, longitude)));
+    QueryGraph graph = QueryGraph.create(hopper.getGraphHopperStorage(), candidates);
 
-    List<GHPoint3D> result = candidates.stream().map(QueryResult::getSnappedPoint).collect(Collectors.toList());
+    List<Candidate> c = new ArrayList<>();
 
-    return Response.ok(result).build();
+    for (QueryResult candidate : candidates) {
+      List<PointList> directions = new ArrayList<>();
+      EdgeIterator edgeIterator = graph.createEdgeExplorer().setBaseNode(candidate.getClosestNode());
+      while (edgeIterator.next()) {
+        EdgeIteratorState edge = graph.getEdgeIteratorState(edgeIterator.getEdge(), edgeIterator.getAdjNode());
+        PointList points = edge.fetchWayGeometry(FetchMode.ALL);
+        directions.add(points);
+      }
+      c.add(new Candidate(candidate.getSnappedPoint(), directions));
+    }
+
+    return Response.ok(c).build();
+  }
+
+  @Data
+  @AllArgsConstructor
+  private static class Candidate {
+    private GHPoint point;
+    private List<PointList> directions;
   }
 }

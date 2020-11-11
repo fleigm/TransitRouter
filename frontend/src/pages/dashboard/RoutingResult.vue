@@ -22,7 +22,7 @@
 
     <l-circle v-if="options.showStops"
               v-for="(stop, i) in routingResult.stops"
-              :key="i"
+              :key="'s' + i"
               color="red"
               :radius="1"
               :lat-lng="[stop.stop_lat, stop.stop_lon]">

@@ -6,7 +6,7 @@
           <div v-for="route in routes"
                :key="route.id"
                class="flex items-center py-2 px-2 border-b cursor-pointer hover:bg-secondary-inverse"
-               @click="selectedRoute(route.id)">
+               @click="selectedRoute(route.route_id)">
             <div class="mr-2">{{ route.route_short_name }}</div>
             <div class="text-secondary text-xs">{{ route.route_long_name }}</div>
           </div>

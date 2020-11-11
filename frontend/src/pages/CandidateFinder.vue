@@ -15,8 +15,15 @@
         <l-circle v-for="(candidate, i) in candidates"
                   :key="i"
                   :radius="1"
-                  :lat-lng="candidate"
+                  :lat-lng="candidate.point"
         ></l-circle>
+
+        <template v-for="(candidate, i) in candidates">
+          <l-animated-polyline v-for="(direction) in candidate.directions"
+                      :lat-lngs="direction"
+                      :options="{offset: i, opacity: 0.5, delay: 5000}"
+          ></l-animated-polyline>
+        </template>
 
       </l-map>
     </div>
@@ -41,7 +48,7 @@ export default {
   methods: {
     findCandidates(event) {
       console.log(event);
-      this.$http(`candidates`, {params: {lat: event.latlng.lat, lon: event.latlng.lng , radius: 25}})
+      this.$http(`candidates`, {params: {lat: event.latlng.lat, lon: event.latlng.lng, radius: 25}})
           .then(({data}) => {
             this.candidates = data;
           })
