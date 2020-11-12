@@ -1,27 +1,48 @@
+/*
+ *  Licensed to GraphHopper GmbH under one or more contributor
+ *  license agreements. See the NOTICE file distributed with this work for
+ *  additional information regarding copyright ownership.
+ *
+ *  GraphHopper GmbH licenses this file to you under the Apache License,
+ *  Version 2.0 (the "License"); you may not use this file except in
+ *  compliance with the License. You may obtain a copy of the License at
+ *
+ *       http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ */
 package de.fleigm.ptmm.routing;
 
 import com.bmw.hmm.SequenceState;
+import com.bmw.hmm.Transition;
 import com.bmw.hmm.ViterbiAlgorithm;
 import com.graphhopper.GraphHopper;
+import com.graphhopper.config.LMProfile;
 import com.graphhopper.config.Profile;
+import com.graphhopper.matching.EdgeMatch;
+import com.graphhopper.matching.HmmProbabilities;
+import com.graphhopper.matching.MatchResult;
 import com.graphhopper.matching.Observation;
 import com.graphhopper.matching.State;
-import com.graphhopper.matching.util.TimeStep;
-import com.graphhopper.routing.DijkstraBidirectionCH;
+import com.graphhopper.routing.AStarBidirection;
+import com.graphhopper.routing.BidirRoutingAlgorithm;
 import com.graphhopper.routing.DijkstraBidirectionRef;
 import com.graphhopper.routing.Path;
-import com.graphhopper.routing.RoutingAlgorithm;
-import com.graphhopper.routing.RoutingAlgorithmFactory;
-import com.graphhopper.routing.ch.CHRoutingAlgorithmFactory;
+import com.graphhopper.routing.lm.LMApproximator;
+import com.graphhopper.routing.lm.LandmarkStorage;
+import com.graphhopper.routing.lm.PrepareLandmarks;
 import com.graphhopper.routing.querygraph.QueryGraph;
 import com.graphhopper.routing.querygraph.VirtualEdgeIteratorState;
 import com.graphhopper.routing.util.DefaultEdgeFilter;
 import com.graphhopper.routing.util.TraversalMode;
 import com.graphhopper.routing.weighting.Weighting;
 import com.graphhopper.storage.Graph;
-import com.graphhopper.storage.RoutingCHGraphImpl;
 import com.graphhopper.storage.index.LocationIndexTree;
-import com.graphhopper.storage.index.QueryResult;
+import com.graphhopper.storage.index.Snap;
 import com.graphhopper.util.DistanceCalc;
 import com.graphhopper.util.DistancePlaneProjection;
 import com.graphhopper.util.EdgeIterator;
@@ -39,123 +60,158 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+/**
+ * This class matches real world GPX entries to the digital road network stored
+ * in GraphHopper. The Viterbi algorithm is used to compute the most likely
+ * sequence of map matching candidates. The Viterbi algorithm takes into account
+ * the distance between GPX entries and map matching candidates as well as the
+ * routing distances between consecutive map matching candidates.
+ * <p>
+ * <p>
+ * See http://en.wikipedia.org/wiki/Map_matching and Newson, Paul, and John
+ * Krumm. "Hidden Markov map matching through noise and sparseness." Proceedings
+ * of the 17th ACM SIGSPATIAL International Conference on Advances in Geographic
+ * Information Systems. ACM, 2009.
+ *
+ * @author Peter Karich
+ * @author Michael Zilske
+ * @author Stefan Holder
+ * @author kodonnell
+ */
 public class TransitRouter {
   private static final String DEFAULT_PROFILE = "bus_custom_shortest";
 
   private final Logger logger = LoggerFactory.getLogger(getClass());
 
-  private final Graph routingGraph;
+  private final Graph graph;
+  private final PrepareLandmarks landmarks;
   private final LocationIndexTree locationIndex;
+  private final double measurementErrorSigma = 25;
+  private final double transitionProbabilityBeta = 2.0;
   private final int maxVisitedNodes;
   private final DistanceCalc distanceCalc = new DistancePlaneProjection();
   private final Weighting weighting;
-  private final boolean ch;
 
   private final double candidateSearchRadius;
   private final List<EmissionProbability> emissionProbabilityFunctions;
   private final List<TransitionProbability> transitionProbabilityFunctions;
 
   public TransitRouter(GraphHopper graphHopper, PMap hints) {
-    locationIndex = (LocationIndexTree) graphHopper.getLocationIndex();
+    this.locationIndex = (LocationIndexTree) graphHopper.getLocationIndex();
 
     Profile profile = graphHopper.getProfile(hints.getString("profile", DEFAULT_PROFILE));
 
-    boolean disableCH = hints.getBool(Parameters.CH.DISABLE, false);
     boolean disableLM = hints.getBool(Parameters.Landmark.DISABLE, false);
-    RoutingAlgorithmFactory routingAlgorithmFactory = graphHopper.getAlgorithmFactory(profile.getName(), disableCH, disableLM);
-    if (routingAlgorithmFactory instanceof CHRoutingAlgorithmFactory) {
-      ch = true;
-      routingGraph = graphHopper.getGraphHopperStorage().getCHGraph(((CHRoutingAlgorithmFactory) routingAlgorithmFactory).getCHConfig());
-    } else {
-      ch = false;
-      routingGraph = graphHopper.getGraphHopperStorage();
-    }
-    // since map matching does not support turn costs we have to disable them here explicitly
-    weighting = graphHopper.createWeighting(profile, hints, false);
-    maxVisitedNodes = hints.getInt(Parameters.Routing.MAX_VISITED_NODES, Integer.MAX_VALUE);
+    if (graphHopper.getLMPreparationHandler().isEnabled() && disableLM && !graphHopper.getRouterConfig().isLMDisablingAllowed())
+      throw new IllegalArgumentException("Disabling LM is not allowed");
+
+    boolean disableCH = hints.getBool(Parameters.CH.DISABLE, false);
+    if (graphHopper.getCHPreparationHandler().isEnabled() && disableCH && !graphHopper.getRouterConfig().isCHDisablingAllowed())
+      throw new IllegalArgumentException("Disabling CH is not allowed");
+
+    // see map-matching/#177: both ch.disable and lm.disable can be used to force Dijkstra which is the better
+    // (=faster) choice when the observations are close to each other
+    boolean useDijkstra = disableLM || disableCH;
+
+    landmarks = prepareLandmarks(graphHopper, profile, useDijkstra);
+    graph = graphHopper.getGraphHopperStorage();
+    weighting = graphHopper.createWeighting(profile, hints);
+    this.maxVisitedNodes = hints.getInt(Parameters.Routing.MAX_VISITED_NODES, Integer.MAX_VALUE);
 
     candidateSearchRadius = hints.getDouble("candidate_search_radius", 25);
     emissionProbabilityFunctions = List.of(GraphhopperEmissionProbability.create(hints));
     transitionProbabilityFunctions = List.of(GraphhopperTransitionProbability.create(hints));
   }
 
-  /**
-   * This method does the actual map matching.
-   * <p>
-   *
-   * @param observations the input list with GPX points which should match to edges
-   *                     of the graph specified in the constructor
-   */
-  public RoutingResult route(List<Observation> observations) {
-    List<Collection<QueryResult>> queriesPerEntry = findCandidates(observations);
-
-    QueryGraph queryGraph = buildQueryGraph(queriesPerEntry);
-
-    // Different QueryResults can have the same tower node as their closest node.
-    // Hence, we now dedupe the query results of each GPX entry by their closest node (#91).
-    // This must be done after calling queryGraph.create() since this replaces some of the
-    // QueryResult nodes with virtual nodes. Virtual nodes are not deduped since there is at
-    // most one QueryResult per edge and virtual nodes are inserted into the middle of an edge.
-    // Reducing the number of QueryResults improves performance since less shortest/fastest
-    // routes need to be computed.
-    queriesPerEntry = deduplicateQueryResultsByClosestNode(queriesPerEntry);
-
-    List<TimeStep<State, Observation, Path>> timeSteps = createTimeSteps(
-        observations,
-        queriesPerEntry,
-        queryGraph);
-
-    List<SequenceState<State, Observation, Path>> viterbiSequence = computeViterbiSequence(timeSteps, queryGraph);
-
-    return computeRoutingResult(viterbiSequence, timeSteps, queryGraph);
-  }
-
-  /**
-   * Creates a QueryGraph containing the candidates that are represented by a virtual node.
-   *
-   * @param queriesPerEntry candidates that will be added to the QueryGraph
-   * @return a QueryGraph
-   */
-  private QueryGraph buildQueryGraph(List<Collection<QueryResult>> queriesPerEntry) {
-    // Add virtual nodes and edges to the graph so that candidates on edges can be represented
-    // by virtual nodes.
-    List<QueryResult> allQueryResults = new ArrayList<>();
-    for (Collection<QueryResult> qrs : queriesPerEntry) {
-      allQueryResults.addAll(qrs);
-    }
-    return QueryGraph.create(routingGraph, allQueryResults);
-  }
-
-  /**
-   * Find the possible locations (edges) of each Observation in the graph.
-   */
-  private List<Collection<QueryResult>> findCandidates(List<Observation> observations) {
-
-    final List<Collection<QueryResult>> gpxEntryLocations = new ArrayList<>();
-    for (Observation observation : observations) {
-      final List<QueryResult> queryResults = locationIndex.findNClosest(
-          observation.getPoint().lat,
-          observation.getPoint().lon,
-          DefaultEdgeFilter.allEdges(weighting.getFlagEncoder()),
-          candidateSearchRadius);
-      gpxEntryLocations.add(queryResults);
-    }
-    return gpxEntryLocations;
-  }
-
-  private List<Collection<QueryResult>> deduplicateQueryResultsByClosestNode(
-      List<Collection<QueryResult>> queriesPerEntry) {
-
-    final List<Collection<QueryResult>> result = new ArrayList<>(queriesPerEntry.size());
-
-    for (Collection<QueryResult> queryResults : queriesPerEntry) {
-      final Map<Integer, QueryResult> dedupedQueryResults = new HashMap<>();
-      for (QueryResult qr : queryResults) {
-        dedupedQueryResults.put(qr.getClosestNode(), qr);
+  private PrepareLandmarks prepareLandmarks(GraphHopper graphHopper, Profile profile, boolean useDijkstra) {
+    final PrepareLandmarks landmarks;
+    if (graphHopper.getLMPreparationHandler().isEnabled() && !useDijkstra) {
+      // using LM because u-turn prevention does not work properly with (node-based) CH
+      List<String> lmProfileNames = new ArrayList<>();
+      PrepareLandmarks lmPreparation = null;
+      for (LMProfile lmProfile : graphHopper.getLMPreparationHandler().getLMProfiles()) {
+        lmProfileNames.add(lmProfile.getProfile());
+        if (lmProfile.getProfile().equals(profile.getName())) {
+          lmPreparation = graphHopper.getLMPreparationHandler().getPreparation(
+              lmProfile.usesOtherPreparation() ? lmProfile.getPreparationProfile() : lmProfile.getProfile()
+          );
+        }
       }
-      result.add(dedupedQueryResults.values());
+      if (lmPreparation == null) {
+        throw new IllegalArgumentException("Cannot find LM preparation for the requested profile: '" + profile.getName() + "'" +
+                                           "\nYou can try disabling LM using " + Parameters.Landmark.DISABLE + "=true" +
+                                           "\navailable LM profiles: " + lmProfileNames);
+      }
+      landmarks = lmPreparation;
+    } else {
+      landmarks = null;
     }
-    return result;
+    return landmarks;
+  }
+
+  public RoutingResult route(List<Observation> observations) {
+    // Snap observations to links. Generates multiple candidate snaps per observation.
+    // In the next step, we will turn them into splits, but we already call them splits now
+    // because they are modified in place.
+    List<Collection<Snap>> splitsPerObservation = observations.stream()
+        .map(o -> locationIndex.findNClosest(
+            o.getPoint().lat,
+            o.getPoint().lon,
+            DefaultEdgeFilter.allEdges(weighting.getFlagEncoder()), measurementErrorSigma))
+        .collect(Collectors.toList());
+
+    // Create the query graph, containing split edges so that all the places where an observation might have happened
+    // are a node. This modifies the Snap objects and puts the new node numbers into them.
+    QueryGraph queryGraph = QueryGraph.create(
+        graph,
+        splitsPerObservation.stream()
+            .flatMap(Collection::stream)
+            .collect(Collectors.toList()));
+
+    // Due to how LocationIndex/QueryGraph is implemented, we can get duplicates when a point is snapped
+    // directly to a tower node instead of creating a split / virtual node. No problem, but we still filter
+    // out the duplicates for performance reasons.
+    splitsPerObservation = splitsPerObservation.stream()
+        .map(this::deduplicate)
+        .collect(Collectors.toList());
+
+    // Creates candidates from the Snaps of all observations (a candidate is basically a
+    // Snap + direction).
+    List<ObservationWithCandidateStates> timeSteps = createTimeSteps(observations, splitsPerObservation, queryGraph);
+
+    // Compute the most likely sequence of map matching candidates:
+    List<SequenceState<State, Observation, Path>> seq = computeViterbiSequence(timeSteps, queryGraph);
+
+    List<EdgeIteratorState> path = seq.stream()
+        .filter(s1 -> s1.transitionDescriptor != null)
+        .flatMap(s1 -> s1.transitionDescriptor.calcEdges().stream())
+        .collect(Collectors.toList());
+
+    MatchResult result = new MatchResult(prepareEdgeMatches(seq, queryGraph));
+    result.setMergedPath(new MapMatchedPath(queryGraph, weighting, path));
+    result.setMatchMillis(seq.stream().filter(s -> s.transitionDescriptor != null).mapToLong(s -> s.transitionDescriptor.getTime()).sum());
+    result.setMatchLength(seq.stream().filter(s -> s.transitionDescriptor != null).mapToDouble(s -> s.transitionDescriptor.getDistance()).sum());
+    result.setGPXEntriesLength(gpxLength(observations));
+    result.setGraph(queryGraph);
+    result.setWeighting(weighting);
+
+    return RoutingResult.builder()
+        .path(new MapMatchedPath(queryGraph, weighting, path))
+        .distance(seq.stream().filter(s -> s.transitionDescriptor != null).mapToDouble(s -> s.transitionDescriptor.getDistance()).sum())
+        .time(seq.stream().filter(s -> s.transitionDescriptor != null).mapToLong(s -> s.transitionDescriptor.getTime()).sum())
+        .candidates(splitsPerObservation.stream().flatMap(Collection::stream).map(Snap::getSnappedPoint).collect(Collectors.toList()))
+        .observations(observations)
+        .matchResult(result)
+        .build();
+
+    //return result;
+  }
+
+  private Collection<Snap> deduplicate(Collection<Snap> splits) {
+    // Only keep one split per node number. Let's say the last one.
+    return splits.stream()
+        .collect(Collectors.toMap(Snap::getClosestNode, s -> s, (s1, s2) -> s2))
+        .values();
   }
 
   /**
@@ -163,244 +219,238 @@ public class TransitRouter {
    * transition probabilities. Creates directed candidates for virtual nodes and undirected
    * candidates for real nodes.
    */
-  private List<TimeStep<State, Observation, Path>> createTimeSteps(
-      List<Observation> filteredGPXEntries,
-      List<Collection<QueryResult>> queriesPerEntry,
-      QueryGraph queryGraph) {
+  private List<ObservationWithCandidateStates> createTimeSteps(List<Observation> observations,
+                                                               List<Collection<Snap>> splitsPerObservation,
+                                                               QueryGraph queryGraph) {
 
-    final int n = filteredGPXEntries.size();
-    if (queriesPerEntry.size() != n) {
+    if (splitsPerObservation.size() != observations.size()) {
       throw new IllegalArgumentException(
           "filteredGPXEntries and queriesPerEntry must have same size.");
     }
 
-    final List<TimeStep<State, Observation, Path>> timeSteps = new ArrayList<>();
-    for (int i = 0; i < n; i++) {
-
-      Observation gpxEntry = filteredGPXEntries.get(i);
-      final Collection<QueryResult> queryResults = queriesPerEntry.get(i);
-
+    final List<ObservationWithCandidateStates> timeSteps = new ArrayList<>();
+    for (int i = 0; i < observations.size(); i++) {
+      Observation observation = observations.get(i);
+      Collection<Snap> splits = splitsPerObservation.get(i);
       List<State> candidates = new ArrayList<>();
-      for (QueryResult qr : queryResults) {
-        int closestNode = qr.getClosestNode();
-        if (queryGraph.isVirtualNode(closestNode)) {
-          // get virtual edges:
+      for (Snap split : splits) {
+        if (queryGraph.isVirtualNode(split.getClosestNode())) {
           List<VirtualEdgeIteratorState> virtualEdges = new ArrayList<>();
-          EdgeIterator iter = queryGraph.createEdgeExplorer().setBaseNode(closestNode);
+          EdgeIterator iter = queryGraph.createEdgeExplorer().setBaseNode(split.getClosestNode());
           while (iter.next()) {
-            virtualEdges.add((VirtualEdgeIteratorState)
-                queryGraph.getEdgeIteratorState(iter.getEdge(), iter.getAdjNode()));
+            if (!queryGraph.isVirtualEdge(iter.getEdge())) {
+              throw new RuntimeException("Virtual nodes must only have virtual edges "
+                                         + "to adjacent nodes.");
+            }
+            virtualEdges.add((VirtualEdgeIteratorState) queryGraph.getEdgeIteratorState(iter.getEdge(), iter.getAdjNode()));
+          }
+          if (virtualEdges.size() != 2) {
+            throw new RuntimeException("Each virtual node must have exactly 2 "
+                                       + "virtual edges (reverse virtual edges are not returned by the "
+                                       + "EdgeIterator");
           }
 
           // Create a directed candidate for each of the two possible directions through
-          // the virtual node. This is needed to penalize U-turns at virtual nodes
-          // (see also #51). We need to add candidates for both directions because
+          // the virtual node. We need to add candidates for both directions because
           // we don't know yet which is the correct one. This will be figured
           // out by the Viterbi algorithm.
-          //
-          // Adding further candidates to explicitly allow U-turns through setting
-          // incomingVirtualEdge==outgoingVirtualEdge doesn't make sense because this
-          // would actually allow to perform a U-turn without a penalty by going to and
-          // from the virtual node through the other virtual edge or its reverse edge.
-          VirtualEdgeIteratorState e1 = virtualEdges.get(0);
-          VirtualEdgeIteratorState e2 = virtualEdges.get(1);
-          for (int j = 0; j < 2; j++) {
-            // get favored/unfavored edges:
-            VirtualEdgeIteratorState incomingVirtualEdge = j == 0 ? e1 : e2;
-            VirtualEdgeIteratorState outgoingVirtualEdge = j == 0 ? e2 : e1;
-            // create candidate
-            QueryResult vqr = new QueryResult(qr.getQueryPoint().lat, qr.getQueryPoint().lon);
-            vqr.setQueryDistance(qr.getQueryDistance());
-            vqr.setClosestNode(qr.getClosestNode());
-            vqr.setWayIndex(qr.getWayIndex());
-            vqr.setSnappedPosition(qr.getSnappedPosition());
-            vqr.setClosestEdge(qr.getClosestEdge());
-            vqr.calcSnappedPoint(distanceCalc);
-            State candidate = new State(gpxEntry, vqr, incomingVirtualEdge,
-                outgoingVirtualEdge);
-            candidates.add(candidate);
-          }
+          candidates.add(new State(observation, split, virtualEdges.get(0), virtualEdges.get(1)));
+          candidates.add(new State(observation, split, virtualEdges.get(1), virtualEdges.get(0)));
         } else {
           // Create an undirected candidate for the real node.
-          State candidate = new State(gpxEntry, qr);
-          candidates.add(candidate);
+          candidates.add(new State(observation, split));
         }
       }
 
-      final TimeStep<State, Observation, Path> timeStep = new TimeStep<>(gpxEntry, candidates);
-      timeSteps.add(timeStep);
+      timeSteps.add(new ObservationWithCandidateStates(observation, candidates));
     }
     return timeSteps;
   }
 
   /**
-   * Computes the most likely candidate sequence for the GPX entries.
+   * Computes the most likely state sequence for the observations.
    */
   private List<SequenceState<State, Observation, Path>> computeViterbiSequence(
-      List<TimeStep<State, Observation, Path>> timeSteps,
+      List<ObservationWithCandidateStates> timeSteps,
       QueryGraph queryGraph) {
 
+    final HmmProbabilities probabilities = new HmmProbabilities(measurementErrorSigma, transitionProbabilityBeta);
     final ViterbiAlgorithm<State, Observation, Path> viterbi = new ViterbiAlgorithm<>();
 
-    TimeStep<State, Observation, Path> prevTimeStep = null;
-    for (TimeStep<State, Observation, Path> timeStep : timeSteps) {
-      computeEmissionProbabilities(timeStep, queryGraph);
+    int timeStepCounter = 0;
+    ObservationWithCandidateStates prevTimeStep = null;
+    for (ObservationWithCandidateStates timeStep : timeSteps) {
+      final Map<State, Double> emissionLogProbabilities = new HashMap<>();
+      final Map<Transition<State>, Double> transitionLogProbabilities = new HashMap<>();
+      final Map<Transition<State>, Path> roadPaths = new HashMap<>();
+
+      // compute emission probabilities
+      for (State candidate : timeStep.candidates) {
+        // distance from observation to road in meters
+        final double distance = candidate.getSnap().getQueryDistance();
+        emissionLogProbabilities.put(candidate, probabilities.emissionLogProbability(distance));
+      }
 
       if (prevTimeStep == null) {
-        viterbi.startWithInitialObservation(
-            timeStep.observation,
-            timeStep.candidates,
-            timeStep.emissionLogProbabilities);
+        viterbi.startWithInitialObservation(timeStep.observation, timeStep.candidates, emissionLogProbabilities);
       } else {
-        computeTransitionProbabilities(prevTimeStep, timeStep, queryGraph);
-        viterbi.nextStep(
-            timeStep.observation,
-            timeStep.candidates,
-            timeStep.emissionLogProbabilities,
-            timeStep.transitionLogProbabilities,
-            timeStep.roadPaths);
-      }
+        final double linearDistance = distanceCalc.calcDist(
+            prevTimeStep.observation.getPoint().lat,
+            prevTimeStep.observation.getPoint().lon,
+            timeStep.observation.getPoint().lat,
+            timeStep.observation.getPoint().lon);
 
+        for (State from : prevTimeStep.candidates) {
+          for (State to : timeStep.candidates) {
+
+            // TODO enforce heading
+            final Path path = createRouter(queryGraph).calcPath(
+                from.getSnap().getClosestNode(),
+                to.getSnap().getClosestNode());
+
+            if (path.isFound()) {
+              double transitionLogProbability = probabilities.transitionLogProbability(path.getDistance(), linearDistance);
+              Transition<State> transition = new Transition<>(from, to);
+              roadPaths.put(transition, path);
+              transitionLogProbabilities.put(transition, transitionLogProbability);
+            } else {
+              logger.error("no path found!");
+            }
+          }
+        }
+        viterbi.nextStep(timeStep.observation, timeStep.candidates,
+            emissionLogProbabilities, transitionLogProbabilities,
+            roadPaths);
+      }
       if (viterbi.isBroken()) {
-        throw new IllegalArgumentException("Sequence is broken for submitted track");
+        throw BrokenSequenceException.create(timeStepCounter, prevTimeStep, timeStep, distanceCalc);
       }
 
+      timeStepCounter++;
       prevTimeStep = timeStep;
     }
 
     return viterbi.computeMostLikelySequence();
   }
 
-  private void computeEmissionProbabilities(
-      TimeStep<State, Observation, Path> timeStep,
-      QueryGraph queryGraph) {
-
-    for (State candidate : timeStep.candidates) {
-      double emissionProbability = 0;
-      for (EmissionProbability f : emissionProbabilityFunctions) {
-        emissionProbability += f.calc(timeStep, candidate, queryGraph);
-      }
-
-      timeStep.addEmissionLogProbability(candidate, emissionProbability);
-    }
-  }
-
-  private void computeTransitionProbabilities(
-      TimeStep<State, Observation, Path> prevTimeStep,
-      TimeStep<State, Observation, Path> timeStep,
-      QueryGraph queryGraph) {
-
-    final double linearDistance = distanceCalc.calcDist(
-        prevTimeStep.observation.getPoint().lat,
-        prevTimeStep.observation.getPoint().lon,
-        timeStep.observation.getPoint().lat,
-        timeStep.observation.getPoint().lon);
-
-    for (State from : prevTimeStep.candidates) {
-      for (State to : timeStep.candidates) {
-        final Path path = computePathBetweenCandidates(from, to, queryGraph);
-
-        if (path.isFound()) {
-          timeStep.addRoadPath(from, to, path);
-
-          double transitionLogProbability = 0;
-          for (TransitionProbability f : transitionProbabilityFunctions) {
-            transitionLogProbability += f.calc(prevTimeStep, timeStep, from, to, path, linearDistance, queryGraph);
-          }
-
-          timeStep.addTransitionLogProbability(from, to, transitionLogProbability);
-        } else {
-          logger.debug("No path found for from: {}, to: {}", from, to);
+  private BidirRoutingAlgorithm createRouter(QueryGraph queryGraph) {
+    BidirRoutingAlgorithm router;
+    if (landmarks != null) {
+      AStarBidirection algo = new AStarBidirection(queryGraph, weighting, TraversalMode.EDGE_BASED) {
+        @Override
+        protected void initCollections(int size) {
+          super.initCollections(50);
         }
-        queryGraph.clearUnfavoredStatus();
-
-      }
+      };
+      LandmarkStorage lms = landmarks.getLandmarkStorage();
+      int activeLM = Math.min(8, lms.getLandmarkCount());
+      algo.setApproximation(LMApproximator.forLandmarks(queryGraph, lms, activeLM));
+      algo.setMaxVisitedNodes(maxVisitedNodes);
+      router = algo;
+    } else {
+      router = new DijkstraBidirectionRef(queryGraph, weighting, TraversalMode.EDGE_BASED) {
+        @Override
+        protected void initCollections(int size) {
+          super.initCollections(50);
+        }
+      };
+      router.setMaxVisitedNodes(maxVisitedNodes);
     }
-  }
-
-  private Path computePathBetweenCandidates(State from, State to, QueryGraph queryGraph) {
-    // enforce heading if required:
-    if (from.isOnDirectedEdge()) {
-      // Make sure that the path starting at the "from" candidate goes through
-      // the outgoing edge.
-      queryGraph.unfavorVirtualEdgePair(
-          from.getQueryResult().getClosestNode(),
-          from.getIncomingVirtualEdge().getEdge());
-    }
-    if (to.isOnDirectedEdge()) {
-      // Make sure that the path ending at "to" candidate goes through
-      // the incoming edge.
-      queryGraph.unfavorVirtualEdgePair(
-          to.getQueryResult().getClosestNode(),
-          to.getOutgoingVirtualEdge().getEdge());
-    }
-
-    RoutingAlgorithm router = createRoutingAlgorithm(queryGraph);
-
-    return router.calcPath(from.getQueryResult().getClosestNode(), to.getQueryResult().getClosestNode());
-  }
-
-  private RoutingAlgorithm createRoutingAlgorithm(QueryGraph queryGraph) {
-    return ch ? createCHRoutingAlgorithm(queryGraph) : createDijkstraRoutingAlgorithm(queryGraph);
-  }
-
-  private RoutingAlgorithm createCHRoutingAlgorithm(QueryGraph queryGraph) {
-    RoutingAlgorithm router = new DijkstraBidirectionCH(new RoutingCHGraphImpl(queryGraph, weighting)) {
-      @Override
-      protected void initCollections(int size) {
-        super.initCollections(50);
-      }
-    };
-    router.setMaxVisitedNodes(maxVisitedNodes);
     return router;
   }
 
-  private RoutingAlgorithm createDijkstraRoutingAlgorithm(QueryGraph queryGraph) {
-    RoutingAlgorithm router = new DijkstraBidirectionRef(queryGraph, weighting, TraversalMode.EDGE_BASED) {
-      @Override
-      protected void initCollections(int size) {
-        super.initCollections(50);
-      }
-    };
-    router.setMaxVisitedNodes(maxVisitedNodes);
-    return router;
-  }
+  private List<EdgeMatch> prepareEdgeMatches(List<SequenceState<State, Observation, Path>> seq, QueryGraph queryGraph) {
+    // This creates a list of directed edges (EdgeIteratorState instances turned the right way),
+    // each associated with 0 or more of the observations.
+    // These directed edges are edges of the real street graph, where nodes are intersections.
+    // So in _this_ representation, the path that you get when you just look at the edges goes from
+    // an intersection to an intersection.
 
-  private RoutingResult computeRoutingResult(
-      List<SequenceState<State, Observation, Path>> seq,
-      List<TimeStep<State, Observation, Path>> timeSteps,
-      QueryGraph queryGraph) {
+    // Implementation note: We have to look at both states _and_ transitions, since we can have e.g. just one state,
+    // or two states with a transition that is an empty path (observations snapped to the same node in the query graph),
+    // but these states still happen on an edge, and for this representation, we want to have that edge.
+    // (Whereas in the ResponsePath representation, we would just see an empty path.)
 
-    double distance = 0.0;
-    long time = 0;
+    // Note that the result can be empty, even when the input is not. Observations can be on nodes as well as on
+    // edges, and when all observations are on the same node, we get no edge at all.
+    // But apart from that corner case, all observations that go in here are also in the result.
+
+    // (Consider totally forbidding candidate states to be snapped to a point, and make them all be on directed
+    // edges, then that corner case goes away.)
+    List<EdgeMatch> edgeMatches = new ArrayList<>();
+    List<State> states = new ArrayList<>();
+    EdgeIteratorState currentDirectedRealEdge = null;
     for (SequenceState<State, Observation, Path> transitionAndState : seq) {
+      // transition (except before the first state)
       if (transitionAndState.transitionDescriptor != null) {
-        distance += transitionAndState.transitionDescriptor.getDistance();
-        time += transitionAndState.transitionDescriptor.getTime();
+        for (EdgeIteratorState edge : transitionAndState.transitionDescriptor.calcEdges()) {
+          EdgeIteratorState newDirectedRealEdge = resolveToRealEdge(edge, queryGraph);
+          if (currentDirectedRealEdge != null) {
+            if (!equalEdges(currentDirectedRealEdge, newDirectedRealEdge)) {
+              EdgeMatch edgeMatch = new EdgeMatch(currentDirectedRealEdge, states);
+              edgeMatches.add(edgeMatch);
+              states = new ArrayList<>();
+            }
+          }
+          currentDirectedRealEdge = newDirectedRealEdge;
+        }
       }
-    }
-
-    List<EdgeIteratorState> edges = new ArrayList<>();
-    for (SequenceState<State, Observation, Path> state : seq) {
-      if (state.transitionDescriptor != null) {
-        edges.addAll(state.transitionDescriptor.calcEdges());
+      // state
+      if (transitionAndState.state.isOnDirectedEdge()) { // as opposed to on a node
+        EdgeIteratorState newDirectedRealEdge = resolveToRealEdge(transitionAndState.state.getOutgoingVirtualEdge(), queryGraph);
+        if (currentDirectedRealEdge != null) {
+          if (!equalEdges(currentDirectedRealEdge, newDirectedRealEdge)) {
+            EdgeMatch edgeMatch = new EdgeMatch(currentDirectedRealEdge, states);
+            edgeMatches.add(edgeMatch);
+            states = new ArrayList<>();
+          }
+        }
+        currentDirectedRealEdge = newDirectedRealEdge;
       }
+      states.add(transitionAndState.state);
     }
-    Path mergedPath = new TransitRouter.MapMatchedPath(queryGraph.getBaseGraph(), weighting, edges);
+    if (currentDirectedRealEdge != null) {
+      EdgeMatch edgeMatch = new EdgeMatch(currentDirectedRealEdge, states);
+      edgeMatches.add(edgeMatch);
+    }
+    return edgeMatches;
+  }
 
-    RoutingResult routingResult = new RoutingResult();
-    routingResult.setPath(mergedPath);
-    routingResult.setDistance(distance);
-    routingResult.setTime(time);
-    routingResult.setObservations(timeSteps.stream().map(t -> t.observation).collect(Collectors.toList()));
-    routingResult.setCandidates(
-        timeSteps.stream()
-            .flatMap(t -> t.candidates.stream())
-            .map(State::getQueryResult)
-            .map(QueryResult::getSnappedPoint)
-            .collect(Collectors.toList()));
+  private double gpxLength(List<Observation> gpxList) {
+    if (gpxList.isEmpty()) {
+      return 0;
+    } else {
+      double gpxLength = 0;
+      Observation prevEntry = gpxList.get(0);
+      for (int i = 1; i < gpxList.size(); i++) {
+        Observation entry = gpxList.get(i);
+        gpxLength += distanceCalc.calcDist(prevEntry.getPoint().lat, prevEntry.getPoint().lon, entry.getPoint().lat, entry.getPoint().lon);
+        prevEntry = entry;
+      }
+      return gpxLength;
+    }
+  }
 
-    return routingResult;
+  private boolean equalEdges(EdgeIteratorState edge1, EdgeIteratorState edge2) {
+    return edge1.getEdge() == edge2.getEdge()
+           && edge1.getBaseNode() == edge2.getBaseNode()
+           && edge1.getAdjNode() == edge2.getAdjNode();
+  }
+
+  private EdgeIteratorState resolveToRealEdge(EdgeIteratorState edgeIteratorState, QueryGraph queryGraph) {
+    if (queryGraph.isVirtualNode(edgeIteratorState.getBaseNode()) || queryGraph.isVirtualNode(edgeIteratorState.getAdjNode())) {
+      return findEdgeByKey(((VirtualEdgeIteratorState) edgeIteratorState).getOriginalEdgeKey());
+    } else {
+      return edgeIteratorState;
+    }
+  }
+
+  private EdgeIteratorState findEdgeByKey(int edgeKey) {
+    EdgeIteratorState edge = graph.getEdgeIteratorState(edgeKey / 2, Integer.MIN_VALUE);
+    if ((edgeKey % 2 == 1) == (edge.getBaseNode() < edge.getAdjNode())) {
+      edge = graph.getEdgeIteratorState(edgeKey / 2, edge.getBaseNode());
+    }
+    return edge;
   }
 
   private static class MapMatchedPath extends Path {
@@ -421,4 +471,5 @@ public class TransitRouter {
       }
     }
   }
+
 }

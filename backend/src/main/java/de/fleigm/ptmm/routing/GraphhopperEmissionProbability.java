@@ -2,8 +2,8 @@ package de.fleigm.ptmm.routing;
 
 import com.graphhopper.matching.Observation;
 import com.graphhopper.matching.State;
-import com.graphhopper.matching.util.Distributions;
-import com.graphhopper.matching.util.TimeStep;
+import com.graphhopper.matching.Distributions;
+import com.graphhopper.matching.TimeStep;
 import com.graphhopper.routing.Path;
 import com.graphhopper.routing.querygraph.QueryGraph;
 import com.graphhopper.util.PMap;
@@ -32,7 +32,7 @@ public class GraphhopperEmissionProbability implements EmissionProbability {
 
   @Override
   public double calc(TimeStep<State, Observation, Path> timeStep, State candidate, QueryGraph queryGraph) {
-    double distance = candidate.getQueryResult().getQueryDistance();
+    double distance = candidate.getSnap().getQueryDistance();
 
     return Distributions.logNormalDistribution(measurementErrorSigma, distance);
   }

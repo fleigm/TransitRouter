@@ -12,11 +12,11 @@ public class StateSerializer implements JsonbSerializer<State> {
   public void serialize(State state, JsonGenerator generator, SerializationContext ctx) {
     generator.writeStartObject();
 
-    generator.write("node", state.getQueryResult().getClosestNode());
+    generator.write("node", state.getSnap().getClosestNode());
 
     generator.writeStartArray("position")
-        .write(state.getQueryResult().getSnappedPoint().lat)
-        .write(state.getQueryResult().getSnappedPoint().lon)
+        .write(state.getSnap().getSnappedPoint().lat)
+        .write(state.getSnap().getSnappedPoint().lon)
         .writeEnd();
 
     if (state.isOnDirectedEdge() && state.getIncomingVirtualEdge() != null) {

@@ -5,7 +5,7 @@ import com.graphhopper.routing.querygraph.QueryGraph;
 import com.graphhopper.routing.util.DefaultEdgeFilter;
 import com.graphhopper.routing.util.FlagEncoder;
 import com.graphhopper.storage.index.LocationIndexTree;
-import com.graphhopper.storage.index.QueryResult;
+import com.graphhopper.storage.index.Snap;
 import com.graphhopper.util.EdgeIterator;
 import com.graphhopper.util.EdgeIteratorState;
 import com.graphhopper.util.FetchMode;
@@ -48,7 +48,7 @@ public class CandidateResource {
 
     FlagEncoder flagEncoder = hopper.getEncodingManager().getEncoder("bus");
 
-    List<QueryResult> candidates = locationIndex.findNClosest(
+    List<Snap> candidates = locationIndex.findNClosest(
         latitude,
         longitude,
         DefaultEdgeFilter.allEdges(flagEncoder),
@@ -58,7 +58,7 @@ public class CandidateResource {
 
     List<Candidate> c = new ArrayList<>();
 
-    for (QueryResult candidate : candidates) {
+    for (Snap candidate : candidates) {
       List<PointList> directions = new ArrayList<>();
       EdgeIterator edgeIterator = graph.createEdgeExplorer().setBaseNode(candidate.getClosestNode());
       while (edgeIterator.next()) {
