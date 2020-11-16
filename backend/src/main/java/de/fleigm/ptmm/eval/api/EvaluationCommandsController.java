@@ -14,9 +14,9 @@ public class EvaluationCommandsController {
   FileEvaluationRepository evaluationRepository;
 
   @POST
-  @Path("clear-info-cache")
+  @Path("clear-cache")
   public Response clearInfoCache() {
-    evaluationRepository.init();
+    evaluationRepository.invalidateCache();
 
     return Response.ok().build();
   }

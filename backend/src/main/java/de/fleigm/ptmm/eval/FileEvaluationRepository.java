@@ -1,6 +1,7 @@
 package de.fleigm.ptmm.eval;
 
 import de.fleigm.ptmm.TransitFeed;
+import io.quarkus.cache.CacheInvalidateAll;
 import io.quarkus.cache.CacheResult;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
@@ -137,5 +138,10 @@ public class FileEvaluationRepository implements EvaluationRepository {
         .map(rawJson -> json.fromJson(rawJson, Info.class))
         .collect(Collectors.toList());
 
+  }
+
+  @CacheInvalidateAll(cacheName = "evaluation-result-cache")
+  public void invalidateCache() {
+    init();
   }
 }

@@ -3,6 +3,7 @@
     <div class="my-8 flex justify-between">
       <div></div>
       <div class="">
+        <el-button size="mini" @click="clearCache">Clear Cache</el-button>
         <v-evaluation-form-dialog></v-evaluation-form-dialog>
       </div>
     </div>
@@ -30,6 +31,16 @@ export default {
   data() {
     return {}
   },
-  methods: {}
+  methods: {
+    clearCache() {
+      this.$http.post('commands/eval/clear-cache')
+          .then(() => {
+            this.$notify.success('Cleared evaluation cache.');
+          })
+      .catch(() => {
+        this.$notify.error("Oops, something went wrong")
+      })
+    }
+  }
 }
 </script>
