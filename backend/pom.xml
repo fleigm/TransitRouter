@@ -59,7 +59,11 @@
             <groupId>com.oath.cyclops</groupId>
             <artifactId>cyclops</artifactId>
         </dependency>
-
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-compress</artifactId>
+            <version>1.20</version>
+        </dependency>
 
         <dependency>
             <groupId>com.graphhopper</groupId>

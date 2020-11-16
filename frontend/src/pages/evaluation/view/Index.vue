@@ -6,6 +6,20 @@
         <el-breadcrumb-item>{{ name }}</el-breadcrumb-item>
       </el-breadcrumb>
       <div>
+        <el-dropdown>
+          <el-button size="mini">
+            Download<i class="el-icon-arrow-down el-icon--right"></i>
+          </el-button>
+          <el-dropdown-menu slot="dropdown">
+            <el-dropdown-item>
+              <el-link :underline="false" :href="downloadLinkGeneratedFeed">Generated GTFS Feed</el-link>
+            </el-dropdown-item>
+            <el-dropdown-item>
+              <el-link :underline="false" :href="downloadLinkFull">All Files</el-link>
+            </el-dropdown-item>
+          </el-dropdown-menu>
+        </el-dropdown>
+
         <el-button plain type="danger" size="mini" @click="deleteEvaluation">Delete</el-button>
       </div>
     </div>
@@ -45,8 +59,14 @@ export default {
 
     failed() {
       return this.info && this.info.status === 'FAILED';
-    }
+    },
 
+    downloadLinkFull() {
+      return `eval/${this.name}/download`;
+    },
+    downloadLinkGeneratedFeed() {
+      return `eval/${this.name}/download/generated`;
+    }
   },
 
   methods: {
@@ -71,6 +91,10 @@ export default {
             this.$notify.error('Could not delete evaluation.');
             console.log(error);
           })
+    },
+
+    download() {
+      this.$http.get(`eval/${this.name}/download`);
     }
   },
 
