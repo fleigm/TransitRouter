@@ -52,7 +52,15 @@ public class Producers {
         .setEncodingManager(EncodingManager.create(new BusFlagEncoder(busFlagEncoderOptions)))
         .setProfiles(
             new Profile("bus_fastest").setVehicle("bus").setWeighting("fastest").setTurnCosts(true),
-            new Profile("bus_custom_shortest").setVehicle("bus").setWeighting("shortest").setTurnCosts(true),
+            new Profile("bus_shortest_turn")
+                .setVehicle("bus")
+                .setWeighting("custom_shortest")
+                .setTurnCosts(true),
+            new Profile("bus_custom_shortest")
+                .setVehicle("bus")
+                .setWeighting("custom_shortest")
+                .setTurnCosts(false),
+            //.putHint(Parameters.Routing.U_TURN_COSTS, 1),
             new Profile("bus_shortest").setVehicle("bus").setWeighting("shortest").setTurnCosts(true));
 
     graphHopper.setDataReaderFile(osmFile);

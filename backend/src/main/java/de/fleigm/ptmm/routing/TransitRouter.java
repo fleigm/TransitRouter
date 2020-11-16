@@ -306,15 +306,16 @@ public class TransitRouter {
             // TODO enforce heading
             final Path path = createRouter(queryGraph).calcPath(
                 from.getSnap().getClosestNode(),
-                to.getSnap().getClosestNode());
+                to.getSnap().getClosestNode(),
+                from.isOnDirectedEdge() ? from.getOutgoingVirtualEdge().getEdge() : EdgeIterator.ANY_EDGE,
+                to.isOnDirectedEdge() ? to.getIncomingVirtualEdge().getEdge() : EdgeIterator.ANY_EDGE);
+
 
             if (path.isFound()) {
               double transitionLogProbability = probabilities.transitionLogProbability(path.getDistance(), linearDistance);
               Transition<State> transition = new Transition<>(from, to);
               roadPaths.put(transition, path);
               transitionLogProbabilities.put(transition, transitionLogProbability);
-            } else {
-              logger.error("no path found!");
             }
           }
         }
