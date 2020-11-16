@@ -49,7 +49,7 @@ public class DownloadController {
   public Response downloadGeneratedFeed(@PathParam("name") String name) {
     return evaluationRepository.find(name)
         .map(info -> Response
-            .ok(Paths.get(evaluationFolder, name, Evaluation.GENERATED_GTFS_FEED))
+            .ok(Paths.get(evaluationFolder, name, Evaluation.GENERATED_GTFS_FEED).toFile())
             .header("Content-Disposition", "attachment;filename=" + info.getName() + "." + Evaluation.GENERATED_GTFS_FEED)
             .build())
         .orElse(Response.status(Response.Status.NOT_FOUND).build());
