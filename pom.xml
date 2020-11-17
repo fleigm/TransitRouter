@@ -15,7 +15,7 @@
     <properties>
 
         <!-- project dependency versions -->
-        <graphhopper.version>2.1</graphhopper.version>
+        <graphhopper.version>2.2</graphhopper.version>
         <graphhopper.map-matching.version>2.0</graphhopper.map-matching.version>
         <gtfs-lib.version>6.0.3</gtfs-lib.version>
         <slf4j.version>1.7.30</slf4j.version>

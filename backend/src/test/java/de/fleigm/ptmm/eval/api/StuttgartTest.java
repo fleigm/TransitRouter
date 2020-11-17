@@ -13,6 +13,7 @@ import de.fleigm.ptmm.routing.TransitRouter;
 import io.quarkus.test.junit.QuarkusTest;
 import org.apache.commons.io.FileUtils;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import javax.inject.Inject;
@@ -26,6 +27,7 @@ import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
+@Disabled
 @QuarkusTest
 public class StuttgartTest {
 
