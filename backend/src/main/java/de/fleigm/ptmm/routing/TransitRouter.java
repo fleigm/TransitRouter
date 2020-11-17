@@ -23,9 +23,7 @@ import com.bmw.hmm.ViterbiAlgorithm;
 import com.graphhopper.GraphHopper;
 import com.graphhopper.config.LMProfile;
 import com.graphhopper.config.Profile;
-import com.graphhopper.matching.EdgeMatch;
 import com.graphhopper.matching.HmmProbabilities;
-import com.graphhopper.matching.MatchResult;
 import com.graphhopper.matching.Observation;
 import com.graphhopper.matching.State;
 import com.graphhopper.routing.AStarBidirection;
@@ -86,15 +84,13 @@ public class TransitRouter {
   private final Graph graph;
   private final PrepareLandmarks landmarks;
   private final LocationIndexTree locationIndex;
-  private final double measurementErrorSigma = 25;
-  private final double transitionProbabilityBeta = 2.0;
   private final int maxVisitedNodes;
   private final DistanceCalc distanceCalc = new DistancePlaneProjection();
   private final Weighting weighting;
 
   private final double candidateSearchRadius;
-  private final List<EmissionProbability> emissionProbabilityFunctions;
-  private final List<TransitionProbability> transitionProbabilityFunctions;
+  private final double sigma;
+  private final double beta;
 
   public TransitRouter(GraphHopper graphHopper, PMap hints) {
     this.locationIndex = (LocationIndexTree) graphHopper.getLocationIndex();
@@ -119,8 +115,8 @@ public class TransitRouter {
     this.maxVisitedNodes = hints.getInt(Parameters.Routing.MAX_VISITED_NODES, Integer.MAX_VALUE);
 
     candidateSearchRadius = hints.getDouble("candidate_search_radius", 25);
-    emissionProbabilityFunctions = List.of(GraphhopperEmissionProbability.create(hints));
-    transitionProbabilityFunctions = List.of(GraphhopperTransitionProbability.create(hints));
+    sigma = hints.getDouble("measurement_error_sigma", 25);
+    beta = hints.getDouble("transitions_beta_probability", 25);
   }
 
   private PrepareLandmarks prepareLandmarks(GraphHopper graphHopper, Profile profile, boolean useDijkstra) {
@@ -157,7 +153,7 @@ public class TransitRouter {
         .map(o -> locationIndex.findNClosest(
             o.getPoint().lat,
             o.getPoint().lon,
-            DefaultEdgeFilter.allEdges(weighting.getFlagEncoder()), measurementErrorSigma))
+            DefaultEdgeFilter.allEdges(weighting.getFlagEncoder()), candidateSearchRadius))
         .collect(Collectors.toList());
 
     // Create the query graph, containing split edges so that all the places where an observation might have happened
@@ -187,24 +183,13 @@ public class TransitRouter {
         .flatMap(s1 -> s1.transitionDescriptor.calcEdges().stream())
         .collect(Collectors.toList());
 
-    MatchResult result = new MatchResult(prepareEdgeMatches(seq, queryGraph));
-    result.setMergedPath(new MapMatchedPath(queryGraph, weighting, path));
-    result.setMatchMillis(seq.stream().filter(s -> s.transitionDescriptor != null).mapToLong(s -> s.transitionDescriptor.getTime()).sum());
-    result.setMatchLength(seq.stream().filter(s -> s.transitionDescriptor != null).mapToDouble(s -> s.transitionDescriptor.getDistance()).sum());
-    result.setGPXEntriesLength(gpxLength(observations));
-    result.setGraph(queryGraph);
-    result.setWeighting(weighting);
-
     return RoutingResult.builder()
         .path(new MapMatchedPath(queryGraph, weighting, path))
         .distance(seq.stream().filter(s -> s.transitionDescriptor != null).mapToDouble(s -> s.transitionDescriptor.getDistance()).sum())
         .time(seq.stream().filter(s -> s.transitionDescriptor != null).mapToLong(s -> s.transitionDescriptor.getTime()).sum())
         .candidates(splitsPerObservation.stream().flatMap(Collection::stream).map(Snap::getSnappedPoint).collect(Collectors.toList()))
         .observations(observations)
-        .matchResult(result)
         .build();
-
-    //return result;
   }
 
   private Collection<Snap> deduplicate(Collection<Snap> splits) {
@@ -274,7 +259,7 @@ public class TransitRouter {
       List<ObservationWithCandidateStates> timeSteps,
       QueryGraph queryGraph) {
 
-    final HmmProbabilities probabilities = new HmmProbabilities(measurementErrorSigma, transitionProbabilityBeta);
+    final HmmProbabilities probabilities = new HmmProbabilities(sigma, beta);
     final ViterbiAlgorithm<State, Observation, Path> viterbi = new ViterbiAlgorithm<>();
 
     int timeStepCounter = 0;
@@ -358,100 +343,6 @@ public class TransitRouter {
       router.setMaxVisitedNodes(maxVisitedNodes);
     }
     return router;
-  }
-
-  private List<EdgeMatch> prepareEdgeMatches(List<SequenceState<State, Observation, Path>> seq, QueryGraph queryGraph) {
-    // This creates a list of directed edges (EdgeIteratorState instances turned the right way),
-    // each associated with 0 or more of the observations.
-    // These directed edges are edges of the real street graph, where nodes are intersections.
-    // So in _this_ representation, the path that you get when you just look at the edges goes from
-    // an intersection to an intersection.
-
-    // Implementation note: We have to look at both states _and_ transitions, since we can have e.g. just one state,
-    // or two states with a transition that is an empty path (observations snapped to the same node in the query graph),
-    // but these states still happen on an edge, and for this representation, we want to have that edge.
-    // (Whereas in the ResponsePath representation, we would just see an empty path.)
-
-    // Note that the result can be empty, even when the input is not. Observations can be on nodes as well as on
-    // edges, and when all observations are on the same node, we get no edge at all.
-    // But apart from that corner case, all observations that go in here are also in the result.
-
-    // (Consider totally forbidding candidate states to be snapped to a point, and make them all be on directed
-    // edges, then that corner case goes away.)
-    List<EdgeMatch> edgeMatches = new ArrayList<>();
-    List<State> states = new ArrayList<>();
-    EdgeIteratorState currentDirectedRealEdge = null;
-    for (SequenceState<State, Observation, Path> transitionAndState : seq) {
-      // transition (except before the first state)
-      if (transitionAndState.transitionDescriptor != null) {
-        for (EdgeIteratorState edge : transitionAndState.transitionDescriptor.calcEdges()) {
-          EdgeIteratorState newDirectedRealEdge = resolveToRealEdge(edge, queryGraph);
-          if (currentDirectedRealEdge != null) {
-            if (!equalEdges(currentDirectedRealEdge, newDirectedRealEdge)) {
-              EdgeMatch edgeMatch = new EdgeMatch(currentDirectedRealEdge, states);
-              edgeMatches.add(edgeMatch);
-              states = new ArrayList<>();
-            }
-          }
-          currentDirectedRealEdge = newDirectedRealEdge;
-        }
-      }
-      // state
-      if (transitionAndState.state.isOnDirectedEdge()) { // as opposed to on a node
-        EdgeIteratorState newDirectedRealEdge = resolveToRealEdge(transitionAndState.state.getOutgoingVirtualEdge(), queryGraph);
-        if (currentDirectedRealEdge != null) {
-          if (!equalEdges(currentDirectedRealEdge, newDirectedRealEdge)) {
-            EdgeMatch edgeMatch = new EdgeMatch(currentDirectedRealEdge, states);
-            edgeMatches.add(edgeMatch);
-            states = new ArrayList<>();
-          }
-        }
-        currentDirectedRealEdge = newDirectedRealEdge;
-      }
-      states.add(transitionAndState.state);
-    }
-    if (currentDirectedRealEdge != null) {
-      EdgeMatch edgeMatch = new EdgeMatch(currentDirectedRealEdge, states);
-      edgeMatches.add(edgeMatch);
-    }
-    return edgeMatches;
-  }
-
-  private double gpxLength(List<Observation> gpxList) {
-    if (gpxList.isEmpty()) {
-      return 0;
-    } else {
-      double gpxLength = 0;
-      Observation prevEntry = gpxList.get(0);
-      for (int i = 1; i < gpxList.size(); i++) {
-        Observation entry = gpxList.get(i);
-        gpxLength += distanceCalc.calcDist(prevEntry.getPoint().lat, prevEntry.getPoint().lon, entry.getPoint().lat, entry.getPoint().lon);
-        prevEntry = entry;
-      }
-      return gpxLength;
-    }
-  }
-
-  private boolean equalEdges(EdgeIteratorState edge1, EdgeIteratorState edge2) {
-    return edge1.getEdge() == edge2.getEdge()
-           && edge1.getBaseNode() == edge2.getBaseNode()
-           && edge1.getAdjNode() == edge2.getAdjNode();
-  }
-
-  private EdgeIteratorState resolveToRealEdge(EdgeIteratorState edgeIteratorState, QueryGraph queryGraph) {
-    if (queryGraph.isVirtualNode(edgeIteratorState.getBaseNode()) || queryGraph.isVirtualNode(edgeIteratorState.getAdjNode())) {
-      return findEdgeByKey(((VirtualEdgeIteratorState) edgeIteratorState).getOriginalEdgeKey());
-    } else {
-      return edgeIteratorState;
-    }
-  }
-
-  private EdgeIteratorState findEdgeByKey(int edgeKey) {
-    EdgeIteratorState edge = graph.getEdgeIteratorState(edgeKey / 2, Integer.MIN_VALUE);
-    if ((edgeKey % 2 == 1) == (edge.getBaseNode() < edge.getAdjNode())) {
-      edge = graph.getEdgeIteratorState(edgeKey / 2, edge.getBaseNode());
-    }
-    return edge;
   }
 
   private static class MapMatchedPath extends Path {
