@@ -9,7 +9,7 @@
 </template>
 
 <script>
-import VSummaryCard from "./Summary";
+import VSummaryCard from "./SummaryCard";
 import VReportList from "./ReportList";
 
 export default {

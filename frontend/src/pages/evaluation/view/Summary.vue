@@ -1,24 +1,35 @@
 <template>
-  <v-card class="my-8" header="Summary">
-    <div class="flex p-2">
+  <div class="flex flex-col gap-4 p-2">
+    <div class="flex justify-between gap-4">
+      <v-metric :value="info.statistics['highestAvgFd.value'] | number('0.00')"
+                class="text-red-400"
+                title="Highest avgFd"
+                unit="m"
+      ></v-metric>
+      <v-metric :value="info.statistics['lowestAvgFd.value'] | number('0.00')"
+                class="text-green-400"
+                title="Lowest avgFd"
+                unit="m"
+      ></v-metric>
+      <v-metric :value="info.statistics['averagedAvgFd'] | number('0.00')"
+                class=""
+                title="Average avgFd"
+                unit="m"
+      ></v-metric>
+      <v-metric :value="shapeGenerationErrors.length"
+                class=""
+                title="shape generation errors"
+                unit=""
+      ></v-metric>
+      <v-metric :value="affectedTripCount"
+                class=""
+                title="affected trips"
+                unit=""
+      ></v-metric>
+    </div>
+    <div class="flex">
       <div class="w-1/2">
-        <div class="flex justify-center gap-4">
-          <v-metric :value="info.statistics['highestAvgFd.value'] | number('0.00')"
-                    class="text-red-400"
-                    title="Highest avgFd"
-                    unit="m"
-          ></v-metric>
-          <v-metric :value="info.statistics['lowestAvgFd.value'] | number('0.00')"
-                    class="text-green-400"
-                    title="Lowest avgFd"
-                    unit="m"
-          ></v-metric>
-          <v-metric :value="info.statistics['averagedAvgFd'] | number('0.00')"
-                    class=""
-                    title="Average avgFd"
-                    unit="m"
-          ></v-metric>
-        </div>
+
         <v-accuracy-chart :accuracies="info.statistics['accuracy']"
                           :height="150"
                           :width="300"></v-accuracy-chart>
@@ -34,9 +45,6 @@
 
         <div class="flex justify-center gap-4 mb-2">
           <v-metric :value="info.parameters.profile" size="mini" title="Profile"></v-metric>
-        </div>
-
-        <div class="flex justify-center gap-4 mb-2">
           <v-metric :value="info.statistics.trips" size="small" title="Trips"></v-metric>
           <v-metric :value="info.statistics.generatedShapes" size="small" title="Shapes"></v-metric>
         </div>
@@ -47,12 +55,12 @@
                     title="Total"
                     unit="s"
           ></v-metric>
-          <v-metric :value="123"
+          <v-metric :value="info.statistics['executionTime.shapeGeneration'] / 1000 | number('0')"
                     size="small"
                     title="Shape generation"
                     unit="s"
           ></v-metric>
-          <v-metric :value="123"
+          <v-metric :value="info.statistics['executionTime.evaluation'] / 1000 | number('0')"
                     size="small"
                     title="Evaluation"
                     unit="s"
@@ -60,7 +68,7 @@
         </div>
       </div>
     </div>
-  </v-card>
+  </div>
 </template>
 
 <script>
@@ -70,7 +78,7 @@ import VMap from "../../../components/Map";
 import VMetric from "../Metric";
 
 export default {
-  name: "v-summary-card",
+  name: "v-summary",
 
   components: {VMetric, VMap, VRoutingResult, VAccuracyChart},
 
@@ -80,5 +88,16 @@ export default {
       required: true
     }
   },
+
+  computed: {
+    shapeGenerationErrors() {
+      return this.info.errors.filter(error => error.code === 'shape_generation_failed') ?? [];
+    },
+    affectedTripCount() {
+      return this.shapeGenerationErrors
+          .flatMap(error => error.details.trips.length)
+          .reduce((sum, count) => sum + count, 0)
+    }
+  }
 }
 </script>

@@ -32,7 +32,7 @@
 
 <script>
 import VReportList from "./ReportList";
-import VSummaryCard from "./Summary";
+import VSummaryCard from "./SummaryCard";
 import VFinishedView from "./FinishedView";
 import VFailedView from "./FailedView";
 

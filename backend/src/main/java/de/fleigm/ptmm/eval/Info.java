@@ -8,7 +8,9 @@ import lombok.NoArgsConstructor;
 
 import java.nio.file.Path;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Data
@@ -30,6 +32,9 @@ public class Info {
   @Builder.Default
   private Map<String, Object> extension = new HashMap<>();
 
+  @Builder.Default
+  private List<Error> errors = new ArrayList<>();
+
   public Info addStatistic(String key, Object value) {
     statistics.put(key, value);
 
@@ -48,6 +53,11 @@ public class Info {
 
   public Object getExtension(String key) {
     return extension.get(key);
+  }
+
+  public Info addError(Error error) {
+    this.errors.add(error);
+    return this;
   }
 
   public Path fullPath(String evaluationFolder) {

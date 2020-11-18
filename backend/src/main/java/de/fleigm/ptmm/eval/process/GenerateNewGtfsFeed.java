@@ -1,13 +1,16 @@
 package de.fleigm.ptmm.eval.process;
 
 import com.conveyal.gtfs.model.ShapePoint;
+import com.conveyal.gtfs.model.Stop;
 import com.conveyal.gtfs.model.Trip;
 import com.graphhopper.GraphHopper;
 import com.graphhopper.util.PMap;
+import com.graphhopper.util.PointList;
 import de.fleigm.ptmm.Pattern;
 import de.fleigm.ptmm.Shape;
 import de.fleigm.ptmm.ShapeGenerator;
 import de.fleigm.ptmm.TransitFeed;
+import de.fleigm.ptmm.eval.Error;
 import de.fleigm.ptmm.eval.Evaluation;
 import de.fleigm.ptmm.eval.Info;
 import de.fleigm.ptmm.routing.TransitRouter;
@@ -20,6 +23,7 @@ import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 @Dependent
 public class GenerateNewGtfsFeed implements Consumer<Info> {
@@ -54,7 +58,7 @@ public class GenerateNewGtfsFeed implements Consumer<Info> {
         .values()
         .parallelStream()
         .flatMap(route -> transitFeed.findPatterns(route).stream())
-        .map(pattern -> new PatternWitShape(pattern, shapeGenerator.generate(pattern)))
+        .map(pattern -> generateShape(pattern, info, shapeGenerator))
         .peek(patternWitShape -> generatedShapes.getAndIncrement())
         .peek(patternWitShape -> trips.getAndAdd(patternWitShape.pattern.trips().size()))
         .forEach(patternWitShape -> store(patternWitShape, transitFeed));
@@ -66,6 +70,25 @@ public class GenerateNewGtfsFeed implements Consumer<Info> {
     info.addStatistic("trips", trips.intValue())
         .addStatistic("generatedShapes", generatedShapes.intValue())
         .addStatistic("executionTime.shapeGeneration", stopWatch.getMillis());
+  }
+
+  private PatternWitShape generateShape(Pattern pattern, Info info, ShapeGenerator shapeGenerator) {
+    try {
+      return new PatternWitShape(pattern, shapeGenerator.generate(pattern));
+    } catch (Exception e) {
+      info.addError(
+          Error.of("shape_generation_failed", "shape generation failed.", e)
+              .addDetail("route", pattern.route())
+              .addDetail("trips", pattern.trips().stream().map(trip -> trip.trip_id).collect(Collectors.toList()))
+              .addDetail("fallback", "straight line shape"));
+
+      PointList points = new PointList();
+      for (Stop stop : pattern.stops()) {
+        points.add(stop.stop_lat, stop.stop_lon);
+      }
+
+      return new PatternWitShape(pattern, new Shape(points));
+    }
   }
 
   private void store(PatternWitShape patternWitShape, TransitFeed transitFeed) {

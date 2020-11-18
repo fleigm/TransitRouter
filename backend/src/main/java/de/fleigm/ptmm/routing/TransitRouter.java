@@ -25,7 +25,6 @@ import com.graphhopper.config.LMProfile;
 import com.graphhopper.config.Profile;
 import com.graphhopper.matching.HmmProbabilities;
 import com.graphhopper.matching.Observation;
-import com.graphhopper.matching.State;
 import com.graphhopper.routing.AStarBidirection;
 import com.graphhopper.routing.BidirRoutingAlgorithm;
 import com.graphhopper.routing.DijkstraBidirectionRef;
@@ -112,7 +111,7 @@ public class TransitRouter {
     landmarks = prepareLandmarks(graphHopper, profile, useDijkstra);
     graph = graphHopper.getGraphHopperStorage();
     weighting = graphHopper.createWeighting(profile, hints);
-    this.maxVisitedNodes = hints.getInt(Parameters.Routing.MAX_VISITED_NODES, Integer.MAX_VALUE);
+    maxVisitedNodes = hints.getInt(Parameters.Routing.MAX_VISITED_NODES, Integer.MAX_VALUE);
 
     candidateSearchRadius = hints.getDouble("candidate_search_radius", 25);
     sigma = hints.getDouble("measurement_error_sigma", 25);
@@ -173,10 +172,10 @@ public class TransitRouter {
 
     // Creates candidates from the Snaps of all observations (a candidate is basically a
     // Snap + direction).
-    List<ObservationWithCandidateStates> timeSteps = createTimeSteps(observations, splitsPerObservation, queryGraph);
+    List<ObservationWithCandidates> timeSteps = createTimeSteps(observations, splitsPerObservation, queryGraph);
 
     // Compute the most likely sequence of map matching candidates:
-    List<SequenceState<State, Observation, Path>> seq = computeViterbiSequence(timeSteps, queryGraph);
+    List<SequenceState<DirectedCandidate, Observation, Path>> seq = computeViterbiSequence(timeSteps, queryGraph);
 
     List<EdgeIteratorState> path = seq.stream()
         .filter(s1 -> s1.transitionDescriptor != null)
@@ -204,20 +203,20 @@ public class TransitRouter {
    * transition probabilities. Creates directed candidates for virtual nodes and undirected
    * candidates for real nodes.
    */
-  private List<ObservationWithCandidateStates> createTimeSteps(List<Observation> observations,
-                                                               List<Collection<Snap>> splitsPerObservation,
-                                                               QueryGraph queryGraph) {
+  private List<ObservationWithCandidates> createTimeSteps(List<Observation> observations,
+                                                          List<Collection<Snap>> splitsPerObservation,
+                                                          QueryGraph queryGraph) {
 
     if (splitsPerObservation.size() != observations.size()) {
       throw new IllegalArgumentException(
           "filteredGPXEntries and queriesPerEntry must have same size.");
     }
 
-    final List<ObservationWithCandidateStates> timeSteps = new ArrayList<>();
+    final List<ObservationWithCandidates> timeSteps = new ArrayList<>();
     for (int i = 0; i < observations.size(); i++) {
       Observation observation = observations.get(i);
       Collection<Snap> splits = splitsPerObservation.get(i);
-      List<State> candidates = new ArrayList<>();
+      List<DirectedCandidate> candidates = new ArrayList<>();
       for (Snap split : splits) {
         if (queryGraph.isVirtualNode(split.getClosestNode())) {
           List<VirtualEdgeIteratorState> virtualEdges = new ArrayList<>();
@@ -239,15 +238,42 @@ public class TransitRouter {
           // the virtual node. We need to add candidates for both directions because
           // we don't know yet which is the correct one. This will be figured
           // out by the Viterbi algorithm.
-          candidates.add(new State(observation, split, virtualEdges.get(0), virtualEdges.get(1)));
-          candidates.add(new State(observation, split, virtualEdges.get(1), virtualEdges.get(0)));
+          //candidates.add(new State(observation, split, virtualEdges.get(0), virtualEdges.get(1)));
+          //candidates.add(new State(observation, split, virtualEdges.get(1), virtualEdges.get(0)));
+
+          candidates.add(DirectedCandidate.builder()
+              .observation(observation)
+              .snap(split)
+              .incomingEdge(virtualEdges.get(0))
+              .outgoingEdge(virtualEdges.get(1))
+              .build());
+
+          candidates.add(DirectedCandidate.builder()
+              .observation(observation)
+              .snap(split)
+              .incomingEdge(virtualEdges.get(1))
+              .outgoingEdge(virtualEdges.get(0))
+              .build());
         } else {
           // Create an undirected candidate for the real node.
-          candidates.add(new State(observation, split));
+          //candidates.add(new State(observation, split));
+
+          EdgeIterator edgeIterator = queryGraph.createEdgeExplorer().setBaseNode(split.getClosestNode());
+          while (edgeIterator.next()) {
+            EdgeIteratorState edge = queryGraph.getEdgeIteratorState(edgeIterator.getEdge(), edgeIterator.getAdjNode());
+            DirectedCandidate directedCandidate = DirectedCandidate.builder()
+                .observation(observation)
+                .snap(split)
+                .incomingEdge(null)
+                .outgoingEdge(edge)
+                .build();
+
+            candidates.add(directedCandidate);
+          }
         }
       }
 
-      timeSteps.add(new ObservationWithCandidateStates(observation, candidates));
+      timeSteps.add(new ObservationWithCandidates(observation, candidates));
     }
     return timeSteps;
   }
@@ -255,57 +281,61 @@ public class TransitRouter {
   /**
    * Computes the most likely state sequence for the observations.
    */
-  private List<SequenceState<State, Observation, Path>> computeViterbiSequence(
-      List<ObservationWithCandidateStates> timeSteps,
+  private List<SequenceState<DirectedCandidate, Observation, Path>> computeViterbiSequence(
+      List<ObservationWithCandidates> timeSteps,
       QueryGraph queryGraph) {
 
     final HmmProbabilities probabilities = new HmmProbabilities(sigma, beta);
-    final ViterbiAlgorithm<State, Observation, Path> viterbi = new ViterbiAlgorithm<>();
+    final ViterbiAlgorithm<DirectedCandidate, Observation, Path> viterbi = new ViterbiAlgorithm<>(true);
 
     int timeStepCounter = 0;
-    ObservationWithCandidateStates prevTimeStep = null;
-    for (ObservationWithCandidateStates timeStep : timeSteps) {
-      final Map<State, Double> emissionLogProbabilities = new HashMap<>();
-      final Map<Transition<State>, Double> transitionLogProbabilities = new HashMap<>();
-      final Map<Transition<State>, Path> roadPaths = new HashMap<>();
+    ObservationWithCandidates prevTimeStep = null;
+    for (ObservationWithCandidates timeStep : timeSteps) {
+      final Map<DirectedCandidate, Double> emissionLogProbabilities = new HashMap<>();
+      final Map<Transition<DirectedCandidate>, Double> transitionLogProbabilities = new HashMap<>();
+      final Map<Transition<DirectedCandidate>, Path> roadPaths = new HashMap<>();
 
       // compute emission probabilities
-      for (State candidate : timeStep.candidates) {
+      for (DirectedCandidate candidate : timeStep.candidates()) {
         // distance from observation to road in meters
-        final double distance = candidate.getSnap().getQueryDistance();
+        final double distance = candidate.snap().getQueryDistance();
         emissionLogProbabilities.put(candidate, probabilities.emissionLogProbability(distance));
       }
 
       if (prevTimeStep == null) {
-        viterbi.startWithInitialObservation(timeStep.observation, timeStep.candidates, emissionLogProbabilities);
+        viterbi.startWithInitialObservation(timeStep.observation(), timeStep.candidates(), emissionLogProbabilities);
       } else {
         final double linearDistance = distanceCalc.calcDist(
-            prevTimeStep.observation.getPoint().lat,
-            prevTimeStep.observation.getPoint().lon,
-            timeStep.observation.getPoint().lat,
-            timeStep.observation.getPoint().lon);
+            prevTimeStep.observation().getPoint().lat,
+            prevTimeStep.observation().getPoint().lon,
+            timeStep.observation().getPoint().lat,
+            timeStep.observation().getPoint().lon);
 
-        for (State from : prevTimeStep.candidates) {
-          for (State to : timeStep.candidates) {
+        for (DirectedCandidate from : prevTimeStep.candidates()) {
+          for (DirectedCandidate to : timeStep.candidates()) {
 
-            // TODO enforce heading
             final Path path = createRouter(queryGraph).calcPath(
-                from.getSnap().getClosestNode(),
-                to.getSnap().getClosestNode(),
-                from.isOnDirectedEdge() ? from.getOutgoingVirtualEdge().getEdge() : EdgeIterator.ANY_EDGE,
-                to.isOnDirectedEdge() ? to.getIncomingVirtualEdge().getEdge() : EdgeIterator.ANY_EDGE);
-
+                from.snap().getClosestNode(),
+                to.outgoingEdge().getAdjNode(),
+                from.outgoingEdge().getEdge(),
+                to.outgoingEdge().getEdge());
 
             if (path.isFound()) {
+              path.getEdges().remove(path.getEdgeCount() - 1);
+
               double transitionLogProbability = probabilities.transitionLogProbability(path.getDistance(), linearDistance);
-              Transition<State> transition = new Transition<>(from, to);
+              Transition<DirectedCandidate> transition = new Transition<>(from, to);
               roadPaths.put(transition, path);
               transitionLogProbabilities.put(transition, transitionLogProbability);
             }
           }
         }
-        viterbi.nextStep(timeStep.observation, timeStep.candidates,
-            emissionLogProbabilities, transitionLogProbabilities,
+
+        viterbi.nextStep(
+            timeStep.observation(),
+            timeStep.candidates(),
+            emissionLogProbabilities,
+            transitionLogProbabilities,
             roadPaths);
       }
       if (viterbi.isBroken()) {

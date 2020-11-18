@@ -55,7 +55,7 @@ public class StuttgartTest {
         .candidateSearchRadius(25.0)
         .beta(2.0)
         .uTurnDistancePenalty(1500.0)
-        .profile("bus_custom_shortest")
+        .profile("bus_shortest_turn")
         .build();
 
     CompletableFuture<Info> result = evaluationService.createEvaluation(request);
@@ -67,17 +67,17 @@ public class StuttgartTest {
 
   @Test
   void asdq() throws IOException, ExecutionException, InterruptedException {
-    FileUtils.deleteDirectory(Paths.get(evaluationFolder, "bus_shortest_turn").toFile());
+    FileUtils.deleteDirectory(Paths.get(evaluationFolder, "bus_fastest").toFile());
     File testFeed = Paths.get(homeDir, "/uni/bachelor/project/files/stuttgart.zip").toFile();
 
     CreateEvaluationRequest request = CreateEvaluationRequest.builder()
-        .name("bus_shortest_turn")
+        .name("bus_fastest")
         .gtfsFeed(FileUtils.openInputStream(testFeed))
         .alpha(25.0)
         .candidateSearchRadius(25.0)
         .beta(2.0)
         .uTurnDistancePenalty(1500.0)
-        .profile("bus_shortest_turn")
+        .profile("bus_fastest")
         .build();
 
     CompletableFuture<Info> result = evaluationService.createEvaluation(request);
@@ -111,26 +111,26 @@ public class StuttgartTest {
   @Test
   void grtrt() {
     List<Observation> observations = List.of(
-        //new Observation(new GHPoint(48.6658586029462, 9.17788021004512)),
-        //new Observation(new GHPoint(48.6594163647239, 9.18581192889257)),
-        //new Observation(new GHPoint(48.6579892237722, 9.18967519598556)),
-        //new Observation(new GHPoint(48.6567412309377, 9.193878269348)),
-        //new Observation(new GHPoint(48.6539393417297, 9.19693492322262)),
-        //new Observation(new GHPoint(48.6490581944514, 9.19587086103749)),
+        new Observation(new GHPoint(48.6658586029462, 9.17788021004512)),
+        new Observation(new GHPoint(48.6594163647239, 9.18581192889257)),
+        new Observation(new GHPoint(48.6579892237722, 9.18967519598556)),
+        new Observation(new GHPoint(48.6567412309377, 9.193878269348)),
+        new Observation(new GHPoint(48.6539393417297, 9.19693492322262)),
+        new Observation(new GHPoint(48.6490581944514, 9.19587086103749)),
         new Observation(new GHPoint(48.6471830126747, 9.19335296297837)),
         new Observation(new GHPoint(48.6474268060521, 9.18732839557161)),
-        new Observation(new GHPoint(48.6463482135936, 9.19774665643316))
-        //new Observation(new GHPoint(48.6477515228735, 9.20263773370914)),
-        //new Observation(new GHPoint(48.6506964237527, 9.21023622125165)),
-        //new Observation(new GHPoint(48.6525312470288, 9.21491275019464)),
-        //new Observation(new GHPoint(48.654848789912, 9.21626634921797)),
-        //new Observation(new GHPoint(48.6595431340697, 9.22087456695226)),
-        //new Observation(new GHPoint(48.6734401740607, 9.2190209800027)),
-        //new Observation(new GHPoint(48.6767424738456, 9.21794902762902))
+        new Observation(new GHPoint(48.6463482135936, 9.19774665643316)),
+        new Observation(new GHPoint(48.6477515228735, 9.20263773370914)),
+        new Observation(new GHPoint(48.6506964237527, 9.21023622125165)),
+        new Observation(new GHPoint(48.6525312470288, 9.21491275019464)),
+        new Observation(new GHPoint(48.654848789912, 9.21626634921797)),
+        new Observation(new GHPoint(48.6595431340697, 9.22087456695226)),
+        new Observation(new GHPoint(48.6734401740607, 9.2190209800027)),
+        new Observation(new GHPoint(48.6767424738456, 9.21794902762902))
     );
 
     TransitRouter transitRouter = new TransitRouter(graphHopper, new PMap()
-        .putObject("profile", "bus_shortest_turn")
+        .putObject("profile", "bus_custom_shortest")
         .putObject("measurement_error_sigma", 25)
         .putObject("candidate_search_radius", 25)
         .putObject("beta", 2.0)
