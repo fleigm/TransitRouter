@@ -109,10 +109,10 @@ public class EvaluationController {
 
     Report report = evaluationResult.get().report();
 
-    Stream<ReportEntry> entries = report.entries().stream();
+    Stream<ReportEntry> entryQueryStream = report.entries().stream();
 
     if (!search.isBlank()) {
-      entries = entries.filter(reportEntry -> reportEntry.tripId.contains(search));
+      entryQueryStream = entryQueryStream.filter(reportEntry -> reportEntry.tripId.contains(search));
     }
 
     if (!sort.isBlank()) {
@@ -121,13 +121,15 @@ public class EvaluationController {
         if (SortQuery.parse(sort).order() == SortQuery.SortOrder.DESC) {
           comparator = comparator.reversed();
         }
-        entries = entries.sorted(comparator);
+        entryQueryStream = entryQueryStream.sorted(comparator);
       }
     }
 
     TransitFeed transitFeed = evaluationResult.get().generatedTransitFeed();
 
-    List<View> views = entries
+    List<ReportEntry> entries = entryQueryStream.collect(Collectors.toList());
+
+    List<View> views = entries.stream()
         .skip(paged.getOffset())
         .limit(paged.getLimit())
         .map(entry -> new View()
@@ -142,7 +144,7 @@ public class EvaluationController {
         .setData(views)
         .setCurrentPage(paged.getPage())
         .setPerPage(paged.getLimit())
-        .setTotal(views.size())
+        .setTotal(entries.size())
         .setUri(uriInfo.getAbsolutePath())
         .create();
 
