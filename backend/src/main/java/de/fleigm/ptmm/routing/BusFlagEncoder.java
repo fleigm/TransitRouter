@@ -9,6 +9,7 @@ import com.graphhopper.routing.util.spatialrules.TransportationMode;
 import com.graphhopper.storage.IntsRef;
 import com.graphhopper.util.Helper;
 import com.graphhopper.util.PMap;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -17,6 +18,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+@Slf4j
 public class BusFlagEncoder extends AbstractFlagEncoder {
   protected final Map<String, Integer> trackTypeSpeedMap = new HashMap<>();
   protected final Set<String> badSurfaceSpeedMap = new HashSet<>();
@@ -57,6 +59,8 @@ public class BusFlagEncoder extends AbstractFlagEncoder {
     restrictedValues.add("military");
     restrictedValues.add("emergency");
     restrictedValues.add("private");
+    restrictedValues.add("customers");
+    restrictedValues.add("destination");
 
     intendedValues.add("yes");
     intendedValues.add("permissive");
@@ -115,17 +119,18 @@ public class BusFlagEncoder extends AbstractFlagEncoder {
     defaultSpeedMap.put("service", 20);
     // unknown road
     defaultSpeedMap.put("road", 20);
-    // forestry stuff
-    defaultSpeedMap.put("track", 15);
+
+    // disable tracks!
+    //defaultSpeedMap.put("track", 15);
 
     trackTypeSpeedMap.put("grade1", 20); // paved
     trackTypeSpeedMap.put("grade2", 15); // now unpaved - gravel mixed with ...
     trackTypeSpeedMap.put("grade3", 10); // ... hard and soft materials
-    trackTypeSpeedMap.put(null, defaultSpeedMap.get("track"));
+    trackTypeSpeedMap.put(null, 15);
 
     // limit speed on bad surfaces to 30 km/h
     badSurfaceSpeed = 30;
-    maxPossibleSpeed = 140;
+    maxPossibleSpeed = 100;
     speedDefault = defaultSpeedMap.get("secondary");
   }
 
@@ -177,7 +182,6 @@ public class BusFlagEncoder extends AbstractFlagEncoder {
 
   @Override
   public EncodingManager.Access getAccess(ReaderWay way) {
-    // TODO: Ferries have conditionals, like opening hours or are closed during some time in the year
     String highwayValue = way.getTag("highway");
     String firstValue = way.getFirstPriorityTag(restrictions);
 
@@ -187,6 +191,10 @@ public class BusFlagEncoder extends AbstractFlagEncoder {
 
     if (!defaultSpeedMap.containsKey(highwayValue))
       return EncodingManager.Access.CAN_SKIP;
+
+    if (highwayValue.equals("track")) {
+      log.warn("did not skip track");
+    }
 
     if (way.hasTag("impassable", "yes") || way.hasTag("status", "impassable"))
       return EncodingManager.Access.CAN_SKIP;

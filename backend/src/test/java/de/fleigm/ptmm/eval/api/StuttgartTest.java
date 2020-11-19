@@ -45,11 +45,11 @@ public class StuttgartTest {
 
   @Test
   void asd() throws IOException, ExecutionException, InterruptedException {
-    FileUtils.deleteDirectory(Paths.get(evaluationFolder, "st_test").toFile());
-    File testFeed = Paths.get(homeDir, "/uni/bachelor/project/files/stuttgart.zip").toFile();
+    FileUtils.deleteDirectory(Paths.get(evaluationFolder, "st_test_2").toFile());
+    File testFeed = Paths.get(homeDir, "/uni/bachelor/project/files/stuttgart_bus_only.zip").toFile();
 
     CreateEvaluationRequest request = CreateEvaluationRequest.builder()
-        .name("st_test")
+        .name("st_test_2")
         .gtfsFeed(FileUtils.openInputStream(testFeed))
         .alpha(25.0)
         .candidateSearchRadius(25.0)
@@ -68,7 +68,7 @@ public class StuttgartTest {
   @Test
   void asdq() throws IOException, ExecutionException, InterruptedException {
     FileUtils.deleteDirectory(Paths.get(evaluationFolder, "bus_fastest").toFile());
-    File testFeed = Paths.get(homeDir, "/uni/bachelor/project/files/stuttgart.zip").toFile();
+    File testFeed = Paths.get(homeDir, "/uni/bachelor/project/files/stuttgart_bus_only.zip").toFile();
 
     CreateEvaluationRequest request = CreateEvaluationRequest.builder()
         .name("bus_fastest")
@@ -90,7 +90,7 @@ public class StuttgartTest {
   @Test
   void qwe() {
     String trip = "37.T0.31-814-j20-4.3.R";
-    TransitFeed transitFeed = new TransitFeed(Paths.get(homeDir, "/uni/bachelor/project/files/stuttgart.zip"));
+    TransitFeed transitFeed = new TransitFeed(Paths.get(homeDir, "/uni/bachelor/project/files/stuttgart_bus_only.zip"));
     TransitRouter transitRouter = new TransitRouter(graphHopper, new PMap()
         .putObject("profile", "bus_custom_shortest")
         .putObject("measurement_error_sigma", 25)
