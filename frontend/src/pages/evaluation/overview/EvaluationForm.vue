@@ -26,8 +26,8 @@
           </el-option>
         </el-select>
       </el-form-item>
-      <el-form-item label="alpha" prop="alpha">
-        <el-input-number v-model="formData.alpha" :precision="2"></el-input-number>
+      <el-form-item label="sigma" prop="sigma">
+        <el-input-number v-model="formData.sigma" :precision="2"></el-input-number>
       </el-form-item>
       <el-form-item label="beta" prop="beta">
         <el-input-number v-model="formData.beta" :precision="2"></el-input-number>
@@ -73,8 +73,8 @@ export default {
         profile: [
           {required: true, message: 'Please enter a profile', trigger: 'blur'}
         ],
-        alpha: [
-          {type: 'number', required: true, min: 0, message: 'Alpha value must be positive', trigger: 'blur'}
+        sigma: [
+          {type: 'number', required: true, min: 0, message: 'sigma value must be positive', trigger: 'blur'}
         ],
         beta: [
           {type: 'number', required: true, min: 0, message: 'Beta value must be positive', trigger: 'blur'}
@@ -93,7 +93,7 @@ export default {
       formData: {
         name: '',
         profile: 'bus_custom_shortest',
-        alpha: 25.0,
+        sigma: 25.0,
         beta: 2.0,
         candidateSearchRadius: 25.0,
         uTurnDistancePenalty: 1500,

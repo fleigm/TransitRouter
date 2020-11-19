@@ -51,10 +51,9 @@ public class EvaluationServiceTest {
     CreateEvaluationRequest request = CreateEvaluationRequest.builder()
         .name("happy_path")
         .gtfsFeed(FileUtils.openInputStream(testFeed))
-        .alpha(25.0)
+        .sigma(25.0)
         .candidateSearchRadius(25.0)
         .beta(2.0)
-        .uTurnDistancePenalty(1500.0)
         .profile("bus_custom_shortest")
         .build();
 
@@ -86,10 +85,9 @@ public class EvaluationServiceTest {
     CreateEvaluationRequest request = CreateEvaluationRequest.builder()
         .name("test_handle_failure")
         .gtfsFeed(FileUtils.openInputStream(testFeed))
-        .alpha(25.0)
+        .sigma(25.0)
         .candidateSearchRadius(25.0)
         .beta(2.0)
-        .uTurnDistancePenalty(1500.0)
         .profile("invalid_profile")
         .build();
 

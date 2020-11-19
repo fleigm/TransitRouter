@@ -3,7 +3,7 @@ import {http} from '../../plugins/HttpPlugin';
 
 const parameters = {
     profile: 'profile',
-    alpha: 'measurement_error_sigma',
+    sigma: 'measurement_error_sigma',
     beta: 'transitions_beta_probability',
     uTurnDistancePenalty: 'u_turn_distance_penalty',
     candidateSearchRadius: 'candidate_search_radius',
@@ -11,7 +11,7 @@ const parameters = {
 
 const defaultOptions = {
     profile: 'bus_shortest',
-    alpha: 25,
+    sigma: 25,
     candidateSearchRadius: 25,
     beta: 2.0,
     uTurnDistancePenalty: 1500,

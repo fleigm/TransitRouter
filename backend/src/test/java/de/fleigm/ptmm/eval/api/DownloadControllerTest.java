@@ -48,10 +48,9 @@ public class DownloadControllerTest {
     CreateEvaluationRequest request = CreateEvaluationRequest.builder()
         .name("download_test")
         .gtfsFeed(FileUtils.openInputStream(testFeed))
-        .alpha(25.0)
+        .sigma(25.0)
         .candidateSearchRadius(25.0)
         .beta(2.0)
-        .uTurnDistancePenalty(1500.0)
         .profile("bus_custom_shortest")
         .build();
 

@@ -3,8 +3,8 @@
     <el-form-item label="Candidate Search Radius">
       <el-input-number size="mini" v-model="options.candidateSearchRadius" :min="0" controls-position="right"></el-input-number>
     </el-form-item>
-    <el-form-item label="alpha">
-      <el-input-number size="mini" v-model="options.alpha" :min="0" controls-position="right"></el-input-number>
+    <el-form-item label="sigma">
+      <el-input-number size="mini" v-model="options.sigma" :min="0" controls-position="right"></el-input-number>
     </el-form-item>
     <el-form-item label="beta">
       <el-input-number size="mini" v-model="options.beta" :precision="3" :step="0.05" :min="0" controls-position="right"></el-input-number>

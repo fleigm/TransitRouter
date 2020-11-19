@@ -51,10 +51,9 @@ public class StuttgartTest {
     CreateEvaluationRequest request = CreateEvaluationRequest.builder()
         .name("st_test_2")
         .gtfsFeed(FileUtils.openInputStream(testFeed))
-        .alpha(25.0)
+        .sigma(25.0)
         .candidateSearchRadius(25.0)
         .beta(2.0)
-        .uTurnDistancePenalty(1500.0)
         .profile("bus_shortest_turn")
         .build();
 
@@ -73,10 +72,9 @@ public class StuttgartTest {
     CreateEvaluationRequest request = CreateEvaluationRequest.builder()
         .name("bus_fastest")
         .gtfsFeed(FileUtils.openInputStream(testFeed))
-        .alpha(25.0)
+        .sigma(25.0)
         .candidateSearchRadius(25.0)
         .beta(2.0)
-        .uTurnDistancePenalty(1500.0)
         .profile("bus_fastest")
         .build();
 
@@ -133,8 +131,7 @@ public class StuttgartTest {
         .putObject("profile", "bus_custom_shortest")
         .putObject("measurement_error_sigma", 25)
         .putObject("candidate_search_radius", 25)
-        .putObject("beta", 2.0)
-        .putObject("u_turn_distance_penalty", 1500));
+        .putObject("beta", 2.0));
 
     RoutingResult route = transitRouter.route(observations);
 

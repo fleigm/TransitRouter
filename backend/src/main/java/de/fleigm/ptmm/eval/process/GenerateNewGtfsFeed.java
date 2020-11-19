@@ -43,10 +43,9 @@ public class GenerateNewGtfsFeed implements Consumer<Info> {
     TransitFeed transitFeed = new TransitFeed(info.fullPath(evaluationFolder).resolve(Evaluation.ORIGINAL_GTFS_FEED));
     TransitRouter transitRouter = new TransitRouter(graphHopper, new PMap()
         .putObject("profile", info.getParameters().getProfile())
-        .putObject("measurement_error_sigma", info.getParameters().getAlpha())
+        .putObject("measurement_error_sigma", info.getParameters().getSigma())
         .putObject("candidate_search_radius", info.getParameters().getCandidateSearchRadius())
-        .putObject("beta", info.getParameters().getBeta())
-        .putObject("u_turn_distance_penalty", info.getParameters().getUTurnDistancePenalty()));
+        .putObject("beta", info.getParameters().getBeta()));
     ShapeGenerator shapeGenerator = new ShapeGenerator(transitFeed, transitRouter);
 
     AtomicInteger trips = new AtomicInteger(0);

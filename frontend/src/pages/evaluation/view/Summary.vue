@@ -36,7 +36,7 @@
       </div>
       <div class="w-1/2">
         <div class="flex justify-center gap-4 mb-2">
-          <v-metric :value="info.parameters.alpha" size="small" title="alpha"></v-metric>
+          <v-metric :value="info.parameters.sigma" size="small" title="sigma"></v-metric>
           <v-metric :value="info.parameters.beta" size="small" title="beta"></v-metric>
           <v-metric :value="info.parameters.candidateSearchRadius" size="small" title="csr"></v-metric>
           <v-metric :value="info.parameters.uTurnDistancePenalty" size="small"

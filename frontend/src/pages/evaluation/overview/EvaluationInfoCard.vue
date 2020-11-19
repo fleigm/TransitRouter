@@ -16,7 +16,7 @@
     <div v-if="!isFinished" class="p-2">
       <div class="flex gap-4 mb-2">
         <v-metric :value="evaluation.parameters.profile" size="mini" title="Profile"></v-metric>
-        <v-metric :value="evaluation.parameters.alpha" size="small" title="alpha"></v-metric>
+        <v-metric :value="evaluation.parameters.sigma" size="small" title="sigma"></v-metric>
         <v-metric :value="evaluation.parameters.beta" size="small" title="beta"></v-metric>
         <v-metric :value="evaluation.parameters.candidateSearchRadius" size="small" title="csr"></v-metric>
         <v-metric :value="evaluation.parameters.uTurnDistancePenalty" size="small"

@@ -4,7 +4,6 @@ import com.conveyal.gtfs.GTFSFeed;
 import com.conveyal.gtfs.model.Route;
 import com.conveyal.gtfs.model.ShapePoint;
 import com.conveyal.gtfs.model.Trip;
-import org.junit.jupiter.api.Test;
 import org.mapdb.Fun;
 
 import java.util.List;
@@ -13,7 +12,7 @@ import java.util.stream.Collectors;
 
 public class GenerateTestFeed {
 
-  @Test
+  //@Test
   void only_bus_with_one_trip_and_shape_per_pattern() {
     TransitFeed transitFeed = new TransitFeed("../../files/stuttgart.zip");
     GTFSFeed feed = transitFeed.internal();

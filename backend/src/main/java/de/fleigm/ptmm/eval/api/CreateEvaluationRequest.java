@@ -33,10 +33,10 @@ public class CreateEvaluationRequest {
   @NotBlank
   private String profile;
 
-  @FormParam("alpha")
+  @FormParam("sigma")
   @NotNull
   @Positive
-  private Double alpha;
+  private Double sigma;
 
   @FormParam("candidateSearchRadius")
   @NotNull
@@ -47,10 +47,5 @@ public class CreateEvaluationRequest {
   @NotNull
   @Positive
   private Double beta;
-
-  @FormParam("uTurnDistancePenalty")
-  @NotNull
-  @Positive
-  private Double uTurnDistancePenalty;
 
 }
