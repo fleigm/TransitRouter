@@ -35,9 +35,6 @@
       <el-form-item label="csr" prop="candidateSearchRadius">
         <el-input-number v-model="formData.candidateSearchRadius" :precision="2"></el-input-number>
       </el-form-item>
-      <el-form-item label="u-turn penalty" prop="uTurnDistancePenalty">
-        <el-input-number v-model="formData.uTurnDistancePenalty"></el-input-number>
-      </el-form-item>
       <el-form-item>
         <el-button type="primary" @click="submit">Start evaluation</el-button>
         <el-button @click="resetForm">Reset</el-button>
@@ -82,9 +79,6 @@ export default {
         candidateSearchRadius: [
           {type: 'number', required: true, min: 0, message: 'Csr value must be positive', trigger: 'blur'}
         ],
-        uTurnDistancePenalty: [
-          {type: 'number', required: true, min: 0, message: 'uTurn penalty value must be positive', trigger: 'blur'}
-        ],
         feed: [
           {required: true, message: 'Please add a gtfs feed', trigger: 'change'}
         ]
@@ -96,7 +90,6 @@ export default {
         sigma: 25.0,
         beta: 2.0,
         candidateSearchRadius: 25.0,
-        uTurnDistancePenalty: 1500,
         feed: null
       },
     }
