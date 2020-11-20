@@ -3,20 +3,16 @@ package de.fleigm.ptmm;
 import com.conveyal.gtfs.model.ShapePoint;
 import com.graphhopper.util.DistancePlaneProjection;
 import com.graphhopper.util.PointList;
+import lombok.Data;
+import lombok.experimental.Accessors;
 
 import java.util.ArrayList;
 import java.util.List;
 
+@Data
+@Accessors(fluent = true)
 public class Shape {
   private final PointList points;
-
-  public Shape(PointList points) {
-    this.points = points;
-  }
-
-  public PointList points() {
-    return points;
-  }
 
   public List<ShapePoint> convertToShapePoints(String shapeId) {
     List<ShapePoint> shapePoints = new ArrayList<>(points.getSize());
