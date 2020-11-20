@@ -17,7 +17,11 @@ public class JsonbConfiguration implements JsonbConfigCustomizer {
         .withSerializers(new GHPointSerializer())
         .withSerializers(new ObservationSerializer())
         .withSerializers(new StateSerializer())
-        .withSerializers(new ViewSerializer())
-        .withPropertyVisibilityStrategy(new PrivateVisibilityStrategy());
+        .withSerializers(new ViewSerializer());
+
+    config.withDeserializers(new GHPointDeserializer())
+        .withDeserializers(new ObservationDeserializer());
+
+    config.withPropertyVisibilityStrategy(new PrivateVisibilityStrategy());
   }
 }

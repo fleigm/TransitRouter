@@ -3,6 +3,7 @@ import CandidateFinder from "../pages/CandidateFinder";
 import EvaluationIndex from '../pages/evaluation/Index';
 import EvaluationView from '../pages/evaluation/view/Index';
 import EvaluationOverview from '../pages/evaluation/overview/Index';
+import RoutingIndex from '../pages/routing/Index';
 
 const routes = [
     {
@@ -21,6 +22,10 @@ const routes = [
             name: 'evaluation.view',
             component: EvaluationView,
         }]
+    }, {
+        path: '/routing',
+        name: 'routing.index',
+        component: RoutingIndex,
     }, {
         path: '/candidate-finder',
         name: 'candidateFinder.index',

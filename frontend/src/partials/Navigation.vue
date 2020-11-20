@@ -37,6 +37,9 @@ export default {
           name: 'Evaluation',
           page: 'evaluation.index'
         }, {
+          name: 'Routing',
+          page: 'routing.index'
+        }, {
           name: 'Candidate Finder',
           page: 'candidateFinder.index'
         }
