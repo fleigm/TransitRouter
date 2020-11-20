@@ -15,6 +15,8 @@ import org.apache.commons.io.FileUtils;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import javax.inject.Inject;
 import java.io.File;
@@ -44,12 +46,12 @@ public class StuttgartTest {
   GraphHopper graphHopper;
 
   @Test
-  void asd() throws IOException, ExecutionException, InterruptedException {
-    FileUtils.deleteDirectory(Paths.get(evaluationFolder, "st_test_2").toFile());
+  void run_evaluation() throws IOException, ExecutionException, InterruptedException {
+    FileUtils.deleteDirectory(Paths.get(evaluationFolder, "bus_shortest_turn").toFile());
     File testFeed = Paths.get(homeDir, "/uni/bachelor/project/files/stuttgart_bus_only.zip").toFile();
 
     CreateEvaluationRequest request = CreateEvaluationRequest.builder()
-        .name("st_test_2")
+        .name("bus_shortest_turn")
         .gtfsFeed(FileUtils.openInputStream(testFeed))
         .sigma(25.0)
         .candidateSearchRadius(25.0)
@@ -64,18 +66,19 @@ public class StuttgartTest {
     assertNotNull(info);
   }
 
-  @Test
-  void asdq() throws IOException, ExecutionException, InterruptedException {
-    FileUtils.deleteDirectory(Paths.get(evaluationFolder, "bus_fastest").toFile());
+  @ParameterizedTest
+  @ValueSource(strings = {"bus_fastest", "bus_fastest_turn", "bus_shortest", "bus_shortest_turn"})
+  void run_all_evaluations(String profile) throws IOException, ExecutionException, InterruptedException {
+    FileUtils.deleteDirectory(Paths.get(evaluationFolder, profile).toFile());
     File testFeed = Paths.get(homeDir, "/uni/bachelor/project/files/stuttgart_bus_only.zip").toFile();
 
     CreateEvaluationRequest request = CreateEvaluationRequest.builder()
-        .name("bus_fastest")
+        .name(profile)
         .gtfsFeed(FileUtils.openInputStream(testFeed))
         .sigma(25.0)
         .candidateSearchRadius(25.0)
         .beta(2.0)
-        .profile("bus_fastest")
+        .profile(profile)
         .build();
 
     CompletableFuture<Info> result = evaluationService.createEvaluation(request);
@@ -95,13 +98,14 @@ public class StuttgartTest {
         .putObject("candidate_search_radius", 25)
         .putObject("beta", 2.0)
         .putObject("u_turn_distance_penalty", 1500));
-    ShapeGenerator shapeGenerator = new ShapeGenerator(transitFeed, transitRouter);
+    ShapeGenerator shapeGenerator = new ShapeGenerator(transitRouter);
 
-    List<GHPoint> collect = transitFeed.getOrderedStopsForTrip(trip).stream()
+    List<Observation> observations = transitFeed.getOrderedStopsForTrip(trip).stream()
         .map(stop -> new GHPoint(stop.stop_lat, stop.stop_lon))
+        .map(Observation::new)
         .collect(Collectors.toList());
 
-    Shape shape = shapeGenerator.generate(transitFeed.trips().get(trip));
+    Shape shape = shapeGenerator.generate(observations);
 
     assertNotNull(shape);
   }

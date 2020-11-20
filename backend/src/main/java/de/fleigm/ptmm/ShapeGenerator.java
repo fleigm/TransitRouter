@@ -1,8 +1,6 @@
 package de.fleigm.ptmm;
 
-import com.conveyal.gtfs.model.Route;
 import com.conveyal.gtfs.model.Stop;
-import com.conveyal.gtfs.model.Trip;
 import com.graphhopper.matching.Observation;
 import com.graphhopper.util.shapes.GHPoint;
 import de.fleigm.ptmm.routing.RoutingResult;
@@ -13,29 +11,14 @@ import java.util.stream.Collectors;
 
 public class ShapeGenerator {
 
-  private final TransitFeed transitFeed;
   private final TransitRouter transitRouter;
 
-  public ShapeGenerator(TransitFeed transitFeed, TransitRouter transitRouter) {
-    this.transitFeed = transitFeed;
+  public ShapeGenerator(TransitRouter transitRouter) {
     this.transitRouter = transitRouter;
-  }
-
-  public List<Shape> generate(Route route) {
-    return transitFeed.findPatterns(route)
-        .stream()
-        .map(this::generate)
-        .collect(Collectors.toList());
   }
 
   public Shape generate(Pattern pattern) {
     List<Observation> observations = getObservations(pattern.stops());
-
-    return generate(observations);
-  }
-
-  public Shape generate(Trip trip) {
-    List<Observation> observations = getObservations(transitFeed.getOrderedStopsForTrip(trip));
 
     return generate(observations);
   }

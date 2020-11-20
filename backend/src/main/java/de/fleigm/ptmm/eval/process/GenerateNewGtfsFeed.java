@@ -46,7 +46,7 @@ public class GenerateNewGtfsFeed implements Consumer<Info> {
         .putObject("measurement_error_sigma", info.getParameters().getSigma())
         .putObject("candidate_search_radius", info.getParameters().getCandidateSearchRadius())
         .putObject("beta", info.getParameters().getBeta()));
-    ShapeGenerator shapeGenerator = new ShapeGenerator(transitFeed, transitRouter);
+    ShapeGenerator shapeGenerator = new ShapeGenerator(transitRouter);
 
     AtomicInteger trips = new AtomicInteger(0);
     AtomicInteger generatedShapes = new AtomicInteger(0);
