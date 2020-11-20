@@ -48,7 +48,7 @@
         </div>
 
         <div class="flex justify-center gap-4 mb-2">
-          <v-metric :value="123"
+          <v-metric :value="info.statistics['executionTime.total'] / 1000 | number('0')"
                     size="small"
                     title="Total"
                     unit="s"

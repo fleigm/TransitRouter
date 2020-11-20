@@ -3,6 +3,7 @@ package de.fleigm.ptmm.eval.process;
 import de.fleigm.ptmm.eval.EvaluationRepository;
 import de.fleigm.ptmm.eval.Info;
 import de.fleigm.ptmm.eval.Status;
+import de.fleigm.ptmm.util.StopWatch;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;
 
@@ -38,6 +39,7 @@ public class EvaluationProcess {
 
   public void run(Info info) {
     MDC.put("evaluation", info.getName());
+    StopWatch stopWatch = StopWatch.createAndStart();
     try {
       runEvaluationProcess(info);
     } catch (Throwable error) {
@@ -45,6 +47,8 @@ public class EvaluationProcess {
       handleEvaluationErrors(info, error);
     } finally {
       MDC.clear();
+      stopWatch.stop();
+      info.addStatistic("executionTime.total", stopWatch.getMillis());
       evaluationRepository.save(info);
     }
   }
