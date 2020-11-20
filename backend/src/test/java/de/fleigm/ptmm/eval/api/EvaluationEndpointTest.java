@@ -37,7 +37,7 @@ public class EvaluationEndpointTest {
     given()
         .multiPart("feed", new File(resourceAsStream))
         .multiPart("name", "endpoint_happy_path")
-        .multiPart("profile", "bus_custom_shortest")
+        .multiPart("profile", "bus_shortest")
         .multiPart("sigma", 25)
         .multiPart("candidateSearchRadius", 25)
         .multiPart("beta", 2.0)

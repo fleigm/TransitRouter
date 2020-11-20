@@ -90,7 +90,7 @@ public class StuttgartTest {
     String trip = "37.T0.31-814-j20-4.3.R";
     TransitFeed transitFeed = new TransitFeed(Paths.get(homeDir, "/uni/bachelor/project/files/stuttgart_bus_only.zip"));
     TransitRouter transitRouter = new TransitRouter(graphHopper, new PMap()
-        .putObject("profile", "bus_custom_shortest")
+        .putObject("profile", "bus_fastest")
         .putObject("measurement_error_sigma", 25)
         .putObject("candidate_search_radius", 25)
         .putObject("beta", 2.0)
@@ -128,7 +128,7 @@ public class StuttgartTest {
     );
 
     TransitRouter transitRouter = new TransitRouter(graphHopper, new PMap()
-        .putObject("profile", "bus_custom_shortest")
+        .putObject("profile", "bus_fastest")
         .putObject("measurement_error_sigma", 25)
         .putObject("candidate_search_radius", 25)
         .putObject("beta", 2.0));

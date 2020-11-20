@@ -54,7 +54,7 @@ public class EvaluationServiceTest {
         .sigma(25.0)
         .candidateSearchRadius(25.0)
         .beta(2.0)
-        .profile("bus_custom_shortest")
+        .profile("bus_shortest")
         .build();
 
     CompletableFuture<Info> evaluation = evaluationService.createEvaluation(request);

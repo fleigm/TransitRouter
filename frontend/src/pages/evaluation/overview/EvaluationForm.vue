@@ -56,11 +56,17 @@ export default {
     return {
       availableProfiles: [
         {
-          value: 'bus_custom_shortest',
-          label: 'bus custom shortest',
+          value: 'bus_shortest',
+          label: 'shortest path',
+        }, {
+          value: 'bus_shortest_turn',
+          label: 'shortest path with turn restrictions'
         }, {
           value: 'bus_fastest',
-          label: 'bus fastest',
+          label: 'fastest path',
+        }, {
+          value: 'bus_fastest_turn',
+          label: 'fastest path with turn restrictions',
         }
       ],
       rules: {
