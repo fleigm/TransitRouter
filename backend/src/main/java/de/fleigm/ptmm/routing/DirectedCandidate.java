@@ -17,10 +17,5 @@ import lombok.experimental.Accessors;
 public class DirectedCandidate {
   private final Observation observation;
   private final Snap snap;
-  private final EdgeIteratorState incomingEdge;
   private final EdgeIteratorState outgoingEdge;
-
-  public boolean enforcesIncomingEdge() {
-    return incomingEdge != null;
-  }
 }

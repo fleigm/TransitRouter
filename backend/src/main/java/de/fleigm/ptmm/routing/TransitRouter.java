@@ -33,7 +33,6 @@ import com.graphhopper.routing.lm.LMApproximator;
 import com.graphhopper.routing.lm.LandmarkStorage;
 import com.graphhopper.routing.lm.PrepareLandmarks;
 import com.graphhopper.routing.querygraph.QueryGraph;
-import com.graphhopper.routing.querygraph.VirtualEdgeIteratorState;
 import com.graphhopper.routing.util.DefaultEdgeFilter;
 import com.graphhopper.routing.util.TraversalMode;
 import com.graphhopper.routing.weighting.Weighting;
@@ -182,11 +181,21 @@ public class TransitRouter {
         .flatMap(s1 -> s1.transitionDescriptor.calcEdges().stream())
         .collect(Collectors.toList());
 
+    // TODO return directed candidates instead of split / snap points
     return RoutingResult.builder()
         .path(new MapMatchedPath(queryGraph, weighting, path))
-        .distance(seq.stream().filter(s -> s.transitionDescriptor != null).mapToDouble(s -> s.transitionDescriptor.getDistance()).sum())
-        .time(seq.stream().filter(s -> s.transitionDescriptor != null).mapToLong(s -> s.transitionDescriptor.getTime()).sum())
-        .candidates(splitsPerObservation.stream().flatMap(Collection::stream).map(Snap::getSnappedPoint).collect(Collectors.toList()))
+        .distance(seq.stream()
+            .filter(s -> s.transitionDescriptor != null)
+            .mapToDouble(s -> s.transitionDescriptor.getDistance())
+            .sum())
+        .time(seq.stream()
+            .filter(s -> s.transitionDescriptor != null)
+            .mapToLong(s -> s.transitionDescriptor.getTime())
+            .sum())
+        .candidates(splitsPerObservation.stream()
+            .flatMap(Collection::stream)
+            .map(Snap::getSnappedPoint)
+            .collect(Collectors.toList()))
         .observations(observations)
         .build();
   }
@@ -218,58 +227,16 @@ public class TransitRouter {
       Collection<Snap> splits = splitsPerObservation.get(i);
       List<DirectedCandidate> candidates = new ArrayList<>();
       for (Snap split : splits) {
-        if (queryGraph.isVirtualNode(split.getClosestNode())) {
-          List<VirtualEdgeIteratorState> virtualEdges = new ArrayList<>();
-          EdgeIterator iter = queryGraph.createEdgeExplorer().setBaseNode(split.getClosestNode());
-          while (iter.next()) {
-            if (!queryGraph.isVirtualEdge(iter.getEdge())) {
-              throw new RuntimeException("Virtual nodes must only have virtual edges "
-                                         + "to adjacent nodes.");
-            }
-            virtualEdges.add((VirtualEdgeIteratorState) queryGraph.getEdgeIteratorState(iter.getEdge(), iter.getAdjNode()));
-          }
-          if (virtualEdges.size() != 2) {
-            throw new RuntimeException("Each virtual node must have exactly 2 "
-                                       + "virtual edges (reverse virtual edges are not returned by the "
-                                       + "EdgeIterator");
-          }
-
-          // Create a directed candidate for each of the two possible directions through
-          // the virtual node. We need to add candidates for both directions because
-          // we don't know yet which is the correct one. This will be figured
-          // out by the Viterbi algorithm.
-          //candidates.add(new State(observation, split, virtualEdges.get(0), virtualEdges.get(1)));
-          //candidates.add(new State(observation, split, virtualEdges.get(1), virtualEdges.get(0)));
-
-          candidates.add(DirectedCandidate.builder()
+        EdgeIterator edgeIterator = queryGraph.createEdgeExplorer().setBaseNode(split.getClosestNode());
+        while (edgeIterator.next()) {
+          EdgeIteratorState edge = queryGraph.getEdgeIteratorState(edgeIterator.getEdge(), edgeIterator.getAdjNode());
+          DirectedCandidate directedCandidate = DirectedCandidate.builder()
               .observation(observation)
               .snap(split)
-              .incomingEdge(virtualEdges.get(0))
-              .outgoingEdge(virtualEdges.get(1))
-              .build());
+              .outgoingEdge(edge)
+              .build();
 
-          candidates.add(DirectedCandidate.builder()
-              .observation(observation)
-              .snap(split)
-              .incomingEdge(virtualEdges.get(1))
-              .outgoingEdge(virtualEdges.get(0))
-              .build());
-        } else {
-          // Create an undirected candidate for the real node.
-          //candidates.add(new State(observation, split));
-
-          EdgeIterator edgeIterator = queryGraph.createEdgeExplorer().setBaseNode(split.getClosestNode());
-          while (edgeIterator.next()) {
-            EdgeIteratorState edge = queryGraph.getEdgeIteratorState(edgeIterator.getEdge(), edgeIterator.getAdjNode());
-            DirectedCandidate directedCandidate = DirectedCandidate.builder()
-                .observation(observation)
-                .snap(split)
-                .incomingEdge(null)
-                .outgoingEdge(edge)
-                .build();
-
-            candidates.add(directedCandidate);
-          }
+          candidates.add(directedCandidate);
         }
       }
 
