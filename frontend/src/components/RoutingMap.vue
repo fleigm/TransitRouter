@@ -10,15 +10,23 @@
     ></l-animated-polyline>
 
     <l-circle-marker v-for="(stop, i) in route.stops"
-              :key="i"
-              color="red"
-              :radius="2"
-              :lat-lng="[stop.stop_lat, stop.stop_lon]">
+                     :key="i"
+                     color="red"
+                     :radius="2"
+                     :lat-lng="[stop.stop_lat, stop.stop_lon]">
       <l-tooltip>
         <span>Stop # {{ i }}</span>
         <pre>{{ stop }}</pre>
       </l-tooltip>
     </l-circle-marker>
+
+    <l-control position="bottomleft">
+      <div class="flex gap-5 px-2 bg-white">
+        <span class="text-blue-600">original shape</span>
+        <span class="text-black">generated shape</span>
+        <span class="text-red-600">stop</span>
+      </div>
+    </l-control>
   </v-map>
 </template>
 
