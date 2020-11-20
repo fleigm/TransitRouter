@@ -3,8 +3,8 @@ package de.fleigm.ptmm.eval;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 
-import javax.json.bind.JsonbBuilder;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -14,13 +14,13 @@ import java.util.Map;
 public class Error {
   private String code;
   private String message;
-  private String throwable;
+  private Exception exception;
   private Map<String, Object> details = new HashMap<>();
 
   public Error(String code, String message, Throwable throwable) {
     this.code = code;
     this.message = message;
-    this.throwable = JsonbBuilder.create().toJson(throwable);
+    this.exception = throwable == null ? null : Exception.of(throwable);
   }
 
   public static Error of(String code, String message) {
@@ -37,5 +37,27 @@ public class Error {
     return this;
   }
 
+
+  /**
+   * We need an extra class for storing throwables.
+   * Manual serialization from Throwable to json is not possible via JSONB
+   * because Quarkus cannot resolve JsonbBuilder.create()
+   */
+  @Data
+  @NoArgsConstructor
+  @AllArgsConstructor
+  public static class Exception {
+    private String message;
+    private String cause;
+    private String stacktrace;
+
+    public static Exception of(Throwable throwable) {
+      return new Exception(
+          throwable.getMessage(),
+          ExceptionUtils.getRootCauseMessage(throwable),
+          ExceptionUtils.getStackTrace(throwable)
+      );
+    }
+  }
 
 }
