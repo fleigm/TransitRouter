@@ -19,8 +19,6 @@
         <v-metric :value="evaluation.parameters.sigma" size="small" title="sigma"></v-metric>
         <v-metric :value="evaluation.parameters.beta" size="small" title="beta"></v-metric>
         <v-metric :value="evaluation.parameters.candidateSearchRadius" size="small" title="csr"></v-metric>
-        <v-metric :value="evaluation.parameters.uTurnDistancePenalty" size="small"
-                  title="uturn penalty"></v-metric>
       </div>
     </div>
     <v-summary v-if="isFinished" :info="evaluation" class="flex p-2 gap-8">

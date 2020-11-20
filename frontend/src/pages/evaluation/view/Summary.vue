@@ -39,8 +39,6 @@
           <v-metric :value="info.parameters.sigma" size="small" title="sigma"></v-metric>
           <v-metric :value="info.parameters.beta" size="small" title="beta"></v-metric>
           <v-metric :value="info.parameters.candidateSearchRadius" size="small" title="csr"></v-metric>
-          <v-metric :value="info.parameters.uTurnDistancePenalty" size="small"
-                    title="uturn penalty"></v-metric>
         </div>
 
         <div class="flex justify-center gap-4 mb-2">

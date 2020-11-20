@@ -92,7 +92,7 @@ export default {
       fileList: [],
       formData: {
         name: '',
-        profile: 'bus_custom_shortest',
+        profile: 'bus_shortest',
         sigma: 25.0,
         beta: 2.0,
         candidateSearchRadius: 25.0,
