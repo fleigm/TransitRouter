@@ -3,18 +3,18 @@
     <div class="my-8 flex justify-between">
       <div></div>
       <div class="">
-        <el-button size="mini" @click="clearCache">Clear Cache</el-button>
+        <Button @click="clearCache" class="p-button-outlined p-button-secondary">Clear Cache</Button>
         <v-evaluation-form-dialog></v-evaluation-form-dialog>
       </div>
     </div>
-    <v-get resource="eval">
+    <!--<v-get resource="eval">
       <div slot-scope="{data : evaluations}">
 
         <template v-for="evaluation in evaluations">
           <v-evaluation-info-card :evaluation="evaluation"></v-evaluation-info-card>
         </template>
       </div>
-    </v-get>
+    </v-get>-->
   </div>
 </template>
 

@@ -1,13 +1,13 @@
 <template>
   <v-map :bounds="bounds">
-    <l-animated-polyline :lat-lngs="route.generatedShape"
+    <l-polyline :lat-lngs="route.generatedShape"
                          :options="{'delay': 2400, offset: 5}"
                          @ready="setBounds">
-    </l-animated-polyline>
+    </l-polyline>
 
-    <l-animated-polyline :lat-lngs="route.originalShape"
+    <l-polyline :lat-lngs="route.originalShape"
                          :options="{'delay': 2400, 'color': '#000', offset: 2}"
-    ></l-animated-polyline>
+    ></l-polyline>
 
     <l-circle-marker v-for="(stop, i) in route.stops"
                      :key="i"
@@ -32,13 +32,12 @@
 
 <script>
 import VMap from "./Map";
-import VRoutingResult from "../pages/dashboard/RoutingResult";
 import L from 'leaflet';
 
 export default {
   name: "v-routing-map",
 
-  components: {VRoutingResult, VMap},
+  components: {VMap},
 
   props: {
     route: Object

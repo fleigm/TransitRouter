@@ -5,8 +5,10 @@ const backendResourceFolder = '..\\backend/src/main/resources/META-INF/resources
 const backendAssetFolder = '../backend/src/main/resources/META-INF/resources';
 
 
+mix.vue();
+
 mix.js('src/app.js', backendResourceFolder)
-    .less('design/app.less', backendResourceFolder)
+    .less('design/app.less', backendResourceFolder + '/app2.css')
     .options({
         postCss: [
             tailwindcss('design/tailwind.config.js'),

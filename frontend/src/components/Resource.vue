@@ -97,7 +97,7 @@ export default {
   },
 
   render() {
-    return this.$scopedSlots.default({
+    return this.$slots.default({
       page: this.page,
       loading: this.loading,
       searchQuery: this.searchQuery,

@@ -1,26 +1,12 @@
 <template>
-  <el-menu router :default-active="$route.path" mode="horizontal">
-    <template v-for="(route, index) in navigation">
-      <el-submenu v-if="route.children && route.children.length > 0"
-                  :key="index"
-                  :index="route.page"
-      >
-        <template slot="title"><i :class="route.icon"></i>{{ route.name }}</template>
-        <el-menu-item v-for="(child, index) in route.children"
-                      :key="index"
-                      :index="route.page"
-        >{{ child.name }}
-        </el-menu-item>
-      </el-submenu>
-      <el-menu-item v-else
-                    :key="index"
-                    :index="route.page"
-                    :route="{name: route.page}"
-      ><i :class="route.icon"></i>
-        {{ route.name }}
-      </el-menu-item>
-    </template>
-  </el-menu>
+  <div class="flex">
+    <router-link v-for="item in items"
+                 :key="item.page"
+                 :to="{name: item.page}"
+                 class="text-lg font-thin py-4 px-2 border-b-2 border-transparent hover:border-blue-500">
+      {{ item.label }}
+    </router-link>
+  </div>
 </template>
 
 <script>
@@ -29,18 +15,18 @@ export default {
 
   data() {
     return {
-      navigation: [
+      items: [
         {
-          name: 'Dashboard',
+          label: 'Dashboard',
           page: 'dashboard.index'
         }, {
-          name: 'Evaluation',
+          label: 'Evaluation',
           page: 'evaluation.index'
         }, {
-          name: 'Routing',
+          label: 'Routing',
           page: 'routing.index'
         }, {
-          name: 'Candidate Finder',
+          label: 'Candidate Finder',
           page: 'candidateFinder.index'
         }
       ]

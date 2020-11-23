@@ -19,8 +19,8 @@ export default {
   methods: {},
 
   render() {
-    if (this.$scopedSlots.combined) {
-      return this.$scopedSlots.combined({
+    if (this.$slots.combined) {
+      return this.$slots.combined({
         isLoading: !this.resolved,
         response: this.response,
         data: this.response.data,
@@ -30,15 +30,15 @@ export default {
 
 
     if (this.error) {
-      return this.$scopedSlots.rejected(this.error);
+      return this.$slots.rejected(this.error);
     }
 
     if (this.resolved) {
-      return this.$scopedSlots.default(this.response);
+      return this.$slots.default(this.response);
 
     }
 
-    return this.$scopedSlots.pending();
+    return this.$slots.pending();
   },
 
   watch: {

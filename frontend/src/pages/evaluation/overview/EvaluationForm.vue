@@ -1,47 +1,13 @@
 <template>
   <div>
-    <el-form ref="evaluation-upload-form" :model="formData" :rules="rules" label-width="120px" size="mini">
-      <el-form-item label="name" prop="name">
-        <el-input v-model="formData.name"></el-input>
-      </el-form-item>
-      <el-form-item label="GTFS feed" prop="feed">
-        <el-upload
-            ref="upload-field"
-            :auto-upload="false"
-            :limit="1"
-            :multiple="false"
-            :on-change="setGtfsFeed"
-            :on-remove="setGtfsFeed"
-            accept=".zip"
-            action="">
-          <el-button size="small" type="">select file</el-button>
-        </el-upload>
-      </el-form-item>
-      <el-form-item label="profile" prop="profile">
-        <el-select v-model="formData.profile">
-          <el-option v-for="option in availableProfiles"
-                     :key="option.value"
-                     :label="option.label"
-                     :value="option.value">
-          </el-option>
-        </el-select>
-      </el-form-item>
-      <el-form-item label="sigma" prop="sigma">
-        <el-input-number v-model="formData.sigma" :precision="2"></el-input-number>
-      </el-form-item>
-      <el-form-item label="beta" prop="beta">
-        <el-input-number v-model="formData.beta" :precision="2"></el-input-number>
-      </el-form-item>
-      <el-form-item label="csr" prop="candidateSearchRadius">
-        <el-input-number v-model="formData.candidateSearchRadius" :precision="2"></el-input-number>
-      </el-form-item>
-      <el-form-item>
-        <el-button type="primary" @click="submit">Start evaluation</el-button>
-        <el-button @click="resetForm">Reset</el-button>
-      </el-form-item>
-    </el-form>
-  </div>
+    <div class="card py-4">
+      <div class="p-float-label">
+        <InputText id="name" type="text" v-model="value2"/>
+        <label for="name">Name</label>
+      </div>
 
+    </div>
+  </div>
 </template>
 
 <script>

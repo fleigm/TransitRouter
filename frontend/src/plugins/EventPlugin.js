@@ -1,9 +1,8 @@
-import Vue from 'vue';
-
-export const events = new Vue();
+import mitt from 'mitt';
 
 export default {
-    install(Vue) {
-        Vue.prototype.$events = events;
+    install(app) {
+        console.log('Install event plugin');
+        app.config.globalProperties.$events = mitt();
     }
 }

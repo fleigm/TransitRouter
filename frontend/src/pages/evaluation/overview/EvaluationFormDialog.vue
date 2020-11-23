@@ -1,19 +1,18 @@
 <template>
 
-  <el-button plain size="mini" type="primary" @click="open">
+  <Button class="p-button-outlined p-button-secondary" @click="open">
     <span>
     Evaluate GTFS Feed <i class="el-icon-upload el-icon-right"></i>
     </span>
-
-    <portal>
-      <el-dialog
-          :visible.sync="showDialog"
-          title="Upload GTFS feed for evaluation">
-
-        <v-evaluation-form></v-evaluation-form>
-      </el-dialog>
-    </portal>
-  </el-button>
+  </Button>
+  <Portal target="portal-target">
+    <Dialog
+        v-model:visible="showDialog"
+        header="Upload GTFS feed for evaluation"
+        :modal="true">
+      <v-evaluation-form></v-evaluation-form>
+    </Dialog>
+  </Portal>
 </template>
 
 <script>
@@ -26,7 +25,7 @@ export default {
 
   data() {
     return {
-      showDialog: false,
+      showDialog: true,
     }
   },
 
@@ -40,11 +39,11 @@ export default {
   },
 
   mounted() {
-    this.$events.$on('evaluation:createdRequest', this.close)
+    this.$events.on('evaluation:createdRequest', this.close)
   },
 
   beforeDestroy() {
-    this.$events.$off('evaluation:createdRequest', this.close)
+    this.$events.off('evaluation:createdRequest', this.close)
   }
 }
 </script>

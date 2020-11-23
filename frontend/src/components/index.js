@@ -6,12 +6,12 @@ import RoutingMap from "./RoutingMap";
 import Get from "./Get";
 
 export default {
-    install(Vue) {
-        Vue.component(Promise.name, Promise);
-        Vue.component(Get.name, Get);
-        Vue.component(Spinner.name, Spinner);
-        Vue.component(Card.name, Card);
-        Vue.component(Resource.name, Resource);
-        Vue.component(RoutingMap.name, RoutingMap);
+    install(app) {
+        app.component(Promise.name, Promise);
+        app.component(Get.name, Get);
+        app.component(Spinner.name, Spinner);
+        app.component(Card.name, Card);
+        app.component(Resource.name, Resource);
+        app.component(RoutingMap.name, RoutingMap);
     }
 }

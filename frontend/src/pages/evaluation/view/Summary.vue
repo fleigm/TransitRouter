@@ -71,14 +71,13 @@
 
 <script>
 import VAccuracyChart from "../AccuracyChart";
-import VRoutingResult from "../../dashboard/RoutingResult";
 import VMap from "../../../components/Map";
 import VMetric from "../Metric";
 
 export default {
   name: "v-summary",
 
-  components: {VMetric, VMap, VRoutingResult, VAccuracyChart},
+  components: {VMetric, VMap, VAccuracyChart},
 
   props: {
     info: {

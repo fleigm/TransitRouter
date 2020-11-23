@@ -3,8 +3,8 @@ import axios from "axios/index";
 export const http = axios.create();
 
 export default {
-    install(Vue, options = {}) {
+    install(app, options = {}) {
         console.log('install http plugin');
-        Vue.prototype.$http = http;
+        app.config.globalProperties.$http = http;
     }
 }
