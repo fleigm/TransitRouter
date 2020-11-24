@@ -34,12 +34,12 @@ public class BusFlagEncoder extends AbstractFlagEncoder {
   protected final Map<String, Integer> defaultSpeedMap = new HashMap<>();
 
   public BusFlagEncoder() {
-    this(5, 5, 0);
+    this(8, 1, 0);
   }
 
   public BusFlagEncoder(PMap properties) {
-    this(properties.getInt("speed_bits", 5),
-        properties.getDouble("speed_factor", 5),
+    this(properties.getInt("speed_bits", 8),
+        properties.getDouble("speed_factor", 1),
         properties.getBool("turn_costs", false) ? 1 : 0);
 
     blockPrivate(properties.getBool("block_private", true));
