@@ -109,7 +109,7 @@ public class TransitRouter {
 
     landmarks = prepareLandmarks(graphHopper, profile, useDijkstra);
     graph = graphHopper.getGraphHopperStorage();
-    weighting = graphHopper.createWeighting(profile, hints);
+    weighting = graphHopper.createWeighting(profile, hints, hints.getBool("disable_turn_costs", false));
     maxVisitedNodes = hints.getInt(Parameters.Routing.MAX_VISITED_NODES, Integer.MAX_VALUE);
 
     candidateSearchRadius = hints.getDouble("candidate_search_radius", 25);
