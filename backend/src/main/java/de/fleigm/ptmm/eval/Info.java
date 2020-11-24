@@ -25,6 +25,7 @@ public class Info {
   private Parameters parameters;
   private LocalDateTime createdAt;
   private Status status;
+  private Path path;
 
   @Builder.Default
   private Map<String, Object> statistics = new HashMap<>();

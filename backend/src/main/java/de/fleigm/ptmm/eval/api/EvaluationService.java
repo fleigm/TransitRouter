@@ -16,6 +16,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.concurrent.CompletableFuture;
 
@@ -47,6 +48,7 @@ public class EvaluationService {
 
     Info info = Info.builder()
         .name(request.getName())
+        .path(Paths.get(baseFolder, request.getName()))
         .createdAt(LocalDateTime.now())
         .parameters(Parameters.builder()
             .sigma(request.getSigma())

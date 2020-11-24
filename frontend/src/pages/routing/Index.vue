@@ -13,7 +13,8 @@
                   <span>{{ observation[0] | number('0.00000') }}</span>,
                   <span>{{ observation[1] | number('0.00000') }}</span>
                 </div>
-                <i class="el-icon-delete text-xs text-secondary hidden group-hover:block cursor-pointer hover:text-red-400"></i>
+                <i class="el-icon-delete text-xs text-secondary hidden group-hover:block cursor-pointer hover:text-red-400"
+                   @click="removeObservation(i)"></i>
               </div>
             </draggable>
           </div>
@@ -46,19 +47,22 @@
     </div>
     <div class="p-4 w-full">
       <v-map :bounds="bounds" v-if="route">
-        <l-circle-marker v-for="(observation, i) in route.observations"
-                         :key="'o' + i"
-                         color="red"
-                         :radius="2"
-                         :lat-lng="observation">
+        <l-marker v-for="(observation, i) in route.observations"
+                  :key="'o' + i"
+                  :lat-lng="observation"
+                  :radius="2"
+                  color="red"
+                  draggable
+                  @dragend="(e) => moveObservation(i, e)">
           <l-tooltip>
             <span>Observation #{{ i }}</span>
           </l-tooltip>
-        </l-circle-marker>
+        </l-marker>
 
         <l-circle v-for="(candidate, i) in route.candidates"
                   :key="'c' + i"
                   :radius="1"
+                  color="blue"
                   :lat-lng="candidate">
         </l-circle>
 
@@ -121,11 +125,8 @@ export default {
       },
       formData: {
         observations: [
-          [48.6658586029462, 9.17788021004512],
-          [48.6594163647239, 9.18581192889257],
-          [48.6579892237722, 9.18967519598556],
-          [48.6567412309377, 9.193878269348],
-          [48.6539393417297, 9.19693492322262],
+          [48.8095244, 9.1819293],
+          [48.8157918, 9.1876709],
         ],
         profile: 'bus_fastest',
         sigma: 25.0,
@@ -154,6 +155,15 @@ export default {
       this.observationInput = '';
 
       this.formData.observations.push([Number(values[1]), Number(values[2])]);
+    },
+
+    removeObservation(index) {
+      this.formData.observations.splice(index, 1);
+    },
+
+    moveObservation(index, event) {
+      const {lat, lng} = event.target._latlng;
+      this.formData.observations.splice(index, 1, [lat, lng])
     },
 
     fetchRoute() {
