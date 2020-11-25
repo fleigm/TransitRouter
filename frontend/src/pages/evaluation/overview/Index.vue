@@ -7,14 +7,11 @@
         <v-evaluation-form-dialog></v-evaluation-form-dialog>
       </div>
     </div>
-    <v-get resource="eval">
-      <div slot-scope="{data : evaluations}">
 
-        <template v-for="evaluation in evaluations">
-          <v-evaluation-info-card :evaluation="evaluation"></v-evaluation-info-card>
-        </template>
-      </div>
-    </v-get>
+    <v-evaluation-info-card v-for="evaluation in evaluations"
+                            :key="evaluation.name"
+                            :evaluation="evaluation"
+    ></v-evaluation-info-card>
   </div>
 </template>
 
@@ -24,23 +21,27 @@ import VMetric from "../Metric";
 import VEvaluationForm from "./EvaluationForm";
 import VEvaluationFormDialog from "./EvaluationFormDialog";
 import VEvaluationInfoCard from "./EvaluationInfoCard";
+import EvaluationService from "../EvaluationService";
 
 export default {
   name: "Overview",
+
   components: {VEvaluationInfoCard, VEvaluationFormDialog, VEvaluationForm, VMetric, VAccuracyChart},
-  data() {
-    return {}
+
+  computed: {
+    evaluations() {
+      return EvaluationService.state.evaluations;
+    }
   },
+
   methods: {
     clearCache() {
-      this.$http.post('commands/eval/clear-cache')
-          .then(() => {
-            this.$notify.success('Cleared evaluation cache.');
-          })
-      .catch(() => {
-        this.$notify.error("Oops, something went wrong")
-      })
+      EvaluationService.clearCache()
     }
+  },
+
+  mounted() {
+    EvaluationService.fetchEvaluations();
   }
 }
 </script>

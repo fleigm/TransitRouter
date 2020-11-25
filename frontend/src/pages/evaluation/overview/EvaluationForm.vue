@@ -45,9 +45,10 @@
 </template>
 
 <script>
-import {Helper} from "../../../Helper";
+import EvaluationService from "../EvaluationService";
+import {Notification} from "element-ui";
+import {watch} from '@vue/composition-api';
 import UploadProgressNotification from "./UploadProgressNotification";
-import Vue from 'vue'
 
 export default {
   name: "v-evaluation-form",
@@ -103,7 +104,7 @@ export default {
 
   methods: {
     setGtfsFeed(file, fileList) {
-      this.formData.feed = fileList.length ? file : null;
+      this.formData.feed = fileList.length ? file.raw : null;
     },
 
     resetForm() {
@@ -111,67 +112,32 @@ export default {
       this.$refs['upload-field'].clearFiles();
     },
 
-    submit() {
-      this.$refs['evaluation-upload-form']
-          .validate()
-          .then(() => this.sendRequest())
-          .catch(() => {
-          })
+    async submit() {
+      this.$events.$once('evaluation:createdRequest', this.displayUploadNotification)
+
+      this.$refs['evaluation-upload-form'].validate()
+          .then(() => EvaluationService.createEvaluation(this.formData))
+          .finally(this.resetForm)
+
     },
 
-    sendRequest() {
-      const createdEvaluationRequest = Vue.observable({
-        formData: Helper.copyObject(this.formData),
-        progress: 0,
-        request: null,
-      });
-
-      createdEvaluationRequest.request = this.$http.post('eval', this.buildFormData(), {
-        headers: {
-          'Content-Type': 'multipart/form-data'
-        },
-        onUploadProgress: function (progressEvent) {
-          createdEvaluationRequest.progress = parseInt(Math.round((progressEvent.loaded * 100) / progressEvent.total));
-        }
-      }).then(this.sendSuccessNotification);
-
-      this.resetForm();
-
-      const uploadNotification = this.$notify({
+    displayUploadNotification(event) {
+      const uploadNotification = Notification.info({
         title: 'Uploading GTFS feed',
         message: this.$createElement(UploadProgressNotification, {
-          props: {
-            event: createdEvaluationRequest
-          }
+          props: {event}
         }),
-        type: 'info',
-        duration: 0,
-        position: 'bottom-right'
-      });
-      createdEvaluationRequest.request.finally(() => {
-        uploadNotification.close();
+        position: 'bottom-right',
+        duration: 0
       });
 
-      this.$events.$emit('evaluation:createdRequest', createdEvaluationRequest)
+      watch(event, (e) => {
+        if (e.progress === 100) {
+          uploadNotification.close();
+        }
+      });
     },
-
-    buildFormData() {
-      const formData = new FormData();
-      for (const [key, value] of Object.entries(this.formData)) {
-        formData.append(key, value);
-      }
-      formData.set('feed', this.formData.feed.raw);
-      return formData;
-    },
-
-    sendSuccessNotification() {
-      this.$notify({
-        title: 'Upload complete',
-        message: 'Your upload was successful and the evaluation process has started.',
-        type: 'success',
-        position: "bottom-right"
-      })
-    },
-  },
+  }
+  ,
 }
 </script>

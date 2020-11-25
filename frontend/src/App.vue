@@ -1,10 +1,12 @@
 <template>
   <el-container class="h-full">
-    <el-header class="flex items-center border-b">
-      <el-container class="">
-        <h1>Public Transit Map Matching</h1>
-      </el-container>
-      <v-navigation></v-navigation>
+    <el-header class="border-b">
+      <div class="container flex items-center ">
+        <el-container class="">
+          <h1>Public Transit Map Matching</h1>
+        </el-container>
+        <v-navigation></v-navigation>
+      </div>
     </el-header>
     <el-container class="flex-1">
       <router-view></router-view>

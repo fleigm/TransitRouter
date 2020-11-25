@@ -16,7 +16,9 @@ export default {
       datasets: [{
         label: 'Accuracy',
         data: this.accuracies,
-      }]
+      }],
+      responsive: true,
+      maintainAspectRatio: false,
     })
   }
 }

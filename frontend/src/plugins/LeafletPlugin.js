@@ -1,7 +1,17 @@
 import 'leaflet/dist/leaflet.css';
 import 'leaflet-polylineoffset';
-import {LCircle, LMap, LMarker, LPolyline, LPopup, LTileLayer, LCircleMarker, LTooltip, LControl} from "vue2-leaflet";
+import {LCircle, LCircleMarker, LControl, LMap, LMarker, LPolyline, LPopup, LTileLayer, LTooltip} from "vue2-leaflet";
 import AnimatedPolyline from "../components/AnimatedPolyline";
+
+import L from 'leaflet';
+
+delete L.Icon.Default.prototype._getIconUrl;
+
+L.Icon.Default.mergeOptions({
+    iconRetinaUrl: require('leaflet/dist/images/marker-icon-2x.png'),
+    iconUrl: require('leaflet/dist/images/marker-icon.png'),
+    shadowUrl: require('leaflet/dist/images/marker-shadow.png'),
+});
 
 export default {
     install(Vue) {

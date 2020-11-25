@@ -35,6 +35,7 @@ import VReportList from "./ReportList";
 import VSummaryCard from "./SummaryCard";
 import VFinishedView from "./FinishedView";
 import VFailedView from "./FailedView";
+import EvaluationService from "../EvaluationService";
 
 export default {
   name: "Index",
@@ -82,15 +83,7 @@ export default {
     },
 
     deleteEvaluation() {
-      this.$http.delete(`eval/${this.name}`)
-          .then(() => {
-            this.$notify.success('Deleted evaluation ' + this.name + '.');
-            this.$router.push({name: 'evaluation.index'})
-          })
-          .catch((error) => {
-            this.$notify.error('Could not delete evaluation.');
-            console.log(error);
-          })
+      EvaluationService.deleteEvaluation(this.evaluation.name);
     },
 
     download() {
