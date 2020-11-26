@@ -1,6 +1,5 @@
 package de.fleigm.ptmm.routing;
 
-import com.graphhopper.matching.MatchResult;
 import com.graphhopper.matching.Observation;
 import com.graphhopper.routing.Path;
 import com.graphhopper.util.shapes.GHPoint;
@@ -19,5 +18,4 @@ public class RoutingResult {
   private final double time;
   private final List<Observation> observations;
   private final List<GHPoint> candidates;
-  private final MatchResult matchResult;
 }

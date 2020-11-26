@@ -1,5 +1,6 @@
 package de.fleigm.ptmm.eval;
 
+import com.graphhopper.util.PMap;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -14,14 +15,25 @@ public class Parameters {
   private double candidateSearchRadius;
   private double sigma;
   private double beta;
+  private boolean disableTurnCosts;
 
   public static Parameters defaultParameters() {
     return Parameters.builder()
-        .profile("bus_custom_shortest")
+        .profile("bus_shortest")
         .candidateSearchRadius(25)
         .sigma(25)
         .beta(2.0)
+        .disableTurnCosts(false)
         .build();
+  }
+
+  public PMap toPropertyMap() {
+    return new PMap()
+        .putObject("profile", profile)
+        .putObject("measurement_error_sigma", sigma)
+        .putObject("candidate_search_radius", candidateSearchRadius)
+        .putObject("beta", beta)
+        .putObject("disable_turn_costs", disableTurnCosts);
   }
 }
 

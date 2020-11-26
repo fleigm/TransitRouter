@@ -3,6 +3,7 @@ package de.fleigm.ptmm;
 import com.conveyal.gtfs.model.ShapePoint;
 import com.graphhopper.util.DistancePlaneProjection;
 import com.graphhopper.util.PointList;
+import de.fleigm.ptmm.routing.RoutingResult;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
@@ -13,6 +14,14 @@ import java.util.List;
 @Accessors(fluent = true)
 public class Shape {
   private final PointList points;
+
+  public static Shape of(RoutingResult routingResult) {
+    return new Shape(routingResult.getPath().calcPoints());
+  }
+
+  public static Shape of(PointList points) {
+    return new Shape(points);
+  }
 
   public List<ShapePoint> convertToShapePoints(String shapeId) {
     List<ShapePoint> shapePoints = new ArrayList<>(points.getSize());

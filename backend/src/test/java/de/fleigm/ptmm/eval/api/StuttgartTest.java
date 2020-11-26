@@ -5,7 +5,6 @@ import com.graphhopper.matching.Observation;
 import com.graphhopper.util.PMap;
 import com.graphhopper.util.shapes.GHPoint;
 import de.fleigm.ptmm.Shape;
-import de.fleigm.ptmm.ShapeGenerator;
 import de.fleigm.ptmm.TransitFeed;
 import de.fleigm.ptmm.eval.Info;
 import de.fleigm.ptmm.routing.RoutingResult;
@@ -47,16 +46,16 @@ public class StuttgartTest {
 
   @Test
   void run_evaluation() throws IOException, ExecutionException, InterruptedException {
-    FileUtils.deleteDirectory(Paths.get(evaluationFolder, "bus_shortest_turn").toFile());
+    FileUtils.deleteDirectory(Paths.get(evaluationFolder, "bus_fastest_turn").toFile());
     File testFeed = Paths.get(homeDir, "/uni/bachelor/project/files/stuttgart_bus_only.zip").toFile();
 
     CreateEvaluationRequest request = CreateEvaluationRequest.builder()
-        .name("bus_shortest_turn")
+        .name("bus_fastest_turn")
         .gtfsFeed(FileUtils.openInputStream(testFeed))
         .sigma(25.0)
         .candidateSearchRadius(25.0)
         .beta(2.0)
-        .profile("bus_shortest_turn")
+        .profile("bus_fastest_turn")
         .build();
 
     CompletableFuture<Info> result = evaluationService.createEvaluation(request);
@@ -98,14 +97,13 @@ public class StuttgartTest {
         .putObject("candidate_search_radius", 25)
         .putObject("beta", 2.0)
         .putObject("u_turn_distance_penalty", 1500));
-    ShapeGenerator shapeGenerator = new ShapeGenerator(transitRouter);
 
     List<Observation> observations = transitFeed.getOrderedStopsForTrip(trip).stream()
         .map(stop -> new GHPoint(stop.stop_lat, stop.stop_lon))
         .map(Observation::new)
         .collect(Collectors.toList());
 
-    Shape shape = shapeGenerator.generate(observations);
+    Shape shape = Shape.of(transitRouter.route(observations));
 
     assertNotNull(shape);
   }

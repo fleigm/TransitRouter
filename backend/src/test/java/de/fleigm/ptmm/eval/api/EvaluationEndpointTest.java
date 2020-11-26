@@ -8,6 +8,8 @@ import io.quarkus.test.junit.QuarkusTest;
 import org.apache.commons.io.FileUtils;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 
 import javax.inject.Inject;
 import java.io.File;
@@ -50,8 +52,9 @@ public class EvaluationEndpointTest {
     assertTrue(evaluationRepository.find("endpoint_happy_path").isPresent());
   }
 
-  @Test
-  void can_delete_evaluation() throws IOException {
+  @ParameterizedTest
+  @EnumSource(value = Status.class, names = {"FINISHED", "FAILED"})
+  void can_delete_evaluation(Status status) throws IOException {
     String evaluationName = "can_delete_evaluation";
 
     FileUtils.deleteDirectory(Paths.get(evaluationFolder, evaluationName).toFile());
@@ -60,7 +63,7 @@ public class EvaluationEndpointTest {
         .name(evaluationName)
         .createdAt(LocalDateTime.now())
         .parameters(Parameters.defaultParameters())
-        .status(Status.FINISHED)
+        .status(status)
         .build();
 
     evaluationRepository.save(info);

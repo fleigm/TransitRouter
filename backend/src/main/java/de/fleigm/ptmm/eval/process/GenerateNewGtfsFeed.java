@@ -3,21 +3,22 @@ package de.fleigm.ptmm.eval.process;
 import com.conveyal.gtfs.model.ShapePoint;
 import com.conveyal.gtfs.model.Trip;
 import com.graphhopper.GraphHopper;
-import com.graphhopper.util.PMap;
+import com.graphhopper.matching.Observation;
 import de.fleigm.ptmm.Pattern;
 import de.fleigm.ptmm.Shape;
-import de.fleigm.ptmm.ShapeGenerator;
 import de.fleigm.ptmm.TransitFeed;
 import de.fleigm.ptmm.eval.Error;
 import de.fleigm.ptmm.eval.Evaluation;
 import de.fleigm.ptmm.eval.Info;
 import de.fleigm.ptmm.routing.TransitRouter;
+import de.fleigm.ptmm.util.Helper;
 import de.fleigm.ptmm.util.StopWatch;
 import lombok.Value;
 import org.mapdb.Fun;
 
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
@@ -35,37 +36,34 @@ public class GenerateNewGtfsFeed implements Consumer<Info> {
   @Override
   public void accept(Info info) {
     TransitFeed transitFeed = new TransitFeed(info.getPath().resolve(Evaluation.ORIGINAL_GTFS_FEED));
-    ShapeGenerator shapeGenerator = new ShapeGenerator(
-        new TransitRouter(graphHopper, new PMap()
-            .putObject("profile", info.getParameters().getProfile())
-            .putObject("measurement_error_sigma", info.getParameters().getSigma())
-            .putObject("candidate_search_radius", info.getParameters().getCandidateSearchRadius())
-            .putObject("beta", info.getParameters().getBeta())));
-    ShapeGenerator fallBackShapeGenerator = new ShapeGenerator(
-        new TransitRouter(graphHopper, new PMap()
-            .putObject("profile", info.getParameters().getProfile())
-            .putObject("measurement_error_sigma", info.getParameters().getSigma())
-            .putObject("candidate_search_radius", info.getParameters().getCandidateSearchRadius())
-            .putObject("beta", info.getParameters().getBeta())
-            .putObject("disable_turn_costs", true)));
+    TransitRouter transitRouter = new TransitRouter(graphHopper, info.getParameters().toPropertyMap());
+    TransitRouter transitRouterWithoutTurnRestrictions = new TransitRouter(graphHopper,
+        info.getParameters()
+            .toPropertyMap()
+            .putObject("disable_turn_costs", true));
 
-    new Runner(info, transitFeed, shapeGenerator, fallBackShapeGenerator).run();
+    List<ShapeGenerator> shapeGenerators = List.of(
+        observations -> Shape.of(transitRouter.route(observations)),
+        observations -> Shape.of(transitRouterWithoutTurnRestrictions.route(observations)),
+        observations -> Shape.of(Helper.toPointList(observations))
+    );
+
+    new Runner(info, transitFeed, shapeGenerators).run();
+  }
+
+  private interface ShapeGenerator {
+    Shape generate(List<Observation> observations);
   }
 
   private static class Runner {
     private final Info info;
     private final TransitFeed transitFeed;
-    private final ShapeGenerator shapeGenerator;
-    private final ShapeGenerator fallbackShapeGenerator;
+    private final List<ShapeGenerator> shapeGenerators;
 
-    public Runner(Info info,
-                  TransitFeed transitFeed,
-                  ShapeGenerator shapeGenerator,
-                  ShapeGenerator fallbackShapeGenerator) {
+    public Runner(Info info, TransitFeed transitFeed, List<ShapeGenerator> shapeGenerators) {
       this.info = info;
       this.transitFeed = transitFeed;
-      this.shapeGenerator = shapeGenerator;
-      this.fallbackShapeGenerator = fallbackShapeGenerator;
+      this.shapeGenerators = shapeGenerators;
     }
 
     void run() {
@@ -93,24 +91,25 @@ public class GenerateNewGtfsFeed implements Consumer<Info> {
     }
 
     private PatternWitShape generateShape(Pattern pattern) {
-      try {
-        return new PatternWitShape(pattern, shapeGenerator.generate(pattern));
-      } catch (Exception e) {
-        info.addError(
-            Error.of("shape_generation_failed", "shape generation failed, use fallback shape generator.", e)
-                .addDetail("route", pattern.route())
-                .addDetail("trips", pattern.trips().stream().map(trip -> trip.trip_id).collect(Collectors.toList()))
-                .addDetail("fallback", "straight line shape"));
+      List<Observation> observations = pattern.observations();
 
-        return new PatternWitShape(pattern, fallbackShapeGenerator.generate(pattern));
-
-        /*PointList points = new PointList();
-        for (Stop stop : pattern.stops()) {
-          points.add(stop.stop_lat, stop.stop_lon);
+      for (var shapeGenerator : shapeGenerators) {
+        try {
+          return new PatternWitShape(pattern, shapeGenerator.generate(observations));
+        } catch (Exception exception) {
+          info.addError(
+              Error.of(
+                  "shape_generation_failed",
+                  "shape generation failed, use fallback shape generator.",
+                  exception
+              )
+                  .addDetail("route", pattern.route())
+                  .addDetail("trips", pattern.trips().stream().map(trip -> trip.trip_id).collect(Collectors.toList()))
+                  .addDetail("fallback", "straight line shape"));
         }
-
-        return new PatternWitShape(pattern, new Shape(points));*/
       }
+
+      throw new RuntimeException("All shape generators failed!");
     }
 
     private void store(PatternWitShape patternWitShape) {

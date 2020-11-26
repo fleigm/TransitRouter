@@ -18,6 +18,7 @@ import de.fleigm.ptmm.http.views.View;
 import org.jboss.resteasy.annotations.providers.multipart.MultipartForm;
 
 import javax.inject.Inject;
+import javax.json.Json;
 import javax.validation.Valid;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
@@ -79,7 +80,11 @@ public class EvaluationController {
     }
 
     if (result.get().getClass().equals(IllegalStateException.class)) {
-      return Response.status(Response.Status.CONFLICT).build();
+      return Response.status(Response.Status.CONFLICT)
+          .entity(Json.createObjectBuilder()
+              .add("message", "Can only delete finished or failed evaluations.")
+              .build())
+          .build();
     }
 
     return Response.serverError().build();
