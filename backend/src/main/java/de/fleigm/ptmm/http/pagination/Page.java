@@ -1,26 +1,29 @@
 package de.fleigm.ptmm.http.pagination;
 
+import lombok.Data;
+
 import javax.ws.rs.core.UriBuilder;
 import java.net.URI;
 import java.util.List;
 
 
+@Data
 public class Page<T> {
 
-  private long total;
-  private int perPage;
-  private long from;
-  private long to;
-  private int currentPage;
-  private int lastPage;
+  private final long total;
+  private final int perPage;
+  private final long from;
+  private final long to;
+  private final int currentPage;
+  private final int lastPage;
   private URI prevPageUrl;
   private URI nextPageUrl;
   private URI firstPageUrl;
   private URI lastPageUrl;
 
-  private List<T> data;
+  private final List<T> data;
 
-  Page(URI uri, int currentPage, int perPage, long total, List<T> data) {
+  public Page(URI uri, int currentPage, int perPage, long total, List<T> data) {
     this.currentPage = currentPage;
     this.perPage = perPage;
     this.total = total;
@@ -31,9 +34,10 @@ public class Page<T> {
     createUrls(uri);
   }
 
-  public static PageBuilder builder() {
-    return new PageBuilder();
+  public static <T> PageBuilder<T> builder() {
+    return new PageBuilder<T>();
   }
+
 
   private void createUrls(URI uri) {
     lastPageUrl = UriBuilder.fromUri(uri)
@@ -57,43 +61,47 @@ public class Page<T> {
     }
   }
 
-  public long getTotal() {
-    return total;
-  }
+  public static class PageBuilder<T> {
+    private URI uri;
+    private int currentPage;
+    private int perPage;
+    private long total;
+    private List<T> data;
 
-  public int getPerPage() {
-    return perPage;
-  }
+    PageBuilder() {
+    }
 
-  public long getFrom() {
-    return from;
-  }
+    public PageBuilder<T> uri(URI uri) {
+      this.uri = uri;
+      return this;
+    }
 
-  public long getTo() {
-    return to;
-  }
+    public PageBuilder<T> currentPage(int currentPage) {
+      this.currentPage = currentPage;
+      return this;
+    }
 
-  public int getCurrentPage() {
-    return currentPage;
-  }
+    public PageBuilder<T> perPage(int perPage) {
+      this.perPage = perPage;
+      return this;
+    }
 
-  public URI getPrevPageUrl() {
-    return prevPageUrl;
-  }
+    public PageBuilder<T> total(long total) {
+      this.total = total;
+      return this;
+    }
 
-  public URI getNextPageUrl() {
-    return nextPageUrl;
-  }
+    public PageBuilder<T> data(List<T> data) {
+      this.data = data;
+      return this;
+    }
 
-  public URI getFirstPageUrl() {
-    return firstPageUrl;
-  }
+    public Page<T> build() {
+      return new Page<T>(uri, currentPage, perPage, total, data);
+    }
 
-  public URI getLastPageUrl() {
-    return lastPageUrl;
-  }
-
-  public List<T> getData() {
-    return data;
+    public String toString() {
+      return "Page.PageBuilder(uri=" + this.uri + ", currentPage=" + this.currentPage + ", perPage=" + this.perPage + ", total=" + this.total + ", data=" + this.data + ")";
+    }
   }
 }
