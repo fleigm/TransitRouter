@@ -75,7 +75,7 @@ export default {
 
   computed: {
     endpoint() {
-      return `eval/${this.name}/trips`
+      return `eval/${this.name}/report`
     }
   },
 

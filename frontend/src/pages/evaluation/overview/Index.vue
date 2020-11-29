@@ -12,6 +12,9 @@
                             :key="evaluation.name"
                             :evaluation="evaluation"
     ></v-evaluation-info-card>
+    <div v-if="!evaluations.length">
+      <div class="text-secondary text-2xl font-thin text-center py-8">There are currently no evaluations.</div>
+    </div>
   </div>
 </template>
 

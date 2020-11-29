@@ -4,6 +4,7 @@ import Card from "./Card";
 import Resource from "./Resource";
 import RoutingMap from "./RoutingMap";
 import Get from "./Get";
+import Histogram from "./Histogram";
 
 export default {
     install(Vue) {
@@ -13,5 +14,6 @@ export default {
         Vue.component(Card.name, Card);
         Vue.component(Resource.name, Resource);
         Vue.component(RoutingMap.name, RoutingMap);
+        Vue.component(Histogram.name, Histogram);
     }
 }

@@ -7,6 +7,9 @@ module.exports = {
             height: {
                 '96': '20rem',
                 '128': '24rem',
+            },
+            minHeight: {
+                '128': '24rem',
             }
         },
         colors: {

@@ -30,9 +30,7 @@
     <div class="flex">
       <div class="w-1/2">
 
-        <v-accuracy-chart :accuracies="info.statistics['accuracy']"
-                          :height="150"
-                          :width="300"></v-accuracy-chart>
+        <v-accuracy-chart :accuracies="info.statistics['accuracy']" class="h-64 relative"></v-accuracy-chart>
       </div>
       <div class="w-1/2">
         <div class="flex justify-center gap-4 mb-2">
@@ -71,14 +69,13 @@
 
 <script>
 import VAccuracyChart from "../AccuracyChart";
-import VRoutingResult from "../../dashboard/RoutingResult";
 import VMap from "../../../components/Map";
 import VMetric from "../Metric";
 
 export default {
   name: "v-summary",
 
-  components: {VMetric, VMap, VRoutingResult, VAccuracyChart},
+  components: {VMetric, VMap, VAccuracyChart},
 
   props: {
     info: {

@@ -85,7 +85,12 @@ public class EvaluationReportController {
     List<View> views = entries.stream()
         .skip(paged.getOffset())
         .limit(paged.getLimit())
-        .map(entry -> entryToView(entry, transitFeed))
+        .map(entry -> new View()
+            .add("tripId", entry.tripId())
+            .add("an", entry.an())
+            .add("al", entry.al())
+            .add("avgFd", entry.avgFd())
+            .add("route", transitFeed.getRouteForTrip(entry.tripId()).route_short_name))
         .collect(Collectors.toList());
 
     var page = Page.<View>builder()
@@ -97,15 +102,6 @@ public class EvaluationReportController {
         .build();
 
     return Response.ok(page).build();
-  }
-
-  private View entryToView(ReportEntry entry, TransitFeed transitFeed) {
-    return new View()
-        .add("tripId", entry.tripId())
-        .add("an", entry.an())
-        .add("al", entry.al())
-        .add("avgFd", entry.avgFd())
-        .add("route", transitFeed.getRouteForTrip(entry.tripId()).route_short_name);
   }
 
   private Comparator<ReportEntry> createComparator(SortQuery sortQuery) {

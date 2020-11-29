@@ -32,13 +32,12 @@
 
 <script>
 import VMap from "./Map";
-import VRoutingResult from "../pages/dashboard/RoutingResult";
 import L from 'leaflet';
 
 export default {
   name: "v-routing-map",
 
-  components: {VRoutingResult, VMap},
+  components: {VMap},
 
   props: {
     route: Object
