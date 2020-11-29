@@ -1,5 +1,5 @@
 <template>
-  <v-resource :endpoint="endpoint" :page-size="15">
+  <v-resource :endpoint="endpoint" :page-size="10">
     <div
         slot-scope="{page, searchQuery, loading, getPage, search, sortBy}">
       <el-table v-loading="loading"

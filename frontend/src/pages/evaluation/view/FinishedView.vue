@@ -1,17 +1,41 @@
 <template>
   <div class="">
     <div class="grid grid-cols-3 gap-4 px-4">
-      <v-card class="">
-        <div class="text-center text-secondary py-2">averaged avg Frechet Distance
-          <span class="italic">&delta;<sub>aF</sub></span>
+      <EvaluationCard header="accuracy">
+        <v-accuracy-chart :accuracies="info.statistics.accuracy" class="h-48"></v-accuracy-chart>
+      </EvaluationCard>
+
+
+      <EvaluationCard header="configuration">
+        <div class="flex flex-col justify-between gap-4">
+          <div class="flex justify-between gap-4">
+            <v-metric :value="info.parameters.profile" size="mini" title="Profile"></v-metric>
+            <v-metric :value="info.parameters.sigma" size="small" title="sigma"></v-metric>
+            <v-metric :value="info.parameters.beta" size="small" title="beta"></v-metric>
+            <v-metric :value="info.parameters.candidateSearchRadius" size="small" title="csr"></v-metric>
+          </div>
+          <div class="flex justify-center gap-4">
+            <v-metric :value="info.statistics.trips" size="small" title="Trips"></v-metric>
+            <v-metric :value="info.statistics.generatedShapes" size="small" title="Shapes"></v-metric>
+          </div>
         </div>
-        <div v-loading="!report.length" class="min-h-128 p-2">
+      </EvaluationCard>
+
+      <EvaluationCard header="execution times">
+        <ExecutionTimeChart v-if="info" :info="info"></ExecutionTimeChart>
+      </EvaluationCard>
+
+      <EvaluationCard>
+        <template #header>
+          averaged avg Frechet Distance <span class="italic">&delta;<sub>aF</sub></span>
+        </template>
+        <div v-loading="!report.length" class="min-h-128">
           <HistogramAverageFrechetDistance v-if="report.length"
                                            :report="report"
                                            class="relative h-128"
           ></HistogramAverageFrechetDistance>
         </div>
-        <div class="flex w-full justify-between border-t p-2">
+        <div slot="footer" class="flex w-full justify-between">
           <v-metric :value="info.statistics.fd['max'] | number('0.0')"
                     class="text-red-400"
                     title="max"
@@ -28,19 +52,19 @@
                     unit="m"
           ></v-metric>
         </div>
-      </v-card>
+      </EvaluationCard>
 
-      <v-card class="">
-        <div class="text-center text-secondary py-2">
+      <EvaluationCard>
+        <div slot="header">
           percentage mismatched hop segments <span class="italic">A<sub>N</sub></span>
         </div>
-        <div v-loading="!report.length" class="min-h-128 p-2">
+        <div v-loading="!report.length" class="min-h-128">
           <HistogramMismatchedHopSegments v-if="report.length"
                                           :report="report"
                                           class="relative h-128">
           </HistogramMismatchedHopSegments>
         </div>
-        <div class="flex w-full justify-between border-t py-2">
+        <div slot="footer" class="flex w-full justify-between">
           <v-metric :value="info.statistics.an['max'] | number('0.000')"
                     class="text-red-400"
                     title="max"
@@ -58,19 +82,19 @@
           ></v-metric>
         </div>
 
-      </v-card>
+      </EvaluationCard>
 
-      <v-card class="">
-        <div class="text-center text-secondary py-2">
+      <EvaluationCard>
+        <div slot="header">
           percentage length mismatched hop segments <span class="italic">A<sub>L</sub></span>
         </div>
-        <div v-loading="!report.length" class="min-h-128 py-2">
+        <div v-loading="!report.length" class="min-h-128">
           <HistogramLengthMismatchedHopSegments v-if="report.length"
                                                 :report="report"
                                                 class="relative h-128">
           </HistogramLengthMismatchedHopSegments>
         </div>
-        <div class="flex w-full justify-between border-t py-2">
+        <div slot="footer" class="flex w-full justify-between">
           <v-metric :value="info.statistics.al['max'] | number('0.000')"
                     class="text-red-400"
                     title="max"
@@ -87,46 +111,30 @@
                     unit=""
           ></v-metric>
         </div>
+      </EvaluationCard>
 
-      </v-card>
+
+      <div class="grid auto-rows-min gap-4">
+
+
+        <EvaluationCard header="shape generation errors">
+          <div class="flex justify-between w-full">
+            <v-metric :value="shapeGenerationErrors.length"
+                      class=""
+                      title="shape generation errors"
+                      unit=""
+            ></v-metric>
+            <v-metric :value="affectedTripCount"
+                      class=""
+                      title="affected trips"
+                      unit=""
+            ></v-metric>
+          </div>
+        </EvaluationCard>
+      </div>
 
       <v-card class="col-span-2">
         <v-report-list :name="$route.params.name"></v-report-list>
-      </v-card>
-
-      <v-card class="p-2">
-        <ExecutionTimeChart v-if="info" :info="info"></ExecutionTimeChart>
-
-        <div class="my-8">
-          <div class="text-center text-secondary mb-4">configuration</div>
-          <div class="flex justify-between gap-4">
-            <v-metric :value="info.parameters.profile" size="mini" title="Profile"></v-metric>
-            <v-metric :value="info.parameters.sigma" size="small" title="sigma"></v-metric>
-            <v-metric :value="info.parameters.beta" size="small" title="beta"></v-metric>
-            <v-metric :value="info.parameters.candidateSearchRadius" size="small" title="csr"></v-metric>
-          </div>
-
-          <div class="flex justify-center gap-4">
-
-            <v-metric :value="info.statistics.trips" size="small" title="Trips"></v-metric>
-            <v-metric :value="info.statistics.generatedShapes" size="small" title="Shapes"></v-metric>
-          </div>
-
-        </div>
-
-
-        <div class="flex justify-between w-full my-8">
-          <v-metric :value="shapeGenerationErrors.length"
-                    class=""
-                    title="shape generation errors"
-                    unit=""
-          ></v-metric>
-          <v-metric :value="affectedTripCount"
-                    class=""
-                    title="affected trips"
-                    unit=""
-          ></v-metric>
-        </div>
       </v-card>
 
 
@@ -148,11 +156,15 @@ import HistogramMismatchedHopSegments from "./HistogramMismatchedHopSegments";
 import HistogramLengthMismatchedHopSegments from "./HistogramLengthMismatchedHopSegments";
 import VSummary from "./Summary";
 import ExecutionTimeChart from "./ExecutionTimeChart";
+import EvaluationCard from "./EvaluationCard";
+import VAccuracyChart from "../AccuracyChart";
 
 export default {
   name: "v-finished-view",
 
   components: {
+    VAccuracyChart,
+    EvaluationCard,
     ExecutionTimeChart,
     VSummary,
     HistogramLengthMismatchedHopSegments,

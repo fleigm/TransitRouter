@@ -20,7 +20,15 @@
           </el-dropdown-menu>
         </el-dropdown>
 
-        <el-button plain type="danger" size="mini" @click="deleteEvaluation">Delete</el-button>
+        <el-popconfirm
+            cancel-button-text='No, Thanks'
+            confirm-button-text='Yes'
+            title="Are you sure to delete this evaluation?"
+            @confim="deleteEvaluation"
+        >
+          <el-button slot="reference" plain size="mini" type="danger">Delete</el-button>
+        </el-popconfirm>
+
       </div>
     </div>
 
@@ -82,7 +90,7 @@ export default {
     },
 
     deleteEvaluation() {
-      EvaluationService.deleteEvaluation(this.evaluation.name);
+      EvaluationService.deleteEvaluation(this.info.name);
     },
 
     download() {

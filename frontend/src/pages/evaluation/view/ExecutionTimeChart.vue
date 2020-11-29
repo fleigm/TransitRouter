@@ -1,11 +1,8 @@
 <template>
   <div class="relative">
-    <div class="text-center text-secondary mb-4">execution times in s</div>
-    <div class="relative">
-      <v-doughnut-chart :data="data" :options="options" class="relative h-48"></v-doughnut-chart>
-      <div class="absolute w-full bottom-1/4 text-center text-xl">
-        total: {{ timeTotal }}s
-      </div>
+    <v-doughnut-chart :data="data" :options="options" class="relative h-48"></v-doughnut-chart>
+    <div class="absolute w-full bottom-1/4 text-center text-xl text-secondary">
+      total: {{ timeTotal }}s
     </div>
   </div>
 </template>
