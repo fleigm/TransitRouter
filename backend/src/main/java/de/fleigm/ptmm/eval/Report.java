@@ -3,18 +3,15 @@ package de.fleigm.ptmm.eval;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.DoubleSummaryStatistics;
 import java.util.List;
 import java.util.stream.Collectors;
 
 public class Report {
 
   private final List<ReportEntry> entries;
-  private final double[] accuracies;
 
   public Report(List<ReportEntry> entries) {
     this.entries = entries;
-    this.accuracies = computeAccuracies(entries);
   }
 
   public static Report read(Path path) {
@@ -41,33 +38,5 @@ public class Report {
 
   public List<ReportEntry> entries() {
     return entries;
-  }
-
-  public double[] accuracies() {
-    return accuracies;
-  }
-
-  public DoubleSummaryStatistics frechetDistanceStatistics() {
-    return entries.stream()
-        .mapToDouble(ReportEntry::avgFd)
-        .summaryStatistics();
-  }
-
-  private double[] computeAccuracies(List<ReportEntry> entries) {
-    double[] accuracies = new double[10];
-
-    for (ReportEntry entry : entries) {
-      for (int i = 0; i < accuracies.length; i++) {
-        if (entry.an <= i * 0.1) {
-          accuracies[i]++;
-        }
-      }
-    }
-
-    for (int i = 0; i < accuracies.length; i++) {
-      accuracies[i] /= entries.size();
-    }
-
-    return accuracies;
   }
 }

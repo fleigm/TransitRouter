@@ -7,8 +7,11 @@ import de.fleigm.ptmm.eval.ReportEntry;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 import javax.enterprise.context.Dependent;
-import java.util.Comparator;
+import javax.json.Json;
+import javax.json.JsonObject;
+import java.util.DoubleSummaryStatistics;
 import java.util.function.Consumer;
+import java.util.function.ToDoubleFunction;
 
 @Dependent
 public class GenerateQuickStats implements Consumer<Info> {
@@ -21,30 +24,42 @@ public class GenerateQuickStats implements Consumer<Info> {
 
   @Override
   public void accept(Info info) {
-
     Report report = Report.read(info.fullPath(evaluationFolder).resolve(Evaluation.GTFS_FULL_REPORT));
 
-    ReportEntry highestAvgFd = report.entries()
-        .stream()
-        .max(Comparator.comparing(ReportEntry::avgFd))
-        .get();
+    info.addStatistic("accuracy", computeAccuracy(report))
+        .addStatistic("fd", buildStatsFor(report, ReportEntry::avgFd))
+        .addStatistic("an", buildStatsFor(report, ReportEntry::an))
+        .addStatistic("al", buildStatsFor(report, ReportEntry::al));
+  }
 
-    ReportEntry lowestAvgFd = report.entries()
+  private JsonObject buildStatsFor(Report report, ToDoubleFunction<ReportEntry> mapper) {
+    DoubleSummaryStatistics stats = report.entries()
         .stream()
-        .min(Comparator.comparing(ReportEntry::avgFd))
-        .get();
+        .mapToDouble(mapper)
+        .summaryStatistics();
 
-    double averageAvgFd = report.entries()
-        .stream()
-        .mapToDouble(ReportEntry::avgFd)
-        .average()
-        .getAsDouble();
+    return Json.createObjectBuilder()
+        .add("min", stats.getMin())
+        .add("max", stats.getMax())
+        .add("average", stats.getAverage())
+        .build();
+  }
 
-    info.addStatistic("accuracy", report.accuracies())
-        .addStatistic("highestAvgFd.trip", highestAvgFd.tripId)
-        .addStatistic("highestAvgFd.value", highestAvgFd.avgFd)
-        .addStatistic("lowestAvgFd.trip", lowestAvgFd.tripId)
-        .addStatistic("lowestAvgFd.value", lowestAvgFd.avgFd)
-        .addStatistic("averagedAvgFd", averageAvgFd);
+  private double[] computeAccuracy(Report report) {
+    double[] accuracies = new double[10];
+
+    for (ReportEntry entry : report.entries()) {
+      for (int i = 0; i < accuracies.length; i++) {
+        if (entry.an <= i * 0.1) {
+          accuracies[i]++;
+        }
+      }
+    }
+
+    for (int i = 0; i < accuracies.length; i++) {
+      accuracies[i] /= report.entries().size();
+    }
+
+    return accuracies;
   }
 }
