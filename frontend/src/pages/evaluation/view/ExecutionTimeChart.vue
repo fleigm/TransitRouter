@@ -4,7 +4,7 @@
     <div class="relative">
       <v-doughnut-chart :data="data" :options="options" class="relative h-48"></v-doughnut-chart>
       <div class="absolute w-full bottom-1/4 text-center text-xl">
-        total: 324s
+        total: {{ timeTotal }}s
       </div>
     </div>
   </div>
@@ -34,21 +34,43 @@ const defaultOptions = {
 export default {
   name: "ExecutionTimeChart",
 
-  data() {
-    return {
-      data: {
-        labels: ['shape generation', 'evaluation', 'rest'],
-        datasets: [{
-          data: [158, 147, 324 - 158 - 147],
-          backgroundColor: ['#075985', '#0369A1', '#0284C7']
-        }]
-      }
-    }
+  props: {
+    info: {
+      type: Object,
+      required: true,
+    },
   },
 
   computed: {
     options() {
       return defaultOptions;
+    },
+
+    data() {
+      return {
+        labels: ['shape generation', 'evaluation', 'rest'],
+        datasets: [{
+          data: [
+            this.timeShapeGeneration,
+            this.timeEvaluation,
+            this.timeRest,
+          ],
+          backgroundColor: ['#075985', '#0369A1', '#0284C7']
+        }]
+      }
+    },
+
+    timeShapeGeneration() {
+      return Math.round(this.info.statistics['executionTime.shapeGeneration'] / 1000);
+    },
+    timeEvaluation() {
+      return Math.round(this.info.statistics['executionTime.evaluation'] / 1000);
+    },
+    timeTotal() {
+      return Math.round(this.info.statistics['executionTime.total'] / 1000);
+    },
+    timeRest() {
+      return this.timeTotal - this.timeShapeGeneration - this.timeEvaluation;
     }
   },
 
