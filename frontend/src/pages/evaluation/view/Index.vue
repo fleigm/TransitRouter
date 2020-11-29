@@ -1,6 +1,6 @@
 <template>
-  <div class="container">
-    <div class="flex justify-between items-center">
+  <div class="w-full">
+    <div class="container flex justify-between items-center">
       <el-breadcrumb separator-class="el-icon-arrow-right" class="my-8">
         <el-breadcrumb-item :to="{ name: 'evaluation.index' }">Evaluations</el-breadcrumb-item>
         <el-breadcrumb-item>{{ name }}</el-breadcrumb-item>
@@ -32,7 +32,6 @@
 
 <script>
 import VReportList from "./ReportList";
-import VSummaryCard from "./SummaryCard";
 import VFinishedView from "./FinishedView";
 import VFailedView from "./FailedView";
 import EvaluationService from "../EvaluationService";
@@ -40,7 +39,7 @@ import EvaluationService from "../EvaluationService";
 export default {
   name: "Index",
 
-  components: {VFailedView, VFinishedView, VSummaryCard, VReportList},
+  components: {VFailedView, VFinishedView, VReportList},
 
   data() {
     return {

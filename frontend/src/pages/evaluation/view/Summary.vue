@@ -70,12 +70,11 @@
 <script>
 import VAccuracyChart from "../AccuracyChart";
 import VMap from "../../../components/Map";
-import VMetric from "../Metric";
 
 export default {
   name: "v-summary",
 
-  components: {VMetric, VMap, VAccuracyChart},
+  components: {VMap, VAccuracyChart},
 
   props: {
     info: {

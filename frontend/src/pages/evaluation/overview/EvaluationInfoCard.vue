@@ -27,14 +27,13 @@
 </template>
 
 <script>
-import VMetric from "../Metric";
 import VAccuracyChart from "../AccuracyChart";
 import VSummary from "../view/Summary";
 
 export default {
   name: "v-evaluation-info-card",
 
-  components: {VSummary, VAccuracyChart, VMetric},
+  components: {VSummary, VAccuracyChart},
 
   props: {
     evaluation: {

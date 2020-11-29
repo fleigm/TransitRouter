@@ -26,6 +26,7 @@
         "@vue/composition-api": "^1.0.0-beta.20",
         "axios": "^0.19.2",
         "chart.js": "^2.9.4",
+        "chartjs-plugin-labels": "^1.1.0",
         "d3-array": "^2.8.0",
         "element-ui": "^2.14.1",
         "leaflet": "^1.7.1",

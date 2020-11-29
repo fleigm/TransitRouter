@@ -7,6 +7,7 @@ import 'element-ui/lib/theme-chalk/reset.css';
 import 'element-ui/lib/theme-chalk/index.css';
 import locale from 'element-ui/lib/locale/lang/en';
 import VuePortal from '@linusborg/vue-simple-portal';
+import './ChartjsSetup';
 import LeafletPlugin from "./plugins/LeafletPlugin";
 import HttpPlugin from "./plugins/HttpPlugin";
 import EventPlugin from "./plugins/EventPlugin";

@@ -20,7 +20,6 @@
 
 <script>
 import VAccuracyChart from "../AccuracyChart";
-import VMetric from "../Metric";
 import VEvaluationForm from "./EvaluationForm";
 import VEvaluationFormDialog from "./EvaluationFormDialog";
 import VEvaluationInfoCard from "./EvaluationInfoCard";
@@ -29,7 +28,7 @@ import EvaluationService from "../EvaluationService";
 export default {
   name: "Overview",
 
-  components: {VEvaluationInfoCard, VEvaluationFormDialog, VEvaluationForm, VMetric, VAccuracyChart},
+  components: {VEvaluationInfoCard, VEvaluationFormDialog, VEvaluationForm, VAccuracyChart},
 
   computed: {
     evaluations() {
