@@ -6,6 +6,7 @@ import de.fleigm.ptmm.eval.Info;
 import de.fleigm.ptmm.eval.Parameters;
 import de.fleigm.ptmm.eval.Status;
 import de.fleigm.ptmm.eval.process.EvaluationProcess;
+import de.fleigm.ptmm.eval.process.ValidateGtfsFeed;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
@@ -16,7 +17,6 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.concurrent.CompletableFuture;
 
@@ -34,8 +34,9 @@ public class EvaluationService {
   EvaluationProcess evaluationProcess;
 
   public CompletableFuture<Info> createEvaluation(CreateEvaluationRequest request) {
+    Path path = Path.of(baseFolder, request.getName());
 
-    if (Files.exists(Path.of(baseFolder, request.getName()))) {
+    if (Files.exists(path)) {
       throw new IllegalArgumentException("duplicate evaluation name");
     }
 
@@ -46,9 +47,19 @@ public class EvaluationService {
       throw new RuntimeException(e);
     }
 
+    if (!ValidateGtfsFeed.validate(path.resolve(Evaluation.ORIGINAL_GTFS_FEED))) {
+      try {
+        FileUtils.deleteDirectory(path.toFile());
+      } catch (IOException e) {
+        log.error("Failed to delete evaluation folder {} with invalid gtfs feed.", request.getName(), e);
+      }
+      throw new IllegalArgumentException("invalid gtfs feed.");
+    }
+
+
     Info info = Info.builder()
         .name(request.getName())
-        .path(Paths.get(baseFolder, request.getName()))
+        .path(path)
         .createdAt(LocalDateTime.now())
         .parameters(Parameters.builder()
             .sigma(request.getSigma())

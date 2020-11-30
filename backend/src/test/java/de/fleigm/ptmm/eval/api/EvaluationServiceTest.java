@@ -12,6 +12,7 @@ import javax.inject.Inject;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
@@ -39,8 +40,6 @@ public class EvaluationServiceTest {
       throw new RuntimeException(e);
     }
   }
-
-
 
   @Test
   void happy_path() throws IOException, ExecutionException, InterruptedException {
@@ -99,5 +98,25 @@ public class EvaluationServiceTest {
     assertNotNull(info.getExtension("error.message"));
     assertNotNull(info.getExtension("error.stackTrace"));
     assertNotNull(info.getExtension("error.rootCause"));
+  }
+
+  @Test
+  void abort_and_remove_folder_if_gtfs_feed_is_invalid() throws IOException {
+    File invalidFeed = new File(getClass().getClassLoader().getResource("invalid_feed.zip").getFile());
+
+    CreateEvaluationRequest request = CreateEvaluationRequest.builder()
+        .name("abort_and_remove_folder_if_gtfs_feed_is_invalid")
+        .gtfsFeed(FileUtils.openInputStream(invalidFeed))
+        .sigma(25.0)
+        .candidateSearchRadius(25.0)
+        .beta(2.0)
+        .profile("invalid_profile")
+        .build();
+
+    assertThrows(IllegalArgumentException.class, () -> evaluationService.createEvaluation(request));
+
+    assertFalse(Files.exists(Path.of(evaluationFolder, "abort_and_remove_folder_if_gtfs_feed_is_invalid")));
+
+
   }
 }
