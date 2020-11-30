@@ -85,14 +85,10 @@ export default {
   },
 
   mounted() {
-    const chart = {
+    this.renderChart({
       labels: this.getLabels(),
       datasets: this.buildDataSets(),
-    };
-
-    console.log(this.chartOptions);
-
-    this.renderChart(chart, this.chartOptions);
+    }, this.chartOptions);
   }
 }
 </script>
