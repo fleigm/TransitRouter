@@ -126,7 +126,8 @@ public class FileEvaluationRepository implements EvaluationRepository {
   List<Info> loadFromDisk(String baseFolder) throws IOException {
     Jsonb json = JsonbBuilder.create();
 
-    return Files.walk(Path.of(baseFolder), 2, new FileVisitOption[0])
+    Path root = Path.of(baseFolder);
+    return Files.walk(root, 2, new FileVisitOption[0])
         .filter(path -> path.endsWith("info.json"))
         .map(path -> {
           try {
@@ -136,6 +137,7 @@ public class FileEvaluationRepository implements EvaluationRepository {
           }
         })
         .map(rawJson -> json.fromJson(rawJson, Info.class))
+        .peek(info -> info.setPath(root.resolve(info.getName())))
         .collect(Collectors.toList());
 
   }

@@ -6,7 +6,6 @@ import com.graphhopper.reader.osm.GraphHopperOSM;
 import com.graphhopper.routing.util.EncodingManager;
 import com.graphhopper.util.PMap;
 import com.graphhopper.util.Parameters;
-import de.fleigm.ptmm.TransitFeed;
 import de.fleigm.ptmm.routing.BusFlagEncoder;
 import io.quarkus.runtime.Startup;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
@@ -19,13 +18,6 @@ import java.nio.file.Path;
 
 @ApplicationScoped
 public class Producers {
-
-  @Produces
-  //@Startup
-  @ApplicationScoped
-  public TransitFeed transitFeed(@ConfigProperty(name = "routing.gtfs.feed-file") String filePath) {
-    return new TransitFeed(filePath);
-  }
 
   @Produces
   @Startup
