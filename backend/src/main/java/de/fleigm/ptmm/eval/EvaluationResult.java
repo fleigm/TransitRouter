@@ -13,6 +13,18 @@ public class EvaluationResult {
     this.generatedTransitFeed = generatedTransitFeed;
   }
 
+  public static EvaluationResult load(Info info) {
+    if (info.getStatus() != Status.FINISHED) {
+      throw new IllegalStateException("Cannot load EvaluationResult if evaluation has not finished successfully.");
+    }
+
+    return new EvaluationResult(
+        Report.read(info.getPath().resolve(Evaluation.GTFS_FULL_REPORT)),
+        new TransitFeed(info.getPath().resolve(Evaluation.ORIGINAL_GTFS_FEED)),
+        new TransitFeed(info.getPath().resolve(Evaluation.GENERATED_GTFS_FEED))
+    );
+  }
+
   public Report report() {
     return report;
   }

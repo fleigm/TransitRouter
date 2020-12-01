@@ -22,12 +22,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
-@Path("eval/{name}/download")
+@Path("eval/{id}/download")
 public class DownloadController {
   private static final String[] INCLUDED_FILES = new String[]{
       Evaluation.INFO_FILE,
@@ -46,10 +46,10 @@ public class DownloadController {
   @GET
   @Path("generated")
   @Produces(MediaType.APPLICATION_OCTET_STREAM)
-  public Response downloadGeneratedFeed(@PathParam("name") String name) {
-    return evaluationRepository.find(name)
+  public Response downloadGeneratedFeed(@PathParam("id") UUID id) {
+    return evaluationRepository.find(id)
         .map(info -> Response
-            .ok(Paths.get(evaluationFolder, name, Evaluation.GENERATED_GTFS_FEED).toFile())
+            .ok(info.getPath().resolve(Evaluation.GENERATED_GTFS_FEED).toFile())
             .header("Content-Disposition", "attachment;filename=" + info.getName() + "." + Evaluation.GENERATED_GTFS_FEED)
             .build())
         .orElse(Response.status(Response.Status.NOT_FOUND).build());
@@ -57,8 +57,8 @@ public class DownloadController {
 
   @GET
   @Produces(MediaType.APPLICATION_OCTET_STREAM)
-  public Response download(@PathParam("name") String name) {
-    return evaluationRepository.find(name)
+  public Response download(@PathParam("id") UUID id) {
+    return evaluationRepository.find(id)
         .map(info -> Response
             .ok((StreamingOutput) output -> buildZipFile(output, info))
             .header("Content-Disposition", "attachment;filename=" + info.getName() + ".zip")
@@ -69,7 +69,7 @@ public class DownloadController {
   private void buildZipFile(OutputStream output, Info info) throws IOException {
     try (var archive = new ZipArchiveOutputStream(output)) {
       List<File> files = Arrays.stream(INCLUDED_FILES)
-          .map(f -> Paths.get(evaluationFolder, info.getName(), f).toFile())
+          .map(file -> info.getPath().resolve(file).toFile())
           .collect(Collectors.toList());
 
       for (var file : files) {

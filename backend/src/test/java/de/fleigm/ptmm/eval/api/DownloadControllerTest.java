@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
@@ -64,16 +65,16 @@ public class DownloadControllerTest {
 
   @Test
   void can_download_generated_gtfs_feed() {
-      given().when()
-          .get("eval/download_test/download/generated")
-          .then()
-          .statusCode(200)
-          .contentType(ContentType.BINARY);
+    given().when()
+        .get("eval/" + info.getId() + "/download/generated")
+        .then()
+        .statusCode(200)
+        .contentType(ContentType.BINARY);
   }
 
   @Test
   void can_download_all_files() throws IOException {
-    Response response = given().when().get("eval/download_test/download");
+    Response response = given().when().get("eval/" + info.getId() + "/download");
 
     response.then()
         .statusCode(200)
@@ -82,7 +83,7 @@ public class DownloadControllerTest {
     ZipArchiveInputStream archive = new ZipArchiveInputStream(response.asInputStream());
     List<ZipArchiveEntry> entries = new ArrayList<>();
     ZipArchiveEntry entry;
-    while ((entry = archive.getNextZipEntry()) != null ) {
+    while ((entry = archive.getNextZipEntry()) != null) {
       entries.add(entry);
     }
 
@@ -99,13 +100,14 @@ public class DownloadControllerTest {
 
   @Test
   void return_404_if_evaluation_does_not_exist() {
-      given().when()
-          .get("eval/some_unknown_evaluation/download")
-          .then()
-          .statusCode(404);
+    UUID id = UUID.randomUUID();
+    given().when()
+        .get("eval/" + id + "/download")
+        .then()
+        .statusCode(404);
 
     given().when()
-        .get("eval/some_unknown_evaluation/download/generated")
+        .get("eval/" + id + "/download/generated")
         .then()
         .statusCode(404);
   }

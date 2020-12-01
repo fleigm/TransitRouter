@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 @Data
 @Builder
@@ -21,10 +22,14 @@ import java.util.Map;
 public class Info {
 
   @EqualsAndHashCode.Include
+  private final UUID id = UUID.randomUUID();
+
   private String name;
   private Parameters parameters;
   private LocalDateTime createdAt;
   private Status status;
+
+  //@Setter(AccessLevel.NONE)
   private Path path;
 
   @Builder.Default
@@ -59,5 +64,21 @@ public class Info {
   public Info addError(Error error) {
     this.errors.add(error);
     return this;
+  }
+
+  public void setBasePath(Path path) {
+    this.path = path.resolve(id.toString());
+  }
+
+  boolean hasFinished() {
+    return status == Status.FINISHED;
+  }
+
+  boolean hasFailed() {
+    return status == Status.FAILED;
+  }
+
+  boolean isPending() {
+    return status == Status.PENDING;
   }
 }

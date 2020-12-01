@@ -27,10 +27,11 @@ import javax.ws.rs.core.UriInfo;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-@Path("eval/{name}/report")
+@Path("eval/{id}/report")
 public class EvaluationReportController {
   @Inject
   EvaluationRepository evaluationRepository;
@@ -38,19 +39,19 @@ public class EvaluationReportController {
   @GET
   @Produces(MediaType.APPLICATION_JSON)
   public Response index(
-      @PathParam("name") String name,
+      @PathParam("id") UUID id,
       @Context UriInfo uriInfo,
       @BeanParam Paged paged,
       @QueryParam("search") @DefaultValue("") String search,
       @QueryParam("sort") @DefaultValue("") String sort) {
 
-    Optional<Info> info = evaluationRepository.find(name);
+    Optional<Info> info = evaluationRepository.find(id);
 
     if (info.isEmpty() || info.get().getStatus() != Status.FINISHED) {
       return Response.status(Response.Status.NOT_FOUND).build();
     }
 
-    return evaluationRepository.findEvaluationResult(name)
+    return evaluationRepository.findEvaluationResult(id)
         .map(evaluationResult -> getPagedReport(evaluationResult, uriInfo, paged, search, sort))
         .orElse(Response.status(Response.Status.NOT_FOUND).build());
   }

@@ -1,6 +1,6 @@
 package de.fleigm.ptmm.eval.api;
 
-import de.fleigm.ptmm.eval.FileEvaluationRepository;
+import de.fleigm.ptmm.eval.EvaluationRepository;
 
 import javax.inject.Inject;
 import javax.ws.rs.POST;
@@ -11,7 +11,7 @@ import javax.ws.rs.core.Response;
 public class EvaluationCommandsController {
 
   @Inject
-  FileEvaluationRepository evaluationRepository;
+  EvaluationRepository evaluationRepository;
 
   @POST
   @Path("clear-cache")

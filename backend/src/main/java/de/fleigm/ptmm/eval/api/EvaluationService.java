@@ -15,7 +15,6 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.util.concurrent.CompletableFuture;
@@ -34,32 +33,8 @@ public class EvaluationService {
   EvaluationProcess evaluationProcess;
 
   public EvaluationResponse createEvaluation(CreateEvaluationRequest request) {
-    Path path = Path.of(baseFolder, request.getName());
-
-    if (Files.exists(path)) {
-      throw new IllegalArgumentException("duplicate evaluation name");
-    }
-
-    try {
-      File file = new File(baseFolder + request.getName() + "/" + Evaluation.ORIGINAL_GTFS_FEED);
-      FileUtils.copyInputStreamToFile(request.getGtfsFeed(), file);
-    } catch (IOException e) {
-      throw new RuntimeException(e);
-    }
-
-    if (!ValidateGtfsFeed.validate(path.resolve(Evaluation.ORIGINAL_GTFS_FEED))) {
-      try {
-        FileUtils.deleteDirectory(path.toFile());
-      } catch (IOException e) {
-        log.error("Failed to delete evaluation folder {} with invalid gtfs feed.", request.getName(), e);
-      }
-      throw new IllegalArgumentException("invalid gtfs feed.");
-    }
-
-
     Info info = Info.builder()
         .name(request.getName())
-        .path(path)
         .createdAt(LocalDateTime.now())
         .parameters(Parameters.builder()
             .sigma(request.getSigma())
@@ -69,6 +44,24 @@ public class EvaluationService {
             .build())
         .status(Status.PENDING)
         .build();
+
+    info.setBasePath(Path.of(baseFolder));
+
+    try {
+      File file = info.getPath().resolve(Evaluation.ORIGINAL_GTFS_FEED).toFile();
+      FileUtils.copyInputStreamToFile(request.getGtfsFeed(), file);
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
+
+    if (!ValidateGtfsFeed.validate(info.getPath().resolve(Evaluation.ORIGINAL_GTFS_FEED))) {
+      try {
+        FileUtils.deleteDirectory(info.getPath().toFile());
+      } catch (IOException e) {
+        log.error("Failed to delete evaluation folder {} with invalid gtfs feed.", request.getName(), e);
+      }
+      throw new IllegalArgumentException("invalid gtfs feed.");
+    }
 
     evaluationRepository.save(info);
 

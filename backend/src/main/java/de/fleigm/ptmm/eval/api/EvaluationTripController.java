@@ -18,8 +18,9 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
-@Path("eval/{name}/trips")
+@Path("eval/{id}/trips")
 public class EvaluationTripController {
 
   @Inject
@@ -28,8 +29,8 @@ public class EvaluationTripController {
   @GET
   @Path("{tripId}")
   @Produces(MediaType.APPLICATION_JSON)
-  public Response show(@PathParam("name") String name, @PathParam("tripId") String tripId) {
-    Optional<EvaluationResult> evaluationResult = evaluationRepository.findEvaluationResult(name);
+  public Response show(@PathParam("id") UUID id, @PathParam("tripId") String tripId) {
+    Optional<EvaluationResult> evaluationResult = evaluationRepository.findEvaluationResult(id);
 
     if (evaluationResult.isEmpty()) {
       return Response.status(Response.Status.NOT_FOUND).build();

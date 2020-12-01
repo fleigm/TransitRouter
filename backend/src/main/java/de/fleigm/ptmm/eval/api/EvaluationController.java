@@ -19,6 +19,7 @@ import javax.ws.rs.core.Response;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Path("eval")
@@ -53,19 +54,19 @@ public class EvaluationController {
   }
 
   @GET
-  @Path("{name}")
+  @Path("{id}")
   @Produces(MediaType.APPLICATION_JSON)
-  public Response show(@PathParam("name") String name) {
-    return evaluationRepository.find(name)
+  public Response show(@PathParam("id") UUID id) {
+    return evaluationRepository.find(id)
         .map(info -> Response.ok(info).build())
         .orElse(Response.status(Response.Status.NOT_FOUND).build());
   }
 
   @DELETE
-  @Path("{name}")
+  @Path("{id}")
   @Produces(MediaType.APPLICATION_JSON)
-  public Response delete(@PathParam("name") String name) {
-    Optional<Exception> result = evaluationRepository.delete(name);
+  public Response delete(@PathParam("id") UUID id) {
+    Optional<Exception> result = evaluationRepository.delete(id);
 
     if (result.isEmpty()) {
       return Response.noContent().build();
