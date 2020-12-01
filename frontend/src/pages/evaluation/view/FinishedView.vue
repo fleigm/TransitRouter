@@ -1,5 +1,5 @@
 <template>
-  <div class="">
+  <div class="pb-8">
     <div class="grid grid-cols-3 gap-4 px-4">
       <EvaluationCard header="accuracy">
         <v-accuracy-chart :accuracies="info.statistics.accuracy" class="h-48"></v-accuracy-chart>
@@ -115,8 +115,6 @@
 
 
       <div class="grid auto-rows-min gap-4">
-
-
         <EvaluationCard header="shape generation errors">
           <div class="flex justify-between w-full">
             <v-metric :value="shapeGenerationErrors.length"
@@ -136,16 +134,8 @@
       <v-card class="col-span-2">
         <v-report-list :name="$route.params.name"></v-report-list>
       </v-card>
-
-
     </div>
 
-
-    <div class="container">
-      <v-card class="my-8">
-
-      </v-card>
-    </div>
   </div>
 </template>
 

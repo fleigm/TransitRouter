@@ -7,6 +7,7 @@ import Get from "./Get";
 import Histogram from "./Histogram";
 import Metric from "./Metric";
 import DoughnutChart from "./DoughnutChart";
+import HelperTooltip from "./HelperTooltip";
 
 export default {
     install: function (Vue) {
@@ -19,5 +20,6 @@ export default {
         Vue.component(Histogram.name, Histogram);
         Vue.component(Metric.name, Metric);
         Vue.component(DoughnutChart.name, DoughnutChart);
+        Vue.component(HelperTooltip.name, HelperTooltip);
     }
 }
