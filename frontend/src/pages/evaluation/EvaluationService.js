@@ -25,9 +25,9 @@ async function clearCache() {
     });
 }
 
-async function deleteEvaluation(name) {
+async function deleteEvaluation(id) {
     try {
-        const response = await http.delete(`eval/${name}`);
+        const response = await http.delete(`eval/${id}`);
         Notification.success(`Deleted evaluation.`);
         return response;
     } catch (error) {
@@ -67,6 +67,8 @@ async function createEvaluation(evaluation) {
             message: 'Your upload was successful and the evaluation process has started.',
             position: 'bottom-right',
         });
+
+        state.evaluations.push(response.data);
 
         return response;
     } catch (error) {

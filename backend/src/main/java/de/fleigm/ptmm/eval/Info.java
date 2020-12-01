@@ -22,7 +22,8 @@ import java.util.UUID;
 public class Info {
 
   @EqualsAndHashCode.Include
-  private final UUID id = UUID.randomUUID();
+  @Builder.Default
+  private UUID id = UUID.randomUUID();
 
   private String name;
   private Parameters parameters;

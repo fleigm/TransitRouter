@@ -3,7 +3,7 @@
     <template #header>
       <div class="flex justify-between items-center p-2">
         <div class="flex gap-4">
-          <router-link :to="{name: 'evaluation.view', params: {name: evaluation.name}}">
+          <router-link :to="{name: 'evaluation.view', params: {name: evaluation.id}}">
             {{ evaluation.name }}
           </router-link>
           <div v-if="!isFinished" class="text-secondary rounded-full border border-blue-400 px-2">

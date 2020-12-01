@@ -3,7 +3,7 @@
     <div class="container flex justify-between items-center">
       <el-breadcrumb separator-class="el-icon-arrow-right" class="my-8">
         <el-breadcrumb-item :to="{ name: 'evaluation.index' }">Evaluations</el-breadcrumb-item>
-        <el-breadcrumb-item>{{ name }}</el-breadcrumb-item>
+        <el-breadcrumb-item>{{ info.name }}</el-breadcrumb-item>
       </el-breadcrumb>
       <div>
         <el-dropdown>
@@ -57,7 +57,7 @@ export default {
   },
 
   computed: {
-    name() {
+    id() {
       return this.$route.params.name
     },
 
@@ -70,17 +70,17 @@ export default {
     },
 
     downloadLinkFull() {
-      return `eval/${this.name}/download`;
+      return `eval/${this.id}/download`;
     },
     downloadLinkGeneratedFeed() {
-      return `eval/${this.name}/download/generated`;
+      return `eval/${this.id}/download/generated`;
     }
   },
 
   methods: {
     fetchInfo() {
       this.loading = true;
-      this.$http.get(`eval/${this.name}`)
+      this.$http.get(`eval/${this.id}`)
           .then(({data}) => {
             this.info = data;
           })
@@ -94,7 +94,7 @@ export default {
     },
 
     download() {
-      this.$http.get(`eval/${this.name}/download`);
+      this.$http.get(`eval/${this.id}/download`);
     }
   },
 
