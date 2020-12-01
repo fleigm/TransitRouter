@@ -27,7 +27,10 @@ export default {
 
   computed: {
     data() {
-      const histogram = bin().thresholds([10, 20, 40, 80, 320, 640, 1280, 2560, 10240]);
+      const histogram = bin().thresholds([5, 10, 20, 40, 80, 320, 640, 1280, 2560, 10240]);
+
+      console.log(histogram(this.report.map(e => e.avgFd)));
+
       return {
         label: 'vehicle count',
         data: histogram(this.report.map(e => e.avgFd)),
