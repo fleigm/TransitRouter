@@ -5,6 +5,7 @@ import de.fleigm.ptmm.eval.Info;
 import de.fleigm.ptmm.eval.Parameters;
 import de.fleigm.ptmm.eval.Status;
 import io.quarkus.test.junit.QuarkusTest;
+import io.restassured.response.Response;
 import org.apache.commons.io.FileUtils;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.junit.jupiter.api.Test;
@@ -19,8 +20,7 @@ import java.nio.file.Paths;
 import java.time.LocalDateTime;
 
 import static io.restassured.RestAssured.given;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 @QuarkusTest
 public class EvaluationEndpointTest {
@@ -36,7 +36,7 @@ public class EvaluationEndpointTest {
     FileUtils.deleteDirectory(Paths.get(evaluationFolder, "endpoint_happy_path").toFile());
 
     String resourceAsStream = getClass().getClassLoader().getResource("test_feed.zip").getFile();
-    given()
+    Response response = given()
         .multiPart("feed", new File(resourceAsStream))
         .multiPart("name", "endpoint_happy_path")
         .multiPart("profile", "bus_shortest")
@@ -44,9 +44,13 @@ public class EvaluationEndpointTest {
         .multiPart("candidateSearchRadius", 25)
         .multiPart("beta", 2.0)
         .when()
-        .post("eval")
-        .then()
-        .statusCode(200);
+        .post("eval");
+
+    response.then().statusCode(201);
+
+    Info info = response.as(Info.class);
+
+    assertEquals("endpoint_happy_path", info.getName());
 
     assertTrue(Files.exists(Paths.get(evaluationFolder, "endpoint_happy_path")));
     assertTrue(evaluationRepository.find("endpoint_happy_path").isPresent());

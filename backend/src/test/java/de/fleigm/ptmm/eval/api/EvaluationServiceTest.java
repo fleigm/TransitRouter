@@ -14,7 +14,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -56,12 +55,14 @@ public class EvaluationServiceTest {
         .profile("bus_shortest")
         .build();
 
-    CompletableFuture<Info> evaluation = evaluationService.createEvaluation(request);
+    EvaluationResponse evaluation = evaluationService.createEvaluation(request);
 
-    Info info = evaluation.get();
+    evaluation.process().get();
 
-    assertTrue(evaluation.isDone());
-    assertFalse(evaluation.isCompletedExceptionally());
+    Info info = evaluation.info();
+
+    assertTrue(evaluation.process().isDone());
+    assertFalse(evaluation.process().isCompletedExceptionally());
 
     assertEquals(Status.FINISHED, info.getStatus());
 
@@ -90,9 +91,11 @@ public class EvaluationServiceTest {
         .profile("invalid_profile")
         .build();
 
-    CompletableFuture<Info> evaluation = evaluationService.createEvaluation(request);
+    EvaluationResponse evaluation = evaluationService.createEvaluation(request);
 
-    Info info = evaluation.get();
+    evaluation.process().get();
+
+    Info info = evaluation.info();
 
     assertEquals(Status.FAILED, info.getStatus());
     assertNotNull(info.getExtension("error.message"));

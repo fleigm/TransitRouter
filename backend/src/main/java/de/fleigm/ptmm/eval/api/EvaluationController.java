@@ -34,9 +34,11 @@ public class EvaluationController {
   @Consumes(MediaType.MULTIPART_FORM_DATA)
   @Produces(MediaType.APPLICATION_JSON)
   public Response create(@MultipartForm @Valid CreateEvaluationRequest request) {
-    evaluationService.createEvaluation(request);
+    EvaluationResponse evaluationResponse = evaluationService.createEvaluation(request);
 
-    return Response.ok().build();
+    return Response.status(Response.Status.CREATED)
+        .entity(evaluationResponse.info())
+        .build();
   }
 
   @GET

@@ -18,7 +18,6 @@ import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
@@ -54,9 +53,12 @@ public class DownloadControllerTest {
         .profile("bus_shortest")
         .build();
 
-    CompletableFuture<Info> evaluation = evaluationService.createEvaluation(request);
+    EvaluationResponse evaluation = evaluationService.createEvaluation(request);
 
-    info = evaluation.get();
+    // wait until evaluation process is finished
+    evaluation.process().get();
+
+    info = evaluation.info();
   }
 
 

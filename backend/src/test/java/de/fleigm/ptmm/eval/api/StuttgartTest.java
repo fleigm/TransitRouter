@@ -6,7 +6,6 @@ import com.graphhopper.util.PMap;
 import com.graphhopper.util.shapes.GHPoint;
 import de.fleigm.ptmm.Shape;
 import de.fleigm.ptmm.TransitFeed;
-import de.fleigm.ptmm.eval.Info;
 import de.fleigm.ptmm.routing.RoutingResult;
 import de.fleigm.ptmm.routing.TransitRouter;
 import io.quarkus.test.junit.QuarkusTest;
@@ -22,11 +21,11 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @Disabled
 @QuarkusTest
@@ -46,11 +45,11 @@ public class StuttgartTest {
 
   @Test
   void run_evaluation() throws IOException, ExecutionException, InterruptedException {
-    FileUtils.deleteDirectory(Paths.get(evaluationFolder, "bus_fastest_turn").toFile());
-    File testFeed = Paths.get(homeDir, "/uni/bachelor/project/files/stuttgart_bus_only.zip").toFile();
+    FileUtils.deleteDirectory(Paths.get(evaluationFolder, "st_complete").toFile());
+    File testFeed = Paths.get(homeDir, "/uni/bachelor/project/files/stuttgart.zip").toFile();
 
     CreateEvaluationRequest request = CreateEvaluationRequest.builder()
-        .name("bus_fastest_turn")
+        .name("st_complete")
         .gtfsFeed(FileUtils.openInputStream(testFeed))
         .sigma(25.0)
         .candidateSearchRadius(25.0)
@@ -58,11 +57,11 @@ public class StuttgartTest {
         .profile("bus_fastest_turn")
         .build();
 
-    CompletableFuture<Info> result = evaluationService.createEvaluation(request);
+    EvaluationResponse result = evaluationService.createEvaluation(request);
 
-    Info info = result.get();
+    result.process().get();
 
-    assertNotNull(info);
+    assertTrue(result.process().isDone());
   }
 
   @ParameterizedTest
@@ -80,11 +79,11 @@ public class StuttgartTest {
         .profile(profile)
         .build();
 
-    CompletableFuture<Info> result = evaluationService.createEvaluation(request);
+    EvaluationResponse result = evaluationService.createEvaluation(request);
 
-    Info info = result.get();
+    result.process().get();
 
-    assertNotNull(info);
+    assertTrue(result.process().isDone());
   }
 
   @Test

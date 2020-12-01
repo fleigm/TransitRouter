@@ -33,7 +33,7 @@ public class EvaluationService {
   @Inject
   EvaluationProcess evaluationProcess;
 
-  public CompletableFuture<Info> createEvaluation(CreateEvaluationRequest request) {
+  public EvaluationResponse createEvaluation(CreateEvaluationRequest request) {
     Path path = Path.of(baseFolder, request.getName());
 
     if (Files.exists(path)) {
@@ -72,9 +72,7 @@ public class EvaluationService {
 
     evaluationRepository.save(info);
 
-    return CompletableFuture
-        .runAsync(() -> evaluationProcess.run(info))
-        .thenApply(unused -> info);
-
+    return new EvaluationResponse(info, CompletableFuture.runAsync(() -> evaluationProcess.run(info)));
   }
+
 }
