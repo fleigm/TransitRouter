@@ -24,7 +24,7 @@ public class GenerateQuickStats implements Consumer<Info> {
 
   @Override
   public void accept(Info info) {
-    Report report = Report.read(info.fullPath(evaluationFolder).resolve(Evaluation.GTFS_FULL_REPORT));
+    Report report = Report.read(info.getPath().resolve(Evaluation.GTFS_FULL_REPORT));
 
     info.addStatistic("accuracy", computeAccuracy(report))
         .addStatistic("fd", buildStatsFor(report, ReportEntry::avgFd))

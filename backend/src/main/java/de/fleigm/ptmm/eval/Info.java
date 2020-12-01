@@ -60,8 +60,4 @@ public class Info {
     this.errors.add(error);
     return this;
   }
-
-  public Path fullPath(String evaluationFolder) {
-    return Path.of(evaluationFolder, name);
-  }
 }

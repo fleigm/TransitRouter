@@ -42,6 +42,8 @@ public class FileEvaluationRepository implements EvaluationRepository {
 
   @Override
   public void save(Info info) {
+    info.setPath(Path.of(evaluationBasePath).resolve(info.getName()));
+
     if (!evaluations.contains(info)) {
       evaluations.add(info);
     }

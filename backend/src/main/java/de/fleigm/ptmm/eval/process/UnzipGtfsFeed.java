@@ -22,12 +22,12 @@ public class UnzipGtfsFeed implements Consumer<Info> {
   @Override
   public void accept(Info info) {
     Unzip.apply(
-        info.fullPath(evaluationFolder).resolve(Evaluation.ORIGINAL_GTFS_FEED),
-        info.fullPath(evaluationFolder).resolve(Evaluation.ORIGINAL_GTFS_FOLDER));
+        info.getPath().resolve(Evaluation.ORIGINAL_GTFS_FEED),
+        info.getPath().resolve(Evaluation.ORIGINAL_GTFS_FOLDER));
 
     Unzip.apply(
-        info.fullPath(evaluationFolder).resolve(Evaluation.GENERATED_GTFS_FEED),
-        info.fullPath(evaluationFolder).resolve(Evaluation.GENERATED_GTFS_FOLDER));
+        info.getPath().resolve(Evaluation.GENERATED_GTFS_FEED),
+        info.getPath().resolve(Evaluation.GENERATED_GTFS_FOLDER));
   }
 
 }

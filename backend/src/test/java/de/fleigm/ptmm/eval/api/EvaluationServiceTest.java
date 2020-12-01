@@ -66,14 +66,14 @@ public class EvaluationServiceTest {
 
     assertEquals(Status.FINISHED, info.getStatus());
 
-    assertTrue(Files.isDirectory(info.fullPath(evaluationFolder)));
-    assertTrue(Files.isDirectory(info.fullPath(evaluationFolder).resolve(Evaluation.ORIGINAL_GTFS_FOLDER)));
-    assertTrue(Files.isDirectory(info.fullPath(evaluationFolder).resolve(Evaluation.GENERATED_GTFS_FOLDER)));
-    assertTrue(Files.exists(info.fullPath(evaluationFolder).resolve(Evaluation.ORIGINAL_GTFS_FEED)));
-    assertTrue(Files.exists(info.fullPath(evaluationFolder).resolve(Evaluation.GENERATED_GTFS_FEED)));
-    assertTrue(Files.exists(info.fullPath(evaluationFolder).resolve(Evaluation.GTFS_FULL_REPORT)));
-    assertTrue(Files.exists(info.fullPath(evaluationFolder).resolve(Evaluation.SHAPEVL_OUTPUT)));
-    assertTrue(Files.exists(info.fullPath(evaluationFolder).resolve(Evaluation.INFO_FILE)));
+    assertTrue(Files.isDirectory(info.getPath()));
+    assertTrue(Files.isDirectory(info.getPath().resolve(Evaluation.ORIGINAL_GTFS_FOLDER)));
+    assertTrue(Files.isDirectory(info.getPath().resolve(Evaluation.GENERATED_GTFS_FOLDER)));
+    assertTrue(Files.exists(info.getPath().resolve(Evaluation.ORIGINAL_GTFS_FEED)));
+    assertTrue(Files.exists(info.getPath().resolve(Evaluation.GENERATED_GTFS_FEED)));
+    assertTrue(Files.exists(info.getPath().resolve(Evaluation.GTFS_FULL_REPORT)));
+    assertTrue(Files.exists(info.getPath().resolve(Evaluation.SHAPEVL_OUTPUT)));
+    assertTrue(Files.exists(info.getPath().resolve(Evaluation.INFO_FILE)));
   }
 
   @Test

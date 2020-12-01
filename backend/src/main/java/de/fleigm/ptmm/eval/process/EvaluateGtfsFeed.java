@@ -29,7 +29,7 @@ public class EvaluateGtfsFeed implements Consumer<Info> {
   @SneakyThrows
   @Override
   public void accept(Info info) {
-    Path folder = info.fullPath(evaluationFolder);
+    Path folder = info.getPath();
     Path original = folder.resolve(Evaluation.ORIGINAL_GTFS_FOLDER);
     Path generated = folder.resolve(Evaluation.GENERATED_GTFS_FOLDER);
     String command = String.format("%s -m 3 -f %s -g %s %s",
