@@ -11,8 +11,6 @@ WORKDIR '/app'
 # Install java and the run-java script
 # Also set up permissions for user `1001`
 RUN microdnf install curl ca-certificates ${JAVA_PACKAGE}
-RUN microdnf update
-RUN microdnf clean all
 RUN chown 1001 .
 RUN chmod "g+rwX" .
 RUN chown 1001:root .
