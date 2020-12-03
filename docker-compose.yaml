@@ -1,0 +1,15 @@
+version: '3.5'
+services:
+  app:
+    container_name: michael-fleig-project
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      APP_RESOURCES: /app/resources
+      EVALUATOION_TOOL: /app/shapevl
+      ROUTING_GRAPHHOPPER_CLEAN: true
+    volumes:
+      - /home/michi-pc/uni/bachelor/project/dr:/app/resources
+    ports:
+      - 8080:8080
