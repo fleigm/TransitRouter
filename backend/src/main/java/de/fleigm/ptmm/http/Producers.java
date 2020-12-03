@@ -8,12 +8,12 @@ import com.graphhopper.util.PMap;
 import com.graphhopper.util.Parameters;
 import de.fleigm.ptmm.routing.BusFlagEncoder;
 import io.quarkus.runtime.Startup;
+import org.apache.commons.io.FileUtils;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Produces;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 
 @ApplicationScoped
@@ -29,7 +29,7 @@ public class Producers {
 
     if (cleanTemporaryFiles) {
       try {
-        Files.deleteIfExists(Path.of(storagePath));
+        FileUtils.deleteDirectory(Path.of(storagePath).toFile());
       } catch (IOException e) {
         e.printStackTrace();
       }
