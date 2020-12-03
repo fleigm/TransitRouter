@@ -6,7 +6,6 @@ import com.graphhopper.routing.ev.DecimalEncodedValue;
 import com.graphhopper.routing.ev.Roundabout;
 import com.graphhopper.routing.util.EncodingManager;
 import com.graphhopper.routing.util.FlagEncoder;
-import com.graphhopper.routing.util.parsers.helpers.OSMValueExtractor;
 import com.graphhopper.storage.IntsRef;
 import com.graphhopper.util.PMap;
 import de.fleigm.ptmm.routing.BusFlagEncoder;
@@ -43,8 +42,6 @@ public class BusFlagEncoderTest {
     way.setTag("maxspeed", "2");
     way.setTag("vehicle", "yes");
     way.setTag("highway", "secondary");
-
-    double maxspeed = OSMValueExtractor.stringToKmh(way.getTag("maxspeed"));
 
     EncodingManager.AcceptWay allowed = new EncodingManager.AcceptWay();
     for (FlagEncoder encoder : em.fetchEdgeEncoders())

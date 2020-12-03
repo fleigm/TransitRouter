@@ -1,5 +1,7 @@
 package de.fleigm.ptmm.eval.process;
 
+import lombok.extern.slf4j.Slf4j;
+
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.List;
@@ -7,6 +9,7 @@ import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
+@Slf4j
 public final class ValidateGtfsFeed {
 
   private static final List<String> REQUIRED_FILES = List.of(
@@ -47,6 +50,7 @@ public final class ValidateGtfsFeed {
 
       return entries.containsAll(REQUIRED_FILES);
     } catch (IOException e) {
+      log.error("GTFS feed validation failed.", e);
       return false;
     }
   }

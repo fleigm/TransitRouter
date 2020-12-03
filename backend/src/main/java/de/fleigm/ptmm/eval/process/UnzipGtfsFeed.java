@@ -4,11 +4,13 @@ import de.fleigm.ptmm.eval.Evaluation;
 import de.fleigm.ptmm.eval.Info;
 import de.fleigm.ptmm.util.Unzip;
 import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 import javax.enterprise.context.Dependent;
 import java.util.function.Consumer;
 
+@Slf4j
 @Dependent
 public class UnzipGtfsFeed implements Consumer<Info> {
 
@@ -21,6 +23,8 @@ public class UnzipGtfsFeed implements Consumer<Info> {
   @SneakyThrows
   @Override
   public void accept(Info info) {
+    log.info("Start unzip step.");
+
     Unzip.apply(
         info.getPath().resolve(Evaluation.ORIGINAL_GTFS_FEED),
         info.getPath().resolve(Evaluation.ORIGINAL_GTFS_FOLDER));
@@ -28,6 +32,8 @@ public class UnzipGtfsFeed implements Consumer<Info> {
     Unzip.apply(
         info.getPath().resolve(Evaluation.GENERATED_GTFS_FEED),
         info.getPath().resolve(Evaluation.GENERATED_GTFS_FOLDER));
+
+    log.info("Finished unzip step");
   }
 
 }

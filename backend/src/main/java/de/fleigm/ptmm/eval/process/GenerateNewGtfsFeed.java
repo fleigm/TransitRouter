@@ -14,6 +14,7 @@ import de.fleigm.ptmm.routing.TransitRouter;
 import de.fleigm.ptmm.util.Helper;
 import de.fleigm.ptmm.util.StopWatch;
 import lombok.Value;
+import lombok.extern.slf4j.Slf4j;
 import org.mapdb.Fun;
 
 import javax.enterprise.context.Dependent;
@@ -23,6 +24,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Dependent
 public class GenerateNewGtfsFeed implements Consumer<Info> {
 
@@ -67,6 +69,8 @@ public class GenerateNewGtfsFeed implements Consumer<Info> {
     }
 
     void run() {
+      log.info("Start feed generation step.");
+
       AtomicInteger trips = new AtomicInteger(0);
       AtomicInteger generatedShapes = new AtomicInteger(0);
 
@@ -88,6 +92,8 @@ public class GenerateNewGtfsFeed implements Consumer<Info> {
       info.addStatistic("trips", trips.intValue())
           .addStatistic("generatedShapes", generatedShapes.intValue())
           .addStatistic("executionTime.shapeGeneration", stopWatch.getMillis());
+
+      log.info("Finished feed generation step. Took {}s", stopWatch.getSeconds());
     }
 
     private PatternWitShape generateShape(Pattern pattern) {

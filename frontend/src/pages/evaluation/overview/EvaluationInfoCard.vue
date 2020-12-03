@@ -28,7 +28,7 @@
 
 <script>
 import VAccuracyChart from "../AccuracyChart";
-import VSummary from "../view/Summary";
+import VSummary from "./Summary";
 
 export default {
   name: "v-evaluation-info-card",

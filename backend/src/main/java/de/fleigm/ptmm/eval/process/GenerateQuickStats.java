@@ -4,6 +4,7 @@ import de.fleigm.ptmm.eval.Evaluation;
 import de.fleigm.ptmm.eval.Info;
 import de.fleigm.ptmm.eval.Report;
 import de.fleigm.ptmm.eval.ReportEntry;
+import lombok.extern.slf4j.Slf4j;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 import javax.enterprise.context.Dependent;
@@ -13,6 +14,7 @@ import java.util.DoubleSummaryStatistics;
 import java.util.function.Consumer;
 import java.util.function.ToDoubleFunction;
 
+@Slf4j
 @Dependent
 public class GenerateQuickStats implements Consumer<Info> {
 
@@ -24,12 +26,16 @@ public class GenerateQuickStats implements Consumer<Info> {
 
   @Override
   public void accept(Info info) {
+    log.info("Start quick stats step.");
+
     Report report = Report.read(info.getPath().resolve(Evaluation.GTFS_FULL_REPORT));
 
     info.addStatistic("accuracy", computeAccuracy(report))
         .addStatistic("fd", buildStatsFor(report, ReportEntry::avgFd))
         .addStatistic("an", buildStatsFor(report, ReportEntry::an))
         .addStatistic("al", buildStatsFor(report, ReportEntry::al));
+
+    log.info("Finished quick stats step.");
   }
 
   private JsonObject buildStatsFor(Report report, ToDoubleFunction<ReportEntry> mapper) {

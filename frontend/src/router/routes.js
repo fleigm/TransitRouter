@@ -4,6 +4,7 @@ import EvaluationIndex from '../pages/evaluation/Index';
 import EvaluationView from '../pages/evaluation/view/Index';
 import EvaluationOverview from '../pages/evaluation/overview/Index';
 import RoutingIndex from '../pages/routing/Index';
+import WikiIndex from '../pages/wiki/Index';
 
 const routes = [
     {
@@ -30,6 +31,10 @@ const routes = [
         path: '/candidate-finder',
         name: 'candidateFinder.index',
         component: CandidateFinder,
+    }, {
+        path: '/wiki',
+        name: 'wiki.index',
+        component: WikiIndex,
     }
 ]
 

@@ -42,6 +42,9 @@ export default {
         }, {
           name: 'Candidate Finder',
           page: 'candidateFinder.index'
+        }, {
+          name: 'Wiki',
+          page: 'wiki.index',
         }
       ]
     }

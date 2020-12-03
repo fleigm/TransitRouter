@@ -144,7 +144,6 @@ import VReportList from "./ReportList";
 import HistogramAverageFrechetDistance from "./HistogramAverageFrechetDistance";
 import HistogramMismatchedHopSegments from "./HistogramMismatchedHopSegments";
 import HistogramLengthMismatchedHopSegments from "./HistogramLengthMismatchedHopSegments";
-import VSummary from "./Summary";
 import ExecutionTimeChart from "./ExecutionTimeChart";
 import EvaluationCard from "./EvaluationCard";
 import VAccuracyChart from "../AccuracyChart";
@@ -156,7 +155,6 @@ export default {
     VAccuracyChart,
     EvaluationCard,
     ExecutionTimeChart,
-    VSummary,
     HistogramLengthMismatchedHopSegments,
     HistogramMismatchedHopSegments, HistogramAverageFrechetDistance, VReportList
   },
