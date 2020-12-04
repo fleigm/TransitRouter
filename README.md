@@ -11,15 +11,23 @@ The goal of this project is to automatically generate shape files for bus routes
 
  Set the correct paths in **backend/src/main/resources/application.properties**
  
- ## Development
- run `npm run watch` inside the frontend module. The compiled code is copied into the backend resource folder automatically.
- 
- run `.\mvnw quarkus:dev` in the root folder
- 
- ## Docker
- 
- `sudo docker build -f backend/src/main/docker/Dockerfile.jvm -t <name> .`
- 
- `
- sudo docker run -i --rm -p 8080:8080 --name <name> <name>`
+## Development
+run `npm run watch` inside the frontend module. The compiled code is copied into the backend resource folder automatically.
+
+run `.\mvnw quarkus:dev` in the root folder
+
+## Docker
+
+compile project: `./mvnw clean package -Dmaven.test.skip=true`
+
+### with docker-compose
+bind volume in docker-compose.yaml
+
+run `docker-compose build` and `docker-compose up -d`
+
+### with DockerFile
+`sudo docker build -t michael-fleig-project .`
+
+`
+sudo docker run -i --rm -p 8080:8080 --name <name> <name>`
  

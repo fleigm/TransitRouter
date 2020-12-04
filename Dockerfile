@@ -4,7 +4,6 @@ ARG RUN_JAVA_VERSION=1.3.8
 
 ENV LANG='en_US.UTF-8' LANGUAGE='en_US:en'
 
-
 WORKDIR '/app'
 
 # Install java and the run-java script
