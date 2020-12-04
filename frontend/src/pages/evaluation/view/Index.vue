@@ -24,7 +24,7 @@
             cancel-button-text='No, Thanks'
             confirm-button-text='Yes'
             title="Are you sure to delete this evaluation?"
-            @confim="deleteEvaluation"
+            @confirm="deleteEvaluation()"
         >
           <el-button slot="reference" plain size="mini" type="danger">Delete</el-button>
         </el-popconfirm>
@@ -52,7 +52,9 @@ export default {
   data() {
     return {
       loading: false,
-      info: null,
+      info: {
+        name: '',
+      },
     }
   },
 
@@ -90,7 +92,8 @@ export default {
     },
 
     deleteEvaluation() {
-      EvaluationService.deleteEvaluation(this.info.name);
+      EvaluationService.deleteEvaluation(this.id)
+          .then(() => this.$router.push({name: 'evaluation.index'}))
     },
 
     download() {
