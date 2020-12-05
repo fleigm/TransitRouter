@@ -9,7 +9,7 @@
     </div>
 
     <v-evaluation-info-card v-for="evaluation in evaluations"
-                            :key="evaluation.name"
+                            :key="evaluation.id"
                             :evaluation="evaluation"
     ></v-evaluation-info-card>
     <div v-if="!evaluations.length">

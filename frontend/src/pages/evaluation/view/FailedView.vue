@@ -1,17 +1,16 @@
 <template>
-  <v-card header="evaluation error message">
-    <div class="p-2">
-      <pre class="py-2">{{ info.extension['error.message']}}</pre>
-      <pre class="py-2">{{ info.extension['error.rootCause']}}</pre>
-      <pre class="py-2">{{ info.extension['error.stackTrace'] }}</pre>
-    </div>
-  </v-card>
+  <div class="container">
+    <ErrorCard v-for="(error, i) in info.errors" :key="i" :error="error"></ErrorCard>
+  </div>
 </template>
 
 <script>
+import EvaluationCard from "./EvaluationCard";
+import ErrorCard from "./ErrorCard";
+
 export default {
   name: "v-failed-view",
-
+  components: {ErrorCard, EvaluationCard},
   props: {
     info: {
       type: Object,

@@ -5,7 +5,7 @@
         <el-breadcrumb-item :to="{ name: 'evaluation.index' }">Evaluations</el-breadcrumb-item>
         <el-breadcrumb-item>{{ info.name }}</el-breadcrumb-item>
       </el-breadcrumb>
-      <div>
+      <div v-if="!notFound && !loading">
         <el-dropdown>
           <el-button size="mini">
             Download<i class="el-icon-arrow-down el-icon--right"></i>
@@ -32,8 +32,14 @@
       </div>
     </div>
 
+    <div v-if="loading" v-loading="true" class="w-full h-128"></div>
+
     <v-finished-view v-if="finished" :info="info"></v-finished-view>
     <v-failed-view v-else-if="failed" :info="info"></v-failed-view>
+
+    <div v-if="notFound">
+      <div class="text-secondary text-2xl font-thin text-center py-8">Could not find evaluation with id {{ id }}</div>
+    </div>
 
   </div>
 </template>
@@ -55,6 +61,7 @@ export default {
       info: {
         name: '',
       },
+      notFound: false,
     }
   },
 
@@ -85,6 +92,13 @@ export default {
       this.$http.get(`eval/${this.id}`)
           .then(({data}) => {
             this.info = data;
+          })
+          .catch(({response}) => {
+            console.log(response);
+
+            if (response.status === 404) {
+              this.notFound = true;
+            }
           })
           .finally(() => {
             this.loading = false;

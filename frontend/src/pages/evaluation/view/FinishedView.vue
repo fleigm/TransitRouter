@@ -147,11 +147,13 @@ import HistogramLengthMismatchedHopSegments from "./HistogramLengthMismatchedHop
 import ExecutionTimeChart from "./ExecutionTimeChart";
 import EvaluationCard from "./EvaluationCard";
 import VAccuracyChart from "../AccuracyChart";
+import ErrorCard from "./ErrorCard";
 
 export default {
   name: "v-finished-view",
 
   components: {
+    ErrorCard,
     VAccuracyChart,
     EvaluationCard,
     ExecutionTimeChart,
