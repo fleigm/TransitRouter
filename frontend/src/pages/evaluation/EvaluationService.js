@@ -68,7 +68,7 @@ async function createEvaluation(evaluation) {
             position: 'bottom-right',
         });
 
-        state.evaluations.push(response.data);
+        state.evaluations.unshift(response.data);
 
         return response;
     } catch (error) {
