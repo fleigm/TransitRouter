@@ -98,9 +98,7 @@ public class EvaluationServiceTest {
     Info info = evaluation.info();
 
     assertEquals(Status.FAILED, info.getStatus());
-    assertNotNull(info.getExtension("error.message"));
-    assertNotNull(info.getExtension("error.stackTrace"));
-    assertNotNull(info.getExtension("error.rootCause"));
+    assertTrue(info.getErrors().stream().anyMatch(error -> error.getCode().equals("process.failed")));
   }
 
   @Test

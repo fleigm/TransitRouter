@@ -1,5 +1,6 @@
 package de.fleigm.ptmm.eval.api;
 
+import de.fleigm.ptmm.DistanceUnit;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -47,5 +48,8 @@ public class CreateEvaluationRequest {
   @NotNull
   @Positive
   private Double beta;
+
+  @FormParam("distanceUnit")
+  private DistanceUnit distanceUnit;
 
 }

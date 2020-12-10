@@ -43,4 +43,17 @@ public class Shape {
 
     return shapePoints;
   }
+
+  public List<ShapePoint> convertToShapePoints(String shapeId, DistanceUnit distanceUnit) {
+    List<ShapePoint> shapePoints = convertToShapePoints(shapeId);
+
+    if (distanceUnit == DistanceUnit.KILOMETERS) {
+      shapePoints.forEach(shapePoint -> shapePoint.shape_dist_traveled /= 1000);
+    } else if (distanceUnit == DistanceUnit.MILES) {
+      shapePoints.forEach(shapePoint -> shapePoint.shape_dist_traveled /= 1609.34);
+    }
+
+    return shapePoints;
+  }
+
 }

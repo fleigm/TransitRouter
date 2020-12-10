@@ -9,6 +9,7 @@ import com.graphhopper.routing.util.FlagEncoder;
 import com.graphhopper.storage.IntsRef;
 import com.graphhopper.util.PMap;
 import de.fleigm.ptmm.routing.BusFlagEncoder;
+import de.fleigm.ptmm.routing.BusNetworkRelationTagParser;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -17,7 +18,10 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 public class BusFlagEncoderTest {
 
   final BusFlagEncoder encoder = createEncoder();
-  private final EncodingManager em = new EncodingManager.Builder().add(encoder).build();
+  private final EncodingManager em = new EncodingManager.Builder()
+      .add(encoder)
+      .addRelationTagParser(new BusNetworkRelationTagParser())
+      .build();
 
   private final BooleanEncodedValue roundaboutEnc = em.getBooleanEncodedValue(Roundabout.KEY);
   private final DecimalEncodedValue avSpeedEnc = encoder.getAverageSpeedEnc();

@@ -1,5 +1,6 @@
 package de.fleigm.ptmm.eval.api;
 
+import de.fleigm.ptmm.DistanceUnit;
 import de.fleigm.ptmm.eval.Evaluation;
 import de.fleigm.ptmm.eval.EvaluationRepository;
 import de.fleigm.ptmm.eval.Info;
@@ -41,6 +42,7 @@ public class EvaluationService {
             .candidateSearchRadius(request.getCandidateSearchRadius())
             .beta(request.getBeta())
             .profile(request.getProfile())
+            .distanceUnit(request.getDistanceUnit() != null ? request.getDistanceUnit() : DistanceUnit.METERS)
             .build())
         .status(Status.PENDING)
         .build();
