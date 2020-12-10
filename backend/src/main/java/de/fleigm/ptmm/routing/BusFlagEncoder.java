@@ -60,7 +60,7 @@ public class BusFlagEncoder extends AbstractFlagEncoder {
     restrictedValues.add("emergency");
     restrictedValues.add("private");
     restrictedValues.add("customers");
-    restrictedValues.add("destination");
+    //restrictedValues.add("destination");
 
     intendedValues.add("yes");
     intendedValues.add("permissive");
@@ -189,15 +189,13 @@ public class BusFlagEncoder extends AbstractFlagEncoder {
       return EncodingManager.Access.CAN_SKIP;
     }
 
-    if (!defaultSpeedMap.containsKey(highwayValue))
+    if (!defaultSpeedMap.containsKey(highwayValue)) {
       return EncodingManager.Access.CAN_SKIP;
-
-    if (highwayValue.equals("track")) {
-      log.warn("did not skip track");
     }
 
-    if (way.hasTag("impassable", "yes") || way.hasTag("status", "impassable"))
+    if (way.hasTag("impassable", "yes") || way.hasTag("status", "impassable")) {
       return EncodingManager.Access.CAN_SKIP;
+    }
 
     // multiple restrictions needs special handling compared to foot and bike, see also motorcycle
     if (!firstValue.isEmpty()) {
@@ -208,13 +206,15 @@ public class BusFlagEncoder extends AbstractFlagEncoder {
     }
 
     // do not drive street cars into fords
-    if (isBlockFords() && ("ford".equals(highwayValue) || way.hasTag("ford")))
+    if (isBlockFords() && ("ford".equals(highwayValue) || way.hasTag("ford"))) {
       return EncodingManager.Access.CAN_SKIP;
+    }
 
-    if (getConditionalTagInspector().isPermittedWayConditionallyRestricted(way))
+    if (getConditionalTagInspector().isPermittedWayConditionallyRestricted(way)) {
       return EncodingManager.Access.CAN_SKIP;
-    else
+    } else {
       return EncodingManager.Access.WAY;
+    }
   }
 
   @Override
@@ -244,6 +244,12 @@ public class BusFlagEncoder extends AbstractFlagEncoder {
       accessEnc.setBool(true, edgeFlags, true);
     }
 
+    // allow designated ways only if they a part of a bus route
+    boolean busRouteNetwork = getBooleanEncodedValue(BusRouteNetwork.KEY).getBool(true, edgeFlags);
+    if (way.hasTag("motor_vehicle", "destination") && !busRouteNetwork) {
+      accessEnc.setBool(true, edgeFlags, false);
+      accessEnc.setBool(false, edgeFlags, false);
+    }
 
     return edgeFlags;
   }
@@ -254,7 +260,8 @@ public class BusFlagEncoder extends AbstractFlagEncoder {
   protected boolean isBackwardOneway(ReaderWay way) {
     return way.hasTag("oneway", "-1")
            || way.hasTag("vehicle:forward", "no")
-           || way.hasTag("motor_vehicle:forward", "no");
+           || way.hasTag("motor_vehicle:forward", "no")
+           || way.hasTag("busway");
   }
 
   /**

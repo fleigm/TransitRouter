@@ -12,6 +12,7 @@ import de.fleigm.ptmm.routing.BusFlagEncoder;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class BusFlagEncoderTest {
 
@@ -52,4 +53,20 @@ public class BusFlagEncoderTest {
     assertEquals(2, avSpeedEnc.getDecimal(false, edgeFlags), 1e-1);
   }
 
+  @Test
+  void allow_oneway_with_bus_lane() {
+    ReaderWay way = new ReaderWay(1);
+    way.setTag("highway", "secondary");
+    way.setTag("busway", "opposite_lane");
+    way.setTag("oneway", "yes");
+
+    EncodingManager.AcceptWay allowed = new EncodingManager.AcceptWay();
+    for (FlagEncoder encoder : em.fetchEdgeEncoders())
+      allowed.put(encoder.toString(), EncodingManager.Access.WAY);
+    IntsRef relFlags = em.createRelationFlags();
+    IntsRef edgeFlags = em.handleWayTags(way, allowed, relFlags);
+
+    assertTrue(accessEnc.getBool(false, edgeFlags));
+    assertTrue(accessEnc.getBool(true, edgeFlags));
+  }
 }
