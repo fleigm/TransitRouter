@@ -3,7 +3,8 @@
       class=""
       :zoom="zoom"
       :center="center"
-      :bounds="bounds">
+      :bounds="bounds"
+      @click="click">
     <l-tile-layer :url="url"/>
     <slot></slot>
   </l-map>
@@ -30,5 +31,11 @@ export default {
       url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
     }
   },
+
+  methods: {
+    click(e) {
+      this.$emit("click", e);
+    }
+  }
 }
 </script>

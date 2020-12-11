@@ -46,7 +46,8 @@
       </el-form>
     </div>
     <div class="p-4 w-full">
-      <v-map :bounds="bounds" v-if="route">
+      <v-map v-if="route" :bounds="bounds"
+             @click="addObservationByClick">
         <l-marker v-for="(observation, i) in route.observations"
                   :key="'o' + i"
                   :lat-lng="observation"
@@ -124,10 +125,7 @@ export default {
         ]
       },
       formData: {
-        observations: [
-          [48.8095244, 9.1819293],
-          [48.8157918, 9.1876709],
-        ],
+        observations: [],
         profile: 'bus_fastest',
         sigma: 25.0,
         beta: 2.0,
@@ -140,13 +138,14 @@ export default {
 
   computed: {
     bounds() {
-      return L.latLngBounds(this.formData.observations);
+      return this.formData.observations.length ? L.latLngBounds(this.formData.observations) : null;
     },
   },
 
   methods: {
     addObservation() {
-      let values = this.observationInput.match('(\\d*\\.?\\d+), (\\d*\\.?\\d+)');
+      let values = this.observationInput.match('(-?\\d*\\.?\\d+), (-?\\d*\\.?\\d+)');
+      console.log(values);
 
       if (!values) {
         return;
@@ -155,6 +154,12 @@ export default {
       this.observationInput = '';
 
       this.formData.observations.push([Number(values[1]), Number(values[2])]);
+    },
+
+    addObservationByClick(event) {
+      const {lat, lng} = event.latlng;
+      this.formData.observations.push([lat, lng]);
+
     },
 
     removeObservation(index) {

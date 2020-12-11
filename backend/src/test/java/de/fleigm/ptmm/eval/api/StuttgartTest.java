@@ -1,30 +1,22 @@
 package de.fleigm.ptmm.eval.api;
 
 import com.graphhopper.GraphHopper;
-import com.graphhopper.matching.Observation;
-import com.graphhopper.util.PMap;
-import com.graphhopper.util.shapes.GHPoint;
-import de.fleigm.ptmm.Shape;
-import de.fleigm.ptmm.TransitFeed;
-import de.fleigm.ptmm.routing.RoutingResult;
-import de.fleigm.ptmm.routing.TransitRouter;
 import io.quarkus.test.junit.QuarkusTest;
 import org.apache.commons.io.FileUtils;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import javax.inject.Inject;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Paths;
-import java.util.List;
 import java.util.concurrent.ExecutionException;
-import java.util.stream.Collectors;
 
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @Disabled
@@ -86,57 +78,35 @@ public class StuttgartTest {
     assertTrue(result.process().isDone());
   }
 
-  @Test
-  void qwe() {
-    String trip = "37.T0.31-814-j20-4.3.R";
-    TransitFeed transitFeed = new TransitFeed(Paths.get(homeDir, "/uni/bachelor/project/files/stuttgart_bus_only.zip"));
-    TransitRouter transitRouter = new TransitRouter(graphHopper, new PMap()
-        .putObject("profile", "bus_fastest")
-        .putObject("measurement_error_sigma", 25)
-        .putObject("candidate_search_radius", 25)
-        .putObject("beta", 2.0)
-        .putObject("u_turn_distance_penalty", 1500));
+  @ParameterizedTest
+  @CsvSource({
+      /*"25, 2.0", "20, 2.0", "15, 2.0", "10, 2.0", "5, 2.0", "2, 2.0",
+      "25, 1.8", "20, 1.8", "15, 1.8", "10, 1.8", "5, 1.8", "2, 1.8",
+      "25, 1.6", "20, 1.6", "15, 1.6", "10, 1.6", "5, 1.6", "2, 1.6",
+      "25, 1.4", "20, 1.4", "15, 1.4", "10, 1.4", "5, 1.4", "2, 1.4",
+      "25, 1.2", "20, 1.2", "15, 1.2", "10, 1.2", "5, 1.2", "2, 1.2",
+      "25, 1.0", "20, 1.0", "15, 1.0", "10, 1.0", "5, 1.0", "2, 1.0",
+      "25, 0.8", "20, 0.8", "15, 0.8", "10, 0.8", "5, 0.8", "2, 0.8",
+      "25, 0.6", "20, 0.6", "15, 0.6", "10, 0.6", "5, 0.6", "2, 0.6",
+      "25, 0.4", "20, 0.4", "15, 0.4", "10, 0.4", "5, 0.4", "2, 0.4",*/
+      "25, 0.2", "20, 0.2", "15, 0.2", "10, 0.2", "5, 0.2", "2, 0.2"})
+  void run_with_different_parameters(double sigma, double beta) throws IOException, ExecutionException, InterruptedException {
+    File feed = Paths.get(homeDir, "/uni/bachelor/project/files/vg.zip").toFile();
 
-    List<Observation> observations = transitFeed.getOrderedStopsForTrip(trip).stream()
-        .map(stop -> new GHPoint(stop.stop_lat, stop.stop_lon))
-        .map(Observation::new)
-        .collect(Collectors.toList());
+    CreateEvaluationRequest request = CreateEvaluationRequest.builder()
+        .name(String.format("Victoria-Gasteiz_%.0f_%.1f", sigma, beta))
+        .gtfsFeed(FileUtils.openInputStream(feed))
+        .sigma(sigma)
+        .candidateSearchRadius(sigma)
+        .beta(beta)
+        .profile("bus_fastest_turn")
+        .build();
 
-    Shape shape = Shape.of(transitRouter.route(observations));
+    EvaluationResponse result = evaluationService.createEvaluation(request);
 
-    assertNotNull(shape);
-  }
+    result.process().get();
 
-  @Test
-  void grtrt() {
-    List<Observation> observations = List.of(
-        new Observation(new GHPoint(48.6658586029462, 9.17788021004512)),
-        new Observation(new GHPoint(48.6594163647239, 9.18581192889257)),
-        new Observation(new GHPoint(48.6579892237722, 9.18967519598556)),
-        new Observation(new GHPoint(48.6567412309377, 9.193878269348)),
-        new Observation(new GHPoint(48.6539393417297, 9.19693492322262)),
-        new Observation(new GHPoint(48.6490581944514, 9.19587086103749)),
-        new Observation(new GHPoint(48.6471830126747, 9.19335296297837)),
-        new Observation(new GHPoint(48.6474268060521, 9.18732839557161)),
-        new Observation(new GHPoint(48.6463482135936, 9.19774665643316)),
-        new Observation(new GHPoint(48.6477515228735, 9.20263773370914)),
-        new Observation(new GHPoint(48.6506964237527, 9.21023622125165)),
-        new Observation(new GHPoint(48.6525312470288, 9.21491275019464)),
-        new Observation(new GHPoint(48.654848789912, 9.21626634921797)),
-        new Observation(new GHPoint(48.6595431340697, 9.22087456695226)),
-        new Observation(new GHPoint(48.6734401740607, 9.2190209800027)),
-        new Observation(new GHPoint(48.6767424738456, 9.21794902762902))
-    );
-
-    TransitRouter transitRouter = new TransitRouter(graphHopper, new PMap()
-        .putObject("profile", "bus_fastest")
-        .putObject("measurement_error_sigma", 25)
-        .putObject("candidate_search_radius", 25)
-        .putObject("beta", 2.0));
-
-    RoutingResult route = transitRouter.route(observations);
-
-    assertNotNull(route);
-
+    assertTrue(result.process().isDone());
+    assertFalse(result.process().isCompletedExceptionally());
   }
 }

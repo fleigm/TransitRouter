@@ -43,10 +43,11 @@
                      :value="option.value">
           </el-option>
         </el-select>
-        <el-form-item>
-          <el-button type="primary" @click="submit">Start evaluation</el-button>
-          <el-button @click="resetForm">Reset</el-button>
-        </el-form-item>
+      </el-form-item>
+      <el-form-item>
+        <el-button type="primary" @click="submit">Start evaluation</el-button>
+        <el-button @click="resetForm">Reset</el-button>
+      </el-form-item>
     </el-form>
   </div>
 
@@ -120,7 +121,8 @@ export default {
         sigma: 25.0,
         beta: 2.0,
         candidateSearchRadius: 25.0,
-        distanceUnit: 'METER'
+        distanceUnit: 'METER',
+
         feed: null
       },
     }
