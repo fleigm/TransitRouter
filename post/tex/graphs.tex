@@ -1,0 +1,176 @@
+\documentclass[parskip=full]{scrartcl}
+\usepackage[utf8]{inputenc}
+\usepackage[english]{babel}
+
+\usepackage{comment}
+\usepackage[backend=biber]{biblatex}
+\addbibresource{biblio.bib}
+
+\usepackage{enumitem}
+
+\usepackage{caption}
+\usepackage{subcaption}
+
+% zusätzliche mathematische Symbole, AMS=American Mathematical Society 
+\usepackage{amssymb}
+\usepackage[fleqn]{amsmath}
+\usepackage{stmaryrd}
+
+\usepackage{tikz}
+\usetikzlibrary{arrows, automata, positioning, shapes, snakes, backgrounds, petri, calc}
+\tikzstyle{line} = [draw,-latex]
+
+\usepackage{amsthm, thmtools}
+\usepackage{
+	nameref,
+	%\nameref
+	hyperref,
+	%\autoref
+	% n.b. \Autoref is defined by thmtools
+	cleveref,
+	% \cref
+	% n.b. cleveref after! hyperref
+}
+
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{algorithmicx}
+
+\begin{document}
+	\begin{minipage}{.5\textwidth}
+		\centering
+		\begin{tikzpicture}[node distance=1cm, auto, >=stealth',bend angle=45, auto]
+			\begin{scope}[every node/.style={circle,thick,draw}]
+				\node [fill=red, label=$c^0_0$] (c0) at (0,0) {};
+				\node (n0) at (2, 0) {};
+				\node (n1) at (4, 0) {};
+				\node [fill=red, label=$c^0_2$] (c1) at (5, 1) {};
+				\node (n2) at (6, 0) {};
+				\node (n3) at (5, -1) {};
+				\node [fill=red, label=left:$c^0_1$] (c2) at (2, -2) {};				
+			\end{scope}
+			
+			\path 
+				(c0) edge [color=blue, line width=2pt] node {$\rightarrow$} (n0)
+				(n0) edge [color=blue, line width=2pt] node {$\rightarrow$} node [below] {$\leftarrow$} (n1)
+				(n1) edge [color=blue, line width=2pt, bend left] node [rotate=45] {$\rightarrow$} node [below, rotate=45] {$\leftarrow$}(c1)
+				(c1) edge [bend left] (n2)
+				(n2) edge [bend left] (n3)
+				(n3) edge [bend left] (n1)
+				(n0) edge [color=blue, line width=2pt] node {$\downarrow$} (c2);
+		\end{tikzpicture}
+	\end{minipage}
+	\begin{minipage}{.5\textwidth}
+		\centering
+		\begin{tikzpicture}[node distance=1cm, auto, >=stealth',bend angle=45, auto]
+			\begin{scope}[every node/.style={circle,thick,draw}]
+			\node [fill=red, label=$c^0_0$] (c0) at (0,0) {};
+			\node (n0) at (2, 0) {};
+			\node (n1) at (4, 0) {};
+			\node [fill=red, label=$c^0_2$] (c1) at (5, 1) {};
+			\node (n2) at (6, 0) {};
+			\node (n3) at (5, -1) {};
+			\node [fill=red, label=left:$c^0_1$] (c2) at (2, -2) {};				
+			\end{scope}
+			
+			\path 
+			(c0) edge [color=blue, line width=2pt] node {$\rightarrow$} (n0)
+			(n0) edge [color=blue, line width=2pt] node {$\rightarrow$} node [below] {$\leftarrow$} (n1)
+			(n1) edge [color=blue, line width=2pt, bend left] node [rotate=45] {$\rightarrow$} (c1)
+			(c1) edge [color=blue, line width=2pt, bend left] node [rotate=-45] {$\rightarrow$} (n2)
+			(n2) edge [color=blue, line width=2pt, bend left] node [rotate=45] {$\leftarrow$} (n3)
+			(n3) edge [color=blue, line width=2pt, bend left] node [rotate=-45] {$\leftarrow$}(n1)
+			(n0) edge [color=blue, line width=2pt] node {$\downarrow$} (c2);
+		\end{tikzpicture}
+	\end{minipage}
+
+
+	\begin{minipage}{.5\textwidth}
+		\centering
+		\begin{tikzpicture}[node distance=2cm, auto, >=stealth',bend angle=45, auto]
+			\begin{scope}[every node/.style={circle,thick,draw}]
+				\node (n) [label=below:$c$] at (0, 0) {$n$};
+				\node (1) [above left of=n] {};
+				\node (2) [above right of=n] {};
+			\end{scope}
+			\path[]
+				(n) edge (1)
+				(n) edge (2);
+		\end{tikzpicture}
+	\end{minipage}	
+	\begin{minipage}{.5\textwidth}
+		\centering
+		\begin{tikzpicture}[node distance=2cm, auto, >=stealth',bend angle=45, auto]
+			\begin{scope}[every node/.style={circle,thick,draw}]
+				\node (n) [] at (0, 0) {$n$};
+				\node (1) [above left of=n] {};
+				\node (2) [above right of=n] {};
+			\end{scope}
+			\path[]
+				(n) edge (1)
+				(n) edge (2);
+			\path[->]
+				(n) edge [bend left, color=blue] node {$c_1$} (1)
+				(n) edge [bend right, color=red] node [below, right] {$c_2$} (2);
+		\end{tikzpicture}
+	\end{minipage}	
+
+	\begin{minipage}{\textwidth}
+		\centering
+		\begin{tikzpicture}[node distance=1cm and 3cm, >=stealth',bend angle=45, auto]
+			\begin{scope}[every node/.style={circle,thick,draw,fill=white}]
+				\node (S) at (0, 0) {S};
+				
+				\node (c00) [above right=of S] {$c^0_0$};
+				\node (c01) [below right=of S] {$c^1_0$};
+				
+				\node (c10) [right=of c00] {$c^0_1$};
+				\node (c11) [below=of c10] {$c^1_1$};
+				\node (c12) [below=of c11] {$c^2_1$};
+				
+				\node (c20) [above right=of c11] {$c^0_2$};
+				\node (c21) [below right=of c11] {$c^1_2$};
+				
+				\node (E) [above right=of c21] {E};
+			\end{scope}
+		
+			\begin{scope}[on background layer]
+				\draw[fill=gray, draw=none, fill opacity=0.2] ($(c00.north west)+(-0.3,0.6)$)  rectangle ($(c01.south east)+(0.3,-0.6)$) node [opacity=1, pos=0] {$C_0$};
+				\draw[fill=gray, draw=none, fill opacity=0.2] ($(c10.north west)+(-0.3,0.6)$)  rectangle ($(c12.south east)+(0.3,-0.6)$) node [opacity=1, pos=0] {$C_1$};
+				\draw[fill=gray, draw=none, fill opacity=0.2] ($(c20.north west)+(-0.3,0.6)$)  rectangle ($(c21.south east)+(0.3,-0.6)$) node [opacity=1, pos=0] {$C_2$};
+			\end{scope}			
+		
+			\path[->]
+				(S) edge node {$Pr(s_0|c^0_0)$} (c00)
+				(S) edge node [below left] {$Pr(s_0|c^1_0)$} (c01)
+				
+				(c00) edge (c10)
+				(c00) edge (c11)
+				(c00) edge (c12)
+				
+				(c01) edge (c10)
+				(c01) edge (c11)
+				(c01) edge node [below, align=center] {$Pr(c^1_0 \rightarrow c^2_1)$\\$\times Pr(s_1|c^1_2)$} (c12)
+				
+				(c10) edge (c20)
+				(c10) edge (c21)
+				
+				(c11) edge (c20)
+				(c11) edge (c21)
+				
+				(c12) edge (c20)
+				(c12) edge node [below, align=center] {$Pr(c^2_1 \rightarrow c^1_2)$\\$\times Pr(s_2|c^1_2)$} (c21)
+				
+				(c20) edge node {$1$} (E)
+				(c21) edge node [below right] {$1$} (E);					
+		\end{tikzpicture}
+	\end{minipage}
+
+	\begin{minipage}{\textwidth}
+		\centering
+		\begin{tikzpicture}[node distance=1.5cm, auto, >=stealth',bend angle=45, auto]
+			\tikzstyle{observation} = [circle, thick, draw=none, fill=red, size=5mm]
+			
+		\end{tikzpicture}
+	\end{minipage}
+\end{document}
