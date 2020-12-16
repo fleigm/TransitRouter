@@ -1,6 +1,5 @@
 package de.fleigm.ptmm.routing;
 
-import com.graphhopper.matching.Observation;
 import com.graphhopper.storage.index.Snap;
 import com.graphhopper.util.EdgeIteratorState;
 import lombok.AllArgsConstructor;

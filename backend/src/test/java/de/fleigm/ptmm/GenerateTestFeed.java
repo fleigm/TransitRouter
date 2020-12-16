@@ -4,8 +4,11 @@ import com.conveyal.gtfs.GTFSFeed;
 import com.conveyal.gtfs.model.Route;
 import com.conveyal.gtfs.model.ShapePoint;
 import com.conveyal.gtfs.model.Trip;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.mapdb.Fun;
 
+import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -50,5 +53,24 @@ public class GenerateTestFeed {
     shapes.forEach(shape -> feed.shape_points.put(shape.getKey(), shape.getValue()));
 
     feed.toFile("../../files/stuttgart_bus_only.zip");
+  }
+
+  @Disabled
+  @Test
+  void convert_distance_unit() {
+    Path path = Path.of(System.getProperty("user.home"), "uni/bachelor/project/files");
+    GTFSFeed feed = GTFSFeed.fromFile(path.resolve("vg.zip").toString());
+
+    feed.shape_points.forEach((key, value) -> {
+      value.shape_dist_traveled *= 1000;
+      feed.shape_points.replace(key, value);
+    });
+
+    feed.stop_times.forEach((key, value) -> {
+      value.shape_dist_traveled *= 1000;
+      feed.stop_times.replace(key, value);
+    });
+
+    feed.toFile(path.resolve("vg_converted.zip").toString());
   }
 }

@@ -1,6 +1,5 @@
 package de.fleigm.ptmm.routing;
 
-import com.graphhopper.matching.Observation;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.ToString;

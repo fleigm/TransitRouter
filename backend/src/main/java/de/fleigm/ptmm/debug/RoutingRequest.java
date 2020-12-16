@@ -1,6 +1,6 @@
 package de.fleigm.ptmm.debug;
 
-import com.graphhopper.matching.Observation;
+import de.fleigm.ptmm.routing.Observation;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

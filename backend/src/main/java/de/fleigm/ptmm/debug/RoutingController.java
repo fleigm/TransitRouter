@@ -2,6 +2,7 @@ package de.fleigm.ptmm.debug;
 
 import com.graphhopper.GraphHopper;
 import com.graphhopper.util.PMap;
+import de.fleigm.ptmm.routing.DefaultTransitRouter;
 import de.fleigm.ptmm.routing.RoutingResult;
 import de.fleigm.ptmm.routing.TransitRouter;
 
@@ -31,7 +32,7 @@ public class RoutingController {
         .putObject("candidate_search_radius", request.getCandidateSearchRadius())
         .putObject("beta", request.getBeta());
 
-    TransitRouter router = new TransitRouter(graphHopper, routingParameters);
+    TransitRouter router = new DefaultTransitRouter(graphHopper, routingParameters);
 
     RoutingResult route = router.route(request.getObservations());
 

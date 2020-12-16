@@ -1,6 +1,5 @@
 package de.fleigm.ptmm.routing;
 
-import com.graphhopper.matching.Observation;
 import com.graphhopper.routing.Path;
 import com.graphhopper.util.shapes.GHPoint;
 import lombok.AllArgsConstructor;

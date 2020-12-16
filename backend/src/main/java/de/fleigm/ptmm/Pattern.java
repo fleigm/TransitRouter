@@ -3,8 +3,8 @@ package de.fleigm.ptmm;
 import com.conveyal.gtfs.model.Route;
 import com.conveyal.gtfs.model.Stop;
 import com.conveyal.gtfs.model.Trip;
-import com.graphhopper.matching.Observation;
 import com.graphhopper.util.shapes.GHPoint;
+import de.fleigm.ptmm.routing.Observation;
 import lombok.Data;
 import lombok.experimental.Accessors;
 

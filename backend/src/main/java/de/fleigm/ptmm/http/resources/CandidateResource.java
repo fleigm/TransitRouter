@@ -12,6 +12,7 @@ import com.graphhopper.util.FetchMode;
 import com.graphhopper.util.PMap;
 import com.graphhopper.util.PointList;
 import com.graphhopper.util.shapes.GHPoint;
+import de.fleigm.ptmm.routing.DefaultTransitRouter;
 import de.fleigm.ptmm.routing.TransitRouter;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -35,7 +36,7 @@ public class CandidateResource {
 
   @PostConstruct
   public void init() {
-    transitRouter = new TransitRouter(hopper, new PMap().putObject("profile", "bus_fastest"));
+    transitRouter = new DefaultTransitRouter(hopper, new PMap().putObject("profile", "bus_fastest"));
   }
 
   @GET

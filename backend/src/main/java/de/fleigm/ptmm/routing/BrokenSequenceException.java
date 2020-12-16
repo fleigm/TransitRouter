@@ -17,10 +17,10 @@ public class BrokenSequenceException extends RuntimeException {
     String likelyReasonStr = "";
     if (prevTimeStep != null) {
       double dist = distanceCalc.calcDist(
-          prevTimeStep.observation().getPoint().lat,
-          prevTimeStep.observation().getPoint().lon,
-          timeStep.observation().getPoint().lat,
-          timeStep.observation().getPoint().lon);
+          prevTimeStep.observation().lat(),
+          prevTimeStep.observation().lon(),
+          timeStep.observation().lat(),
+          timeStep.observation().lon());
       if (dist > 2000) {
         likelyReasonStr = "Too long distance to previous measurement? "
                           + Math.round(dist) + "m, ";

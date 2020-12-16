@@ -1,7 +1,7 @@
 package de.fleigm.ptmm.http.json;
 
-import com.graphhopper.matching.Observation;
 import com.graphhopper.util.shapes.GHPoint;
+import de.fleigm.ptmm.routing.Observation;
 
 import javax.json.JsonArray;
 import javax.json.bind.serializer.DeserializationContext;

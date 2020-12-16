@@ -80,21 +80,21 @@ public class StuttgartTest {
 
   @ParameterizedTest
   @CsvSource({
-      /*"25, 2.0", "20, 2.0", "15, 2.0", "10, 2.0", "5, 2.0", "2, 2.0",
-      "25, 1.8", "20, 1.8", "15, 1.8", "10, 1.8", "5, 1.8", "2, 1.8",
-      "25, 1.6", "20, 1.6", "15, 1.6", "10, 1.6", "5, 1.6", "2, 1.6",
-      "25, 1.4", "20, 1.4", "15, 1.4", "10, 1.4", "5, 1.4", "2, 1.4",
-      "25, 1.2", "20, 1.2", "15, 1.2", "10, 1.2", "5, 1.2", "2, 1.2",
-      "25, 1.0", "20, 1.0", "15, 1.0", "10, 1.0", "5, 1.0", "2, 1.0",
-      "25, 0.8", "20, 0.8", "15, 0.8", "10, 0.8", "5, 0.8", "2, 0.8",
-      "25, 0.6", "20, 0.6", "15, 0.6", "10, 0.6", "5, 0.6", "2, 0.6",
-      "25, 0.4", "20, 0.4", "15, 0.4", "10, 0.4", "5, 0.4", "2, 0.4",*/
-      "25, 0.2", "20, 0.2", "15, 0.2", "10, 0.2", "5, 0.2", "2, 0.2"})
+      "20, 2.0", "15, 2.0", "10, 2.0", "5, 2.0",
+      "20, 1.8", "15, 1.8", "10, 1.8", "5, 1.8",
+      "20, 1.6", "15, 1.6", "10, 1.6", "5, 1.6",
+      "20, 1.4", "15, 1.4", "10, 1.4", "5, 1.4",
+      "20, 1.2", "15, 1.2", "10, 1.2", "5, 1.2",
+      "20, 1.0", "15, 1.0", "10, 1.0", "5, 1.0",
+      "20, 0.8", "15, 0.8", "10, 0.8", "5, 0.8",
+      "20, 0.6", "15, 0.6", "10, 0.6", "5, 0.6",
+      "20, 0.4", "15, 0.4", "10, 0.4", "5, 0.4",
+      "20, 0.2", "15, 0.2", "10, 0.2", "5, 0.2"})
   void run_with_different_parameters(double sigma, double beta) throws IOException, ExecutionException, InterruptedException {
-    File feed = Paths.get(homeDir, "/uni/bachelor/project/files/vg.zip").toFile();
+    File feed = Paths.get(homeDir, "/uni/bachelor/project/files/vg_converted.zip").toFile();
 
     CreateEvaluationRequest request = CreateEvaluationRequest.builder()
-        .name(String.format("Victoria-Gasteiz_%.0f_%.1f", sigma, beta))
+        .name(String.format("vg_converted_%.0f_%.1f", sigma, beta))
         .gtfsFeed(FileUtils.openInputStream(feed))
         .sigma(sigma)
         .candidateSearchRadius(sigma)

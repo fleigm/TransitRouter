@@ -3,13 +3,14 @@ package de.fleigm.ptmm.eval.process;
 import com.conveyal.gtfs.model.ShapePoint;
 import com.conveyal.gtfs.model.Trip;
 import com.graphhopper.GraphHopper;
-import com.graphhopper.matching.Observation;
 import de.fleigm.ptmm.Pattern;
 import de.fleigm.ptmm.Shape;
 import de.fleigm.ptmm.TransitFeed;
 import de.fleigm.ptmm.eval.Error;
 import de.fleigm.ptmm.eval.Evaluation;
 import de.fleigm.ptmm.eval.Info;
+import de.fleigm.ptmm.routing.DefaultTransitRouter;
+import de.fleigm.ptmm.routing.Observation;
 import de.fleigm.ptmm.routing.TransitRouter;
 import de.fleigm.ptmm.util.Helper;
 import de.fleigm.ptmm.util.StopWatch;
@@ -38,8 +39,8 @@ public class GenerateNewGtfsFeed implements Consumer<Info> {
   @Override
   public void accept(Info info) {
     TransitFeed transitFeed = new TransitFeed(info.getPath().resolve(Evaluation.ORIGINAL_GTFS_FEED));
-    TransitRouter transitRouter = new TransitRouter(graphHopper, info.getParameters().toPropertyMap());
-    TransitRouter transitRouterWithoutTurnRestrictions = new TransitRouter(graphHopper,
+    TransitRouter transitRouter = new DefaultTransitRouter(graphHopper, info.getParameters().toPropertyMap());
+    TransitRouter transitRouterWithoutTurnRestrictions = new DefaultTransitRouter(graphHopper,
         info.getParameters()
             .toPropertyMap()
             .putObject("disable_turn_costs", true));
