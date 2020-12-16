@@ -44,10 +44,10 @@
 				\node [fill=red, label=$c^0_0$] (c0) at (0,0) {};
 				\node (n0) at (2, 0) {};
 				\node (n1) at (4, 0) {};
-				\node [fill=red, label=$c^0_2$] (c1) at (5, 1) {};
+				\node [fill=red, label=$c^0_1$] (c1) at (5, 1) {};
 				\node (n2) at (6, 0) {};
 				\node (n3) at (5, -1) {};
-				\node [fill=red, label=left:$c^0_1$] (c2) at (2, -2) {};				
+				\node [fill=red, label=left:$c^0_2$] (c2) at (2, -2) {};				
 			\end{scope}
 			
 			\path 
@@ -67,10 +67,10 @@
 			\node [fill=red, label=$c^0_0$] (c0) at (0,0) {};
 			\node (n0) at (2, 0) {};
 			\node (n1) at (4, 0) {};
-			\node [fill=red, label=$c^0_2$] (c1) at (5, 1) {};
+			\node [fill=red, label=$c^0_1$] (c1) at (5, 1) {};
 			\node (n2) at (6, 0) {};
 			\node (n3) at (5, -1) {};
-			\node [fill=red, label=left:$c^0_1$] (c2) at (2, -2) {};				
+			\node [fill=red, label=left:$c^0_2$] (c2) at (2, -2) {};				
 			\end{scope}
 			
 			\path 
@@ -169,7 +169,41 @@
 	\begin{minipage}{\textwidth}
 		\centering
 		\begin{tikzpicture}[node distance=1.5cm, auto, >=stealth',bend angle=45, auto]
+			\begin{scope}[every node/.style={circle,thick,draw,fill=white}]
+				\node (c1) [fill=red, label=$c^0_1$] {};
+				\node (n1) at (2, 1) {};
+				\node (n2) at (4, -0.5) {};
+				\node (c2) [fill=red, label=$c^0_2$] at (6, 0) {};	
+				\node (n3) at (8, 0.5) {};
+			\end{scope}
+		
+		\path[->]
+			(c1) edge node {$e_1$} (n1)
+			(n1) edge (n2)
+			(n2) edge (c2)
+			(c2) edge node {$e_2$}(n3);
+					
+		\end{tikzpicture}
+	\end{minipage}
+
+	\begin{minipage}{\textwidth}
+		\centering
+		\begin{tikzpicture}[node distance=3cm, auto, >=stealth',bend angle=45, auto]
+			\begin{scope}[every node/.style={circle,thick,draw,fill=white}]
+				\node (s1) [fill=green, label=$s_1$] at (1, 1){};
+				\node (t1) {};
+				\node (t2) [above=of t1] {};
+				\node (t3) [right=of t2] {};
+			\end{scope}
+			
+		\end{tikzpicture}
+	\end{minipage}
+
+	\begin{minipage}{\textwidth}
+		\centering
+		\begin{tikzpicture}[node distance=1.5cm, auto, >=stealth',bend angle=45, auto]
 			\tikzstyle{observation} = [circle, thick, draw=none, fill=red, size=5mm]
+		
 			
 		\end{tikzpicture}
 	\end{minipage}
