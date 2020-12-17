@@ -1,42 +1,3 @@
-\documentclass[parskip=full]{scrartcl}
-\usepackage[utf8]{inputenc}
-\usepackage[english]{babel}
-
-\usepackage{comment}
-\usepackage[backend=biber]{biblatex}
-\addbibresource{biblio.bib}
-
-\usepackage{enumitem}
-
-\usepackage{caption}
-\usepackage{subcaption}
-
-% zusätzliche mathematische Symbole, AMS=American Mathematical Society 
-\usepackage{amssymb}
-\usepackage[fleqn]{amsmath}
-\usepackage{stmaryrd}
-
-\usepackage{tikz}
-\usetikzlibrary{arrows, automata, positioning, shapes, snakes, backgrounds, petri, calc}
-\tikzstyle{line} = [draw,-latex]
-
-\usepackage{amsthm, thmtools}
-\usepackage{
-	nameref,
-	%\nameref
-	hyperref,
-	%\autoref
-	% n.b. \Autoref is defined by thmtools
-	cleveref,
-	% \cref
-	% n.b. cleveref after! hyperref
-}
-
-\usepackage{algorithm}
-\usepackage{algpseudocode}
-\usepackage{algorithmicx}
-
-\begin{document}
 	\begin{minipage}{.5\textwidth}
 		\centering
 		\begin{tikzpicture}[node distance=1cm, auto, >=stealth',bend angle=45, auto]
@@ -207,4 +168,3 @@
 			
 		\end{tikzpicture}
 	\end{minipage}
-\end{document}
