@@ -7,7 +7,7 @@ We split the paths $P$ and $Q$ into an equal number of segments such that the se
 
 
 ## Percentage of unmatched hop segments $A_N$
-A *hop segment* is the segment of a Path $P$ between two station / hops.
+A *hop segment* is the path between two station / hops.
 A *hop segment* is mismatched its Frèchet Distance is $\geq$ 20m.
 $$A_N = \frac{\text{\#unmatched hop segments}}{\text{\#hop segments}}$$ 
 
