@@ -178,6 +178,7 @@ public class DefaultTransitRouter implements TransitRouter {
     // TODO return directed candidates instead of split / snap points
     return RoutingResult.builder()
         .path(path)
+        .pathSegments(seq.stream().filter(x -> x.transitionDescriptor != null).map(x -> x.transitionDescriptor).collect(Collectors.toList()))
         .distance(path.getDistance())
         .time(path.getTime())
         .candidates(splitsPerObservation.stream()
@@ -277,8 +278,12 @@ public class DefaultTransitRouter implements TransitRouter {
                 to.outgoingEdge().getEdge());
 
             if (path.isFound()) {
-              path.getEdges().remove(path.getEdgeCount() - 1);
               double probability = probabilities.transitionLogProbability(path.getDistance(), linearDistance);
+
+              path.getEdges().remove(path.getEdgeCount() - 1);
+              path.setEndNode(to.outgoingEdge().getBaseNode());
+              path.setDistance(path.getDistance() - to.outgoingEdge().getDistance());
+
               hmmStep.addTransition(from, to, path, probability);
             }
           }

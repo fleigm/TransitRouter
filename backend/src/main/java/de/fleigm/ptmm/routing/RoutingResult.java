@@ -13,6 +13,7 @@ import java.util.List;
 @AllArgsConstructor
 public class RoutingResult {
   private final Path path;
+  private final List<Path> pathSegments;
   private final double distance;
   private final double time;
   private final List<Observation> observations;
