@@ -150,6 +150,9 @@ public class GenerateNewGtfsFeed implements Consumer<Info> {
 
         for (int i = 0; i < stopTimes.size(); i++) {
           StopTime stopTime = stopTimes.get(i);
+          if (i >= distances.length) {
+            log.info("failed");
+          }
           stopTime.shape_dist_traveled = distances[i];
           storage.replace(new Fun.Tuple2<>(stopTime.trip_id, stopTime.stop_sequence), stopTime);
         }
