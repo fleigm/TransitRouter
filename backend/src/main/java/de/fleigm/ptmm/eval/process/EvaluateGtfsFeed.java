@@ -5,21 +5,18 @@ import de.fleigm.ptmm.eval.Info;
 import de.fleigm.ptmm.util.StopWatch;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.eclipse.microprofile.config.inject.ConfigProperty;
 
-import javax.enterprise.context.Dependent;
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.function.Consumer;
 
 @Slf4j
-@Dependent
 public class EvaluateGtfsFeed implements Consumer<Info> {
 
   private final String evaluationToolPath;
 
-  public EvaluateGtfsFeed(@ConfigProperty(name = "evaluation.tool") String evaluationToolPath) {
+  public EvaluateGtfsFeed(String evaluationToolPath) {
     this.evaluationToolPath = evaluationToolPath;
   }
 

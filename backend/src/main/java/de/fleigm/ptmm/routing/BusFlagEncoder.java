@@ -9,7 +9,6 @@ import com.graphhopper.routing.util.spatialrules.TransportationMode;
 import com.graphhopper.storage.IntsRef;
 import com.graphhopper.util.Helper;
 import com.graphhopper.util.PMap;
-import lombok.extern.slf4j.Slf4j;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -18,7 +17,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-@Slf4j
+/**
+ *
+ */
 public class BusFlagEncoder extends AbstractFlagEncoder {
   protected final Map<String, Integer> trackTypeSpeedMap = new HashMap<>();
   protected final Set<String> badSurfaceSpeedMap = new HashSet<>();

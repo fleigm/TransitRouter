@@ -4,15 +4,12 @@ import de.fleigm.ptmm.eval.Error;
 import de.fleigm.ptmm.eval.EvaluationRepository;
 import de.fleigm.ptmm.eval.Info;
 import de.fleigm.ptmm.eval.Status;
+import de.fleigm.ptmm.routing.TransitRouterFactory;
 import de.fleigm.ptmm.util.StopWatch;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;
 
-import javax.enterprise.context.Dependent;
-import javax.inject.Inject;
-
 @Slf4j
-@Dependent
 public class EvaluationProcess {
 
   private final EvaluationRepository evaluationRepository;
@@ -21,18 +18,16 @@ public class EvaluationProcess {
   private final EvaluateGtfsFeed evaluateGtfsFeed;
   private final GenerateQuickStats generateQuickStats;
 
-  @Inject
-  public EvaluationProcess(EvaluationRepository evaluationRepository,
-                           GenerateNewGtfsFeed generateNewGtfsFeed,
-                           UnzipGtfsFeed unzipGtfsFeed,
-                           EvaluateGtfsFeed evaluateGtfsFeed,
-                           GenerateQuickStats generateQuickStats) {
+  public EvaluationProcess(TransitRouterFactory transitRouterFactory,
+                           EvaluationRepository evaluationRepository,
+                           String evaluationFolder,
+                           String evaluationTool) {
 
     this.evaluationRepository = evaluationRepository;
-    this.generateNewGtfsFeed = generateNewGtfsFeed;
-    this.unzipGtfsFeed = unzipGtfsFeed;
-    this.evaluateGtfsFeed = evaluateGtfsFeed;
-    this.generateQuickStats = generateQuickStats;
+    this.generateNewGtfsFeed = new GenerateNewGtfsFeed(transitRouterFactory);
+    this.unzipGtfsFeed = new UnzipGtfsFeed(evaluationFolder);
+    this.evaluateGtfsFeed = new EvaluateGtfsFeed(evaluationTool);
+    this.generateQuickStats = new GenerateQuickStats(evaluationFolder);
   }
 
   public void run(Info info) {

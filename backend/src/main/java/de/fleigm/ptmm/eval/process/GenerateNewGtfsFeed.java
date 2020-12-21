@@ -2,45 +2,40 @@ package de.fleigm.ptmm.eval.process;
 
 import com.conveyal.gtfs.model.ShapePoint;
 import com.conveyal.gtfs.model.Trip;
-import com.graphhopper.GraphHopper;
 import de.fleigm.ptmm.Pattern;
 import de.fleigm.ptmm.Shape;
 import de.fleigm.ptmm.TransitFeed;
 import de.fleigm.ptmm.eval.Error;
 import de.fleigm.ptmm.eval.Evaluation;
 import de.fleigm.ptmm.eval.Info;
-import de.fleigm.ptmm.routing.DefaultTransitRouter;
 import de.fleigm.ptmm.routing.Observation;
 import de.fleigm.ptmm.routing.TransitRouter;
+import de.fleigm.ptmm.routing.TransitRouterFactory;
 import de.fleigm.ptmm.util.Helper;
 import de.fleigm.ptmm.util.StopWatch;
 import lombok.Value;
 import lombok.extern.slf4j.Slf4j;
 import org.mapdb.Fun;
 
-import javax.enterprise.context.Dependent;
-import javax.inject.Inject;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 @Slf4j
-@Dependent
 public class GenerateNewGtfsFeed implements Consumer<Info> {
 
-  private final GraphHopper graphHopper;
+  private final TransitRouterFactory transitRouterFactory;
 
-  @Inject
-  public GenerateNewGtfsFeed(GraphHopper graphHopper) {
-    this.graphHopper = graphHopper;
+  public GenerateNewGtfsFeed(TransitRouterFactory transitRouterFactory) {
+    this.transitRouterFactory = transitRouterFactory;
   }
 
   @Override
   public void accept(Info info) {
     TransitFeed transitFeed = new TransitFeed(info.getPath().resolve(Evaluation.ORIGINAL_GTFS_FEED));
-    TransitRouter transitRouter = new DefaultTransitRouter(graphHopper, info.getParameters().toPropertyMap());
-    TransitRouter transitRouterWithoutTurnRestrictions = new DefaultTransitRouter(graphHopper,
+    TransitRouter transitRouter = transitRouterFactory.create(info);
+    TransitRouter transitRouterWithoutTurnRestrictions = transitRouterFactory.create(
         info.getParameters()
             .toPropertyMap()
             .putObject("disable_turn_costs", true));

@@ -1,6 +1,8 @@
 package de.fleigm.ptmm.eval.api;
 
 import com.graphhopper.GraphHopper;
+import de.fleigm.ptmm.eval.EvaluationRepository;
+import de.fleigm.ptmm.routing.GraphHopperTransitRouter;
 import io.quarkus.test.junit.QuarkusTest;
 import org.apache.commons.io.FileUtils;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
@@ -31,6 +33,12 @@ public class StuttgartTest {
 
   @ConfigProperty(name = "evaluation.folder")
   String evaluationFolder;
+
+  @ConfigProperty(name = "evaluation.tool")
+  String evaluationTool;
+
+  @Inject
+  EvaluationRepository evaluationRepository;
 
   @Inject
   GraphHopper graphHopper;
@@ -108,5 +116,32 @@ public class StuttgartTest {
 
     assertTrue(result.process().isDone());
     assertFalse(result.process().isCompletedExceptionally());
+  }
+
+  @Test
+  void run_graphHopper_map_matching() throws IOException, ExecutionException, InterruptedException {
+    File testFeed = Paths.get(homeDir, "/uni/bachelor/project/files/stuttgart.zip").toFile();
+
+    CreateEvaluationRequest request = CreateEvaluationRequest.builder()
+        .name("st_gh_complete")
+        .gtfsFeed(FileUtils.openInputStream(testFeed))
+        .sigma(25.0)
+        .candidateSearchRadius(25.0)
+        .beta(2.0)
+        .profile("bus_fastest")
+        .build();
+
+    EvaluationService service = new EvaluationService();
+    service.evaluationRepository = evaluationRepository;
+    service.evaluationTool = evaluationTool;
+    service.evaluationFolder = evaluationFolder;
+    service.transitRouterFactory = parameters -> new GraphHopperTransitRouter(graphHopper, parameters);
+
+    EvaluationResponse result = service.createEvaluation(request);
+
+    result.process().get();
+
+    assertTrue(result.process().isDone());
+
   }
 }

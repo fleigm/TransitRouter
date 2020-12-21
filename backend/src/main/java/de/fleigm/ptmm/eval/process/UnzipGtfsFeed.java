@@ -5,18 +5,15 @@ import de.fleigm.ptmm.eval.Info;
 import de.fleigm.ptmm.util.Unzip;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.eclipse.microprofile.config.inject.ConfigProperty;
 
-import javax.enterprise.context.Dependent;
 import java.util.function.Consumer;
 
 @Slf4j
-@Dependent
 public class UnzipGtfsFeed implements Consumer<Info> {
 
   private final String evaluationFolder;
 
-  public UnzipGtfsFeed(@ConfigProperty(name = "evaluation.folder") String evaluationFolder) {
+  public UnzipGtfsFeed(String evaluationFolder) {
     this.evaluationFolder = evaluationFolder;
   }
 

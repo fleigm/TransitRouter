@@ -10,9 +10,13 @@ import java.util.stream.Collectors;
 
 public class GraphHopperTransitRouter implements TransitRouter {
 
-  private MapMatching mapMatching;
+  private final MapMatching mapMatching;
 
   public GraphHopperTransitRouter(GraphHopper graphHopper, PMap hints) {
+    mapMatching = new MapMatching(graphHopper, hints);
+
+    mapMatching.setMeasurementErrorSigma(hints.getDouble("measurement_error_sigma", 25));
+    mapMatching.setTransitionProbabilityBeta(hints.getDouble("transitions_beta_probability", 2.0));
   }
 
   @Override

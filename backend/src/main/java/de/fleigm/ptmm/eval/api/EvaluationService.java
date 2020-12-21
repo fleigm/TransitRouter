@@ -8,6 +8,7 @@ import de.fleigm.ptmm.eval.Parameters;
 import de.fleigm.ptmm.eval.Status;
 import de.fleigm.ptmm.eval.process.EvaluationProcess;
 import de.fleigm.ptmm.eval.process.ValidateGtfsFeed;
+import de.fleigm.ptmm.routing.TransitRouterFactory;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
@@ -25,13 +26,16 @@ import java.util.concurrent.CompletableFuture;
 public class EvaluationService {
 
   @ConfigProperty(name = "evaluation.folder")
-  String baseFolder;
+  String evaluationFolder;
+
+  @ConfigProperty(name = "evaluation.tool")
+  String evaluationTool;
 
   @Inject
   EvaluationRepository evaluationRepository;
 
   @Inject
-  EvaluationProcess evaluationProcess;
+  TransitRouterFactory transitRouterFactory;
 
   public EvaluationResponse createEvaluation(CreateEvaluationRequest request) {
     Info info = Info.builder()
@@ -47,7 +51,7 @@ public class EvaluationService {
         .status(Status.PENDING)
         .build();
 
-    info.setBasePath(Path.of(baseFolder));
+    info.setBasePath(Path.of(evaluationFolder));
 
     try {
       File file = info.getPath().resolve(Evaluation.ORIGINAL_GTFS_FEED).toFile();
@@ -67,7 +71,13 @@ public class EvaluationService {
 
     evaluationRepository.save(info);
 
-    return new EvaluationResponse(info, CompletableFuture.runAsync(() -> evaluationProcess.run(info)));
+    EvaluationProcess process = new EvaluationProcess(
+        transitRouterFactory,
+        evaluationRepository,
+        evaluationFolder,
+        evaluationTool);
+
+    return new EvaluationResponse(info, CompletableFuture.runAsync(() -> process.run(info)));
   }
 
 }

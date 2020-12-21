@@ -5,9 +5,7 @@ import de.fleigm.ptmm.eval.Info;
 import de.fleigm.ptmm.eval.Report;
 import de.fleigm.ptmm.eval.ReportEntry;
 import lombok.extern.slf4j.Slf4j;
-import org.eclipse.microprofile.config.inject.ConfigProperty;
 
-import javax.enterprise.context.Dependent;
 import javax.json.Json;
 import javax.json.JsonObject;
 import java.util.DoubleSummaryStatistics;
@@ -15,12 +13,11 @@ import java.util.function.Consumer;
 import java.util.function.ToDoubleFunction;
 
 @Slf4j
-@Dependent
 public class GenerateQuickStats implements Consumer<Info> {
 
   private final String evaluationFolder;
 
-  public GenerateQuickStats(@ConfigProperty(name = "evaluation.folder") String evaluationFolder) {
+  public GenerateQuickStats(String evaluationFolder) {
     this.evaluationFolder = evaluationFolder;
   }
 
