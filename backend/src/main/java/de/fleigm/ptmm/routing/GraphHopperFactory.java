@@ -35,7 +35,8 @@ public class GraphHopperFactory {
     }
 
     BusFlagEncoder busFlagEncoder = new BusFlagEncoder(new PMap()
-        .putObject(Parameters.Routing.TURN_COSTS, true));
+        .putObject(Parameters.Routing.TURN_COSTS, true)
+        .putObject("block_barriers", false));
 
     EncodingManager encodingManager = EncodingManager.start()
         .add(busFlagEncoder)
