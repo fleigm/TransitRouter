@@ -1,0 +1,136 @@
+\section*{Stuttgart}
+
+\begin{tikzpicture}[]
+	\pgfplotstableread[col sep=tab,]{../stats/stuttgart.ptmm.stats.avg_fd.tsv}\ptmm
+	\pgfplotstableread[col sep=tab,]{../stats/stuttgart.pfaedle.stats.avg_fd.tsv}\pfaedle
+	\pgfplotstableread[col sep=tab,]{../stats/stuttgart.graphhopper.stats.avg_fd.tsv}\gh
+	
+	\begin{axis}[
+		ybar,
+		ymajorgrids,
+		%axis lines = center,
+		axis x line*=bottom,
+		axis y line=left, 
+		axis line style = {-latex},
+		bar width=6pt, 
+		width=\textwidth,
+		height=6cm,
+		ymin=0,
+		%enlarge y limits=false,
+		scaled ticks=false,
+		xtick=data,
+		xticklabels from table={\ptmm}{bin},
+		ytick={0, 5000, 10000, 15000, 20000, 25000, 30000},
+		%yticklabels={5k, 10k, 15k, 20k, 25k, 30k},
+		ylabel={vehicle count},
+		ylabel near ticks,
+		%ylabel style={at=(current axis.above origin), anchor=south},
+		xlabel={$\delta a_F$},
+		xlabel style={at=(current axis.right of origin), anchor=west}
+		]
+		
+		\addplot[bar shift=-24pt, opacity=.5, fill=blue] table[y=value, x expr=\coordindex, x=bin col sep=tab] {\ptmm};
+		\addlegendentry{TransitRouter}
+		\addplot[bar shift=-16pt, opacity=.5, fill=red] table[y=value, x expr=\coordindex, x=bin col sep=tab] {\gh};
+		\addlegendentry{GHMM}
+		\addplot[bar shift=-8pt, opacity=.5, fill=orange] table[y=value, x expr=\coordindex, x=bin col sep=tab] {\pfaedle};
+		\addlegendentry{pfeadle}
+	\end{axis}
+\end{tikzpicture}
+
+\begin{tikzpicture}[]
+	\pgfplotstableread[col sep=tab,]{../stats/stuttgart.ptmm.stats.accuracy.tsv}\ptmm
+	\pgfplotstableread[col sep=tab,]{../stats/stuttgart.pfaedle.stats.accuracy.tsv}\pfaedle
+	\pgfplotstableread[col sep=tab,]{../stats/stuttgart.graphhopper.stats.accuracy.tsv}\gh
+
+	\begin{axis}[
+		ybar,
+		ymajorgrids,
+		axis x line*=bottom,
+		axis y line*=left, 
+		bar width=6pt, 
+		width=\textwidth,
+		height=6cm,
+		ymin=0,
+		xtick=data,
+		xticklabels from table={\ptmm}{bin},
+		ylabel={accuracy},
+		ytick={0.2, 0.4, 0.6, 0.8, 1.0},
+		xlabel={$A_N$},
+		xlabel style={at=(current axis.right of origin), anchor=west}
+		]
+		
+		\addplot[bar shift=-24pt, opacity=.5, fill=blue] table[y=value, x expr=\coordindex, x=bin col sep=tab] {\ptmm};
+		\addplot[bar shift=-16pt, opacity=.5, fill=red] table[y=value, x expr=\coordindex, x=bin col sep=tab] {\gh};
+		\addplot[bar shift=-8pt, opacity=.5, fill=orange] table[y=value, x expr=\coordindex, x=bin col sep=tab] {\pfaedle};
+	\end{axis}
+	
+\end{tikzpicture}
+
+\begin{tikzpicture}[]
+	\pgfplotstableread[col sep=tab,]{../stats/stuttgart.ptmm.stats.an.tsv}\ptmm
+	\pgfplotstableread[col sep=tab,]{../stats/stuttgart.pfaedle.stats.an.tsv}\pfaedle
+	\pgfplotstableread[col sep=tab,]{../stats/stuttgart.graphhopper.stats.an.tsv}\gh
+	
+	\begin{axis}[
+		ybar,
+		ymajorgrids,
+		axis x line*=bottom,
+		axis y line=left, 
+		scaled ticks=false,
+		bar width=4pt, 
+		width=\textwidth,
+		height=6cm,
+		ymin=0,
+		scaled ticks=false,
+		xtick=data,
+		xticklabels from table={\ptmm}{bin},
+		%xticklabels={0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0},
+		xticklabel style={rotate=45,anchor=east, /pgf/number format/.cd,fixed,precision=0},
+		ytick={0, 5000, 10000, 15000, 20000, 25000, 30000},
+		ylabel={vehicle count},
+		ylabel near ticks,
+		xlabel={$A_N$},
+		xlabel style={at=(current axis.right of origin), anchor=west}
+		]
+		
+		\addplot[bar shift=-14pt, opacity=.5, fill=blue] table[y=value, x expr=\coordindex, x=bin col sep=tab] {\ptmm};
+		\addplot[bar shift=-10pt, opacity=.5, fill=red] table[y=value, x expr=\coordindex, x=bin col sep=tab] {\gh};
+		\addplot[bar shift=-6pt, opacity=.5, fill=orange] table[y=value, x expr=\coordindex, x=bin col sep=tab] {\pfaedle};
+	\end{axis}
+	
+\end{tikzpicture}
+
+\begin{tikzpicture}[]
+	\pgfplotstableread[col sep=tab,]{../stats/stuttgart.ptmm.stats.al.tsv}\ptmm
+	\pgfplotstableread[col sep=tab,]{../stats/stuttgart.pfaedle.stats.al.tsv}\pfaedle
+	\pgfplotstableread[col sep=tab,]{../stats/stuttgart.graphhopper.stats.al.tsv}\gh
+	
+	\begin{axis}[
+		ybar,
+		ymajorgrids,
+		axis x line*=bottom,
+		axis y line=left,
+		scaled ticks=false, 
+		bar width=4pt, 
+		width=\textwidth,
+		height=6cm,
+		ymin=0,
+		scaled ticks=false,
+		xtick=data,
+		xticklabels from table={\ptmm}{bin},
+		%xticklabels={0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0},
+		xticklabel style={rotate=45,anchor=east, /pgf/number format/.cd,fixed,precision=0},
+		ytick={0, 5000, 10000, 15000, 20000, 25000, 30000},
+		ylabel near ticks,
+		ylabel={vehicle count},
+		xlabel={$A_L$},
+		xlabel style={at=(current axis.right of origin), anchor=west}
+		]
+		
+		\addplot[bar shift=-14pt, opacity=.5, fill=blue] table[y=value, x expr=\coordindex, x=bin col sep=tab] {\ptmm};
+		\addplot[bar shift=-10pt, opacity=.5, fill=red] table[y=value, x expr=\coordindex, x=bin col sep=tab] {\gh};
+		\addplot[bar shift=-6pt, opacity=.5, fill=orange] table[y=value, x expr=\coordindex, x=bin col sep=tab] {\pfaedle};
+	\end{axis}
+	
+\end{tikzpicture}

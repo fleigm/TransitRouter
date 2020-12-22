@@ -1,8 +1,10 @@
 # Introduction
 
-*TransitRouter* is a web application for generating shape files of GTFS feeds using a map matching approach described in the paper [Hidden Markov Map Matching Through Noise and Sparseness](https://www.ismll.uni-hildesheim.de/lehre/semSpatial-10s/script/6.pdf).
+*TransitRouter* is a tool for generating shapes of GTFS feeds for bus routes using the map matching approach described in the paper [Hidden Markov Map Matching Through Noise and Sparseness](https://www.ismll.uni-hildesheim.de/lehre/semSpatial-10s/script/6.pdf).
 
 *TransitRouter* uses the OSM routing engine [GraphHopper]() and a modified version the [GraphHopper Map Matching library](). 
+
+The quality of the results are compared with the original GraphHopper Map Matching (*GHMM*) and [*pfaedle*](https://github.com/ad-freiburg/pfaedle) a similar tool developed by the chair of Algorithms and Data Structures at the university of Freiburg.
 
 ## General Transit Feed Specification GTFS
 

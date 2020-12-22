@@ -51,11 +51,17 @@ public class StuttgartTest {
     CreateEvaluationRequest request = CreateEvaluationRequest.builder()
         .name("st_complete")
         .gtfsFeed(FileUtils.openInputStream(testFeed))
-        .sigma(25.0)
-        .candidateSearchRadius(25.0)
-        .beta(2.0)
-        .profile("bus_fastest_turn")
+        .sigma(10.0)
+        .candidateSearchRadius(10.0)
+        .beta(1.0)
+        .profile("bus_fastest")
         .build();
+
+    EvaluationService evaluationService = new EvaluationService();
+    evaluationService.evaluationRepository = evaluationRepository;
+    evaluationService.evaluationTool = evaluationTool;
+    evaluationService.evaluationFolder = evaluationFolder;
+    evaluationService.transitRouterFactory = parameters -> new GraphHopperTransitRouter(graphHopper, parameters);
 
     EvaluationResponse result = evaluationService.createEvaluation(request);
 
@@ -89,15 +95,9 @@ public class StuttgartTest {
   @ParameterizedTest
   @CsvSource({
       "20, 2.0", "15, 2.0", "10, 2.0", "5, 2.0",
-      "20, 1.8", "15, 1.8", "10, 1.8", "5, 1.8",
-      "20, 1.6", "15, 1.6", "10, 1.6", "5, 1.6",
-      "20, 1.4", "15, 1.4", "10, 1.4", "5, 1.4",
-      "20, 1.2", "15, 1.2", "10, 1.2", "5, 1.2",
+      "20, 1.5", "15, 1.5", "10, 1.5", "5, 1.5",
       "20, 1.0", "15, 1.0", "10, 1.0", "5, 1.0",
-      "20, 0.8", "15, 0.8", "10, 0.8", "5, 0.8",
-      "20, 0.6", "15, 0.6", "10, 0.6", "5, 0.6",
-      "20, 0.4", "15, 0.4", "10, 0.4", "5, 0.4",
-      "20, 0.2", "15, 0.2", "10, 0.2", "5, 0.2"})
+      "20, 0.5", "15, 0.5", "10, 0.5", "5, 0.5"})
   void run_with_different_parameters(double sigma, double beta) throws IOException, ExecutionException, InterruptedException {
     File feed = Paths.get(homeDir, "/uni/bachelor/project/files/vg_converted.zip").toFile();
 
@@ -110,7 +110,13 @@ public class StuttgartTest {
         .profile("bus_fastest_turn")
         .build();
 
-    EvaluationResponse result = evaluationService.createEvaluation(request);
+    EvaluationService service = new EvaluationService();
+    service.evaluationRepository = evaluationRepository;
+    service.evaluationTool = evaluationTool;
+    service.evaluationFolder = evaluationFolder;
+    service.transitRouterFactory = parameters -> new GraphHopperTransitRouter(graphHopper, parameters);
+
+    EvaluationResponse result = service.createEvaluation(request);
 
     result.process().get();
 
