@@ -26,7 +26,7 @@ For each station $s_i$ we want to find a set of possible candidates $C_i$. To co
 
 For every edge $e_j \in E$ within a radius $r$ around $s_i$ calculate the projection $p_{i,j}$ of $s_i$ on $e_j$. Then for each outgoing edge $e_k$ of $p_{i,j}$ we add a candidate $c_i^{k} = (p_{i,j}, e_k)$ to $C_i$. So a candidate consists of a position in out road network and a direction in which we can drive.
 
-Note that we could have used *orientation less* candidates consisting only of the projection $p_{i,j}$ but we the direction to enable turn restrictions which we will see at a later point.
+Note that we could have used *orientation less* candidates consisting only of the projection $p_{i,j}$ but we need the direction to enable turn restrictions which we will see at a later point.
 
 ### Hidden Markov Model *HMM*
 To find the most likely sequence of candidates we use a Hidden Markov Model (*HMM*) with our stations $s_i$ as observations and our candidates $C_i$ as observations. The approach is based on **TODO**
@@ -59,3 +59,8 @@ Having no information from which direction we arrived at candidate $c^0_1$ the m
 In GraphHopper we can specify a start and end edge when finding the path between two nodes. We use this to enable turn restrictions between hops.
 Given two candidates $c_1 = (u_1, e_1), c_2 = (u_2, e_2)$. Let $v$ be the neighbor of $u_2$ connected by $e_2$. Then we calculate the path $P_1$ from $u_1$ starting with edge $e_2$ to $v$ ending with $e_2$. 
 When we combine the most likely paths $P_i$ to get the whole path $P$ we remove the last edge from every $P_i$.
+
+## Path finding between candidates
+As a path finding strategy either shortest or fastest routing can be used. Note that turn costs do not work properly with shortest routing because of the way GraphHopper calculates the turn penalties.
+
+For feeds with short distances between stations shortest routing might produce better results that fastest routing. An example can be seen in the evaluation chapter.

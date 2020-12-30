@@ -50,3 +50,16 @@ To be used as a base line we removed the filtering of close observations describ
 
 ![](resources/vg.al.png)
 *Percentage of length of unmatched hop segments $A_L$*
+
+
+## Current problems and further research
+
+### Inter-hop turn restrictions are not properly reflected in the HMM
+
+### Path finding difficulties with turn restrictions
+With turn restrictions enabled for some trips GraphHopper is not able to find any path between the candidates of two stations. If this happens we disable turn restrictions for that particular trip. For Stuttgart this affects around $10\%$ of all trips. For Victoria-Gasteiz none of the trips is affected.
+
+At the moment we were not able to find the reasons why GraphHopper is not able to find any path. This issue needs further investigation.
+
+### Use OSM metadata
+OSM provides useful information about public transit routes which might increase the quality of the generated shapes.

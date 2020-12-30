@@ -1,9 +1,11 @@
 \section*{Victoria-Gasteiz}
 
 \begin{tikzpicture}[]
-	\pgfplotstableread[col sep=tab,]{../stats/vg.ptmm.stats.avg_fd.tsv}\ptmm
+	\pgfplotstableread[col sep=tab,]{../stats/vg.fastest.ptmm.stats.avg_fd.tsv}\ptmmFastest
+	\pgfplotstableread[col sep=tab,]{../stats/vg.shortest.ptmm.stats.avg_fd.tsv}\ptmmShortest
+	\pgfplotstableread[col sep=tab,]{../stats/vg.fastest.gh.stats.avg_fd.tsv}\ghFastest
+	\pgfplotstableread[col sep=tab,]{../stats/vg.shortest.gh.stats.avg_fd.tsv}\ghShortest
 	\pgfplotstableread[col sep=tab,]{../stats/vg.pfaedle.stats.avg_fd.tsv}\pfaedle
-	\pgfplotstableread[col sep=tab,]{../stats/vg.graphhopper.stats.avg_fd.tsv}\gh
 	
 	\begin{axis}[
 		ybar,
@@ -12,14 +14,14 @@
 		axis x line*=bottom,
 		axis y line=left, 
 		axis line style = {-latex},
-		bar width=6pt, 
+		bar width=4pt, 
 		width=\textwidth,
 		height=6cm,
 		ymin=0,
 		%enlarge y limits=false,
 		scaled ticks=false,
 		xtick=data,
-		xticklabels from table={\ptmm}{bin},
+		xticklabels from table={\ptmmFastest}{bin},
 		ytick={0, 1000, 2000, 3000, 4000, 5000},
 		%yticklabels={5k, 10k, 15k, 20k, 25k, 30k},
 		ylabel={vehicle count},
@@ -29,48 +31,58 @@
 		xlabel style={at=(current axis.right of origin), anchor=west}
 		]
 		
-		\addplot[bar shift=-24pt, opacity=.5, fill=blue] table[y=value, x expr=\coordindex, x=bin col sep=tab] {\ptmm};
-		\addlegendentry{TransitRouter}
-		\addplot[bar shift=-16pt, opacity=.5, fill=red] table[y=value, x expr=\coordindex, x=bin col sep=tab] {\gh};
-		\addlegendentry{GHMM}
-		\addplot[bar shift=-8pt, opacity=.5, fill=orange] table[y=value, x expr=\coordindex, x=bin col sep=tab] {\pfaedle};
+		\addplot table[y=value, x expr=\coordindex, x=bin col sep=tab] {\ptmmFastest};
+		\addlegendentry{TransitRouter fastest}
+		\addplot table[y=value, x expr=\coordindex, x=bin col sep=tab] {\ghFastest};
+		\addlegendentry{GHMM fastest}
+		\addplot table[y=value, x expr=\coordindex, x=bin col sep=tab] {\ptmmShortest};
+		\addlegendentry{TransitRouter shortest}
+		\addplot table[y=value, x expr=\coordindex, x=bin col sep=tab] {\ghShortest};
+		\addlegendentry{GHMM shortest}
+		\addplot table[y=value, x expr=\coordindex, x=bin col sep=tab] {\pfaedle};
 		\addlegendentry{pfeadle}
 	\end{axis}
 \end{tikzpicture}
 
 \begin{tikzpicture}[]
-	\pgfplotstableread[col sep=tab,]{../stats/vg.ptmm.stats.accuracy.tsv}\ptmm
+		\pgfplotstableread[col sep=tab,]{../stats/vg.fastest.ptmm.stats.accuracy.tsv}\ptmmFastest
+	\pgfplotstableread[col sep=tab,]{../stats/vg.shortest.ptmm.stats.accuracy.tsv}\ptmmShortest
+	\pgfplotstableread[col sep=tab,]{../stats/vg.fastest.gh.stats.accuracy.tsv}\ghFastest
+	\pgfplotstableread[col sep=tab,]{../stats/vg.shortest.gh.stats.accuracy.tsv}\ghShortest
 	\pgfplotstableread[col sep=tab,]{../stats/vg.pfaedle.stats.accuracy.tsv}\pfaedle
-	\pgfplotstableread[col sep=tab,]{../stats/vg.graphhopper.stats.accuracy.tsv}\gh
 
 	\begin{axis}[
 		ybar,
 		ymajorgrids,
 		axis x line*=bottom,
 		axis y line*=left, 
-		bar width=6pt, 
+		bar width=4pt, 
 		width=\textwidth,
 		height=6cm,
 		ymin=0,
 		xtick=data,
-		xticklabels from table={\ptmm}{bin},
+		xticklabels from table={\ptmmFastest}{bin},
 		ylabel={accuracy},
 		ytick={0.2, 0.4, 0.6, 0.8, 1.0},
 		xlabel={$A_N$},
 		xlabel style={at=(current axis.right of origin), anchor=west}
 		]
 		
-		\addplot[bar shift=-24pt, opacity=.5, fill=blue] table[y=value, x expr=\coordindex, x=bin col sep=tab] {\ptmm};
-		\addplot[bar shift=-16pt, opacity=.5, fill=red] table[y=value, x expr=\coordindex, x=bin col sep=tab] {\gh};
-		\addplot[bar shift=-8pt, opacity=.5, fill=orange] table[y=value, x expr=\coordindex, x=bin col sep=tab] {\pfaedle};
+		\addplot table[y=value, x expr=\coordindex, x=bin col sep=tab] {\ptmmFastest};
+		\addplot table[y=value, x expr=\coordindex, x=bin col sep=tab] {\ghFastest};
+		\addplot table[y=value, x expr=\coordindex, x=bin col sep=tab] {\ptmmShortest};
+		\addplot table[y=value, x expr=\coordindex, x=bin col sep=tab] {\ghShortest};
+		\addplot table[y=value, x expr=\coordindex, x=bin col sep=tab] {\pfaedle};
 	\end{axis}
 	
 \end{tikzpicture}
 
 \begin{tikzpicture}[]
-	\pgfplotstableread[col sep=tab,]{../stats/vg.ptmm.stats.an.tsv}\ptmm
+	\pgfplotstableread[col sep=tab,]{../stats/vg.fastest.ptmm.stats.an.tsv}\ptmmFastest
+	\pgfplotstableread[col sep=tab,]{../stats/vg.shortest.ptmm.stats.an.tsv}\ptmmShortest
+	\pgfplotstableread[col sep=tab,]{../stats/vg.fastest.gh.stats.an.tsv}\ghFastest
+	\pgfplotstableread[col sep=tab,]{../stats/vg.shortest.gh.stats.an.tsv}\ghShortest
 	\pgfplotstableread[col sep=tab,]{../stats/vg.pfaedle.stats.an.tsv}\pfaedle
-	\pgfplotstableread[col sep=tab,]{../stats/vg.graphhopper.stats.an.tsv}\gh
 	
 	\begin{axis}[
 		ybar,
@@ -83,8 +95,9 @@
 		height=6cm,
 		ymin=0,
 		scaled ticks=false,
+		xmax=10,
 		xtick=data,
-		xticklabels from table={\ptmm}{bin},
+		xticklabels from table={\ptmmFastest}{bin},
 		%xticklabels={0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0},
 		xticklabel style={rotate=45,anchor=east, /pgf/number format/.cd,fixed,precision=0},
 		ytick={0, 1000, 2000, 3000, 4000, 5000},
@@ -94,17 +107,21 @@
 		xlabel style={at=(current axis.right of origin), anchor=west}
 		]
 		
-		\addplot[bar shift=-14pt, opacity=.5, fill=blue] table[y=value, x expr=\coordindex, x=bin col sep=tab] {\ptmm};
-		\addplot[bar shift=-10pt, opacity=.5, fill=red] table[y=value, x expr=\coordindex, x=bin col sep=tab] {\gh};
-		\addplot[bar shift=-6pt, opacity=.5, fill=orange] table[y=value, x expr=\coordindex, x=bin col sep=tab] {\pfaedle};
+		\addplot table[y=value, x expr=\coordindex, x=bin col sep=tab] {\ptmmFastest};
+		\addplot table[y=value, x expr=\coordindex, x=bin col sep=tab] {\ghFastest};
+		\addplot table[y=value, x expr=\coordindex, x=bin col sep=tab] {\ptmmShortest};
+		\addplot table[y=value, x expr=\coordindex, x=bin col sep=tab] {\ghShortest};
+		\addplot table[y=value, x expr=\coordindex, x=bin col sep=tab] {\pfaedle};
 	\end{axis}
 	
 \end{tikzpicture}
 
 \begin{tikzpicture}[]
-	\pgfplotstableread[col sep=tab,]{../stats/vg.ptmm.stats.al.tsv}\ptmm
+	\pgfplotstableread[col sep=tab,]{../stats/vg.fastest.ptmm.stats.al.tsv}\ptmmFastest
+	\pgfplotstableread[col sep=tab,]{../stats/vg.shortest.ptmm.stats.al.tsv}\ptmmShortest
+	\pgfplotstableread[col sep=tab,]{../stats/vg.fastest.gh.stats.al.tsv}\ghFastest
+	\pgfplotstableread[col sep=tab,]{../stats/vg.shortest.gh.stats.al.tsv}\ghShortest
 	\pgfplotstableread[col sep=tab,]{../stats/vg.pfaedle.stats.al.tsv}\pfaedle
-	\pgfplotstableread[col sep=tab,]{../stats/vg.graphhopper.stats.al.tsv}\gh
 	
 	\begin{axis}[
 		ybar,
@@ -117,9 +134,9 @@
 		height=6cm,
 		ymin=0,
 		scaled ticks=false,
-		%xmax=3,
+		xmax=6,
 		xtick=data,
-		xticklabels from table={\ptmm}{bin},
+		xticklabels from table={\ptmmFastest}{bin},
 		%xticklabels={0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0},
 		xticklabel style={rotate=45,anchor=east, /pgf/number format/.cd,fixed,precision=0},
 		ytick={0, 1000, 2000, 3000, 4000, 5000},
@@ -129,9 +146,11 @@
 		xlabel style={at=(current axis.right of origin), anchor=west}
 		]
 		
-		\addplot[bar shift=-14pt, opacity=.5, fill=blue] table[y=value, x expr=\coordindex, x=bin col sep=tab] {\ptmm};
-		\addplot[bar shift=-10pt, opacity=.5, fill=red] table[y=value, x expr=\coordindex, x=bin col sep=tab] {\gh};
-		\addplot[bar shift=-6pt, opacity=.5, fill=orange] table[y=value, x expr=\coordindex, x=bin col sep=tab] {\pfaedle};
+		\addplot table[y=value, x expr=\coordindex, x=bin col sep=tab] {\ptmmFastest};
+		\addplot table[y=value, x expr=\coordindex, x=bin col sep=tab] {\ghFastest};
+		\addplot table[y=value, x expr=\coordindex, x=bin col sep=tab] {\ptmmShortest};
+		\addplot table[y=value, x expr=\coordindex, x=bin col sep=tab] {\ghShortest};
+		\addplot table[y=value, x expr=\coordindex, x=bin col sep=tab] {\pfaedle};
 	\end{axis}
 	
 \end{tikzpicture}

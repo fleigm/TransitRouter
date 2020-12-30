@@ -151,11 +151,30 @@
 		\centering
 		\begin{tikzpicture}[node distance=3cm, auto, >=stealth',bend angle=45, auto]
 			\begin{scope}[every node/.style={circle,thick,draw,fill=white}]
-				\node (s1) [fill=green, label=$s_1$] at (1, 1){};
-				\node (t1) {};
-				\node (t2) [above=of t1] {};
-				\node (t3) [right=of t2] {};
+				\node (n1) [fill=red, label=left:$s_0$] {};
+				\node (n2) [right=of n1] {};
+				\node (n3) [right=of n2, fill=red, label=right:$s_1$] {};
+				\node (n4) [above=of n3] {};
+				\node (n5) [above=of n2] {};
+				\node (n6) [above=of n1, fill=red, label=left:$s_2$] {};
 			\end{scope}
+		
+		\path 	(n1) edge node {$a$} (n2)
+				(n2) edge node {$b$} (n3)
+					 edge node {$d$} (n5)
+				(n3) edge node {$b$} (n4)
+				(n4) edge node {$c$} (n5)
+				(n5) edge node {$e$} (n6);
+				
+		\path[->,color=green]
+			(n2) edge [bend left] node {$1$} (n3)
+			(n3) edge [bend left=60] node {$2$} (n2)
+			(n2) edge [bend left] node {$3$} (n5);
+			
+		\path[->,color=red]
+			(n2) edge [bend right=30] node {$1$} (n3)
+			(n3) edge [bend right] node {$2$} (n4)
+			(n4) edge [bend right] node {$3$} (n5);
 			
 		\end{tikzpicture}
 	\end{minipage}
