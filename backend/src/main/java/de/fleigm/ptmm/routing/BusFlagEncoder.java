@@ -262,7 +262,8 @@ public class BusFlagEncoder extends AbstractFlagEncoder {
     return way.hasTag("oneway", "-1")
            || way.hasTag("vehicle:forward", "no")
            || way.hasTag("motor_vehicle:forward", "no")
-           || way.hasTag("busway");
+           || way.hasTag("busway")
+           || way.hasTag("oneway:psv", "no");
   }
 
   /**
