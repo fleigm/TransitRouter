@@ -19,7 +19,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
-public class Info {
+public class GeneratedFeedInfo {
 
   @EqualsAndHashCode.Include
   @Builder.Default
@@ -32,6 +32,7 @@ public class Info {
 
   //@Setter(AccessLevel.NONE)
   private Path path;
+  private Path originalFeed;
 
   @Builder.Default
   private Map<String, Object> statistics = new HashMap<>();
@@ -42,13 +43,13 @@ public class Info {
   @Builder.Default
   private List<Error> errors = new ArrayList<>();
 
-  public Info addStatistic(String key, Object value) {
+  public GeneratedFeedInfo addStatistic(String key, Object value) {
     statistics.put(key, value);
 
     return this;
   }
 
-  public Info addExtension(String key, Object value) {
+  public GeneratedFeedInfo addExtension(String key, Object value) {
     extension.put(key, value);
 
     return this;
@@ -62,7 +63,7 @@ public class Info {
     return extension.get(key);
   }
 
-  public Info addError(Error error) {
+  public GeneratedFeedInfo addError(Error error) {
     this.errors.add(error);
     return this;
   }

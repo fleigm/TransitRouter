@@ -2,9 +2,9 @@ package de.fleigm.ptmm.eval.process;
 
 import de.fleigm.ptmm.eval.Error;
 import de.fleigm.ptmm.eval.EvaluationRepository;
-import de.fleigm.ptmm.eval.Info;
+import de.fleigm.ptmm.eval.GeneratedFeedInfo;
 import de.fleigm.ptmm.eval.Status;
-import de.fleigm.ptmm.routing.TransitRouterFactory;
+import de.fleigm.ptmm.eval.api.TransitRouterFactory;
 import de.fleigm.ptmm.util.StopWatch;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;
@@ -30,7 +30,7 @@ public class EvaluationProcess {
     this.generateQuickStats = new GenerateQuickStats(evaluationFolder);
   }
 
-  public void run(Info info) {
+  public void run(GeneratedFeedInfo info) {
     MDC.put("evaluation.id", info.getId().toString());
     MDC.put("evaluation.name", info.getName());
 
@@ -53,7 +53,7 @@ public class EvaluationProcess {
     }
   }
 
-  private void runEvaluationProcess(Info info) {
+  private void runEvaluationProcess(GeneratedFeedInfo info) {
     generateNewGtfsFeed.accept(info);
     unzipGtfsFeed.accept(info);
     evaluateGtfsFeed.accept(info);

@@ -3,9 +3,8 @@ package de.fleigm.ptmm.eval.api;
 import de.fleigm.ptmm.TransitFeed;
 import de.fleigm.ptmm.eval.EvaluationRepository;
 import de.fleigm.ptmm.eval.EvaluationResult;
-import de.fleigm.ptmm.eval.Info;
+import de.fleigm.ptmm.eval.GeneratedFeedInfo;
 import de.fleigm.ptmm.eval.Report;
-import de.fleigm.ptmm.eval.ReportEntry;
 import de.fleigm.ptmm.eval.Status;
 import de.fleigm.ptmm.http.pagination.Page;
 import de.fleigm.ptmm.http.pagination.Paged;
@@ -45,7 +44,7 @@ public class EvaluationReportController {
       @QueryParam("search") @DefaultValue("") String search,
       @QueryParam("sort") @DefaultValue("") String sort) {
 
-    Optional<Info> info = evaluationRepository.find(id);
+    Optional<GeneratedFeedInfo> info = evaluationRepository.find(id);
 
     if (info.isEmpty() || info.get().getStatus() != Status.FINISHED) {
       return Response.status(Response.Status.NOT_FOUND).build();
@@ -63,14 +62,14 @@ public class EvaluationReportController {
                                   String sort) {
 
     Report report = evaluationResult.report();
-    Stream<ReportEntry> entryQueryStream = report.entries().stream();
+    Stream<Report.Entry> entryQueryStream = report.entries().stream();
 
     if (!search.isBlank()) {
-      entryQueryStream = entryQueryStream.filter(reportEntry -> reportEntry.tripId.contains(search));
+      entryQueryStream = entryQueryStream.filter(entry -> entry.tripId.contains(search));
     }
 
     if (!sort.isBlank()) {
-      Comparator<ReportEntry> comparator = createComparator(SortQuery.parse(sort));
+      Comparator<Report.Entry> comparator = createComparator(SortQuery.parse(sort));
       if (comparator != null) {
         if (SortQuery.parse(sort).order() == SortQuery.SortOrder.DESC) {
           comparator = comparator.reversed();
@@ -81,7 +80,7 @@ public class EvaluationReportController {
 
     TransitFeed transitFeed = evaluationResult.generatedTransitFeed();
 
-    List<ReportEntry> entries = entryQueryStream.collect(Collectors.toList());
+    List<Report.Entry> entries = entryQueryStream.collect(Collectors.toList());
 
     List<View> views = entries.stream()
         .skip(paged.getOffset())
@@ -105,17 +104,17 @@ public class EvaluationReportController {
     return Response.ok(page).build();
   }
 
-  private Comparator<ReportEntry> createComparator(SortQuery sortQuery) {
-    Comparator<ReportEntry> comparator = null;
+  private Comparator<Report.Entry> createComparator(SortQuery sortQuery) {
+    Comparator<Report.Entry> comparator = null;
     switch (sortQuery.attribute()) {
       case "an":
-        comparator = Comparator.comparingDouble(ReportEntry::an);
+        comparator = Comparator.comparingDouble(Report.Entry::an);
         break;
       case "al":
-        comparator = Comparator.comparingDouble(ReportEntry::al);
+        comparator = Comparator.comparingDouble(Report.Entry::al);
         break;
       case "avgFd":
-        comparator = Comparator.comparingDouble(ReportEntry::avgFd);
+        comparator = Comparator.comparingDouble(Report.Entry::avgFd);
         break;
     }
     return comparator;

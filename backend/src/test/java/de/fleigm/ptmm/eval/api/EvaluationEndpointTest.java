@@ -1,7 +1,7 @@
 package de.fleigm.ptmm.eval.api;
 
 import de.fleigm.ptmm.eval.EvaluationRepository;
-import de.fleigm.ptmm.eval.Info;
+import de.fleigm.ptmm.eval.GeneratedFeedInfo;
 import de.fleigm.ptmm.eval.Parameters;
 import de.fleigm.ptmm.eval.Status;
 import io.quarkus.test.junit.QuarkusTest;
@@ -44,7 +44,7 @@ public class EvaluationEndpointTest {
 
     response.then().statusCode(201);
 
-    Info info = response.as(Info.class);
+    GeneratedFeedInfo info = response.as(GeneratedFeedInfo.class);
 
     assertEquals("endpoint_happy_path", info.getName());
 
@@ -56,7 +56,7 @@ public class EvaluationEndpointTest {
   void can_delete_evaluation(Status status) throws IOException {
     String evaluationName = "can_delete_evaluation";
 
-    Info info = Info.builder()
+    GeneratedFeedInfo info = GeneratedFeedInfo.builder()
         .name(evaluationName)
         .createdAt(LocalDateTime.now())
         .parameters(Parameters.defaultParameters())
@@ -78,7 +78,7 @@ public class EvaluationEndpointTest {
   void cannot_delete_pending_evaluation() throws IOException {
     String evaluationName = "cannot_delete_pending_evaluation";
 
-    Info info = Info.builder()
+    GeneratedFeedInfo info = GeneratedFeedInfo.builder()
         .name(evaluationName)
         .createdAt(LocalDateTime.now())
         .parameters(Parameters.defaultParameters())

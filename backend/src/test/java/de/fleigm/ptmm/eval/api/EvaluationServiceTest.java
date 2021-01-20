@@ -1,7 +1,7 @@
 package de.fleigm.ptmm.eval.api;
 
 import de.fleigm.ptmm.eval.Evaluation;
-import de.fleigm.ptmm.eval.Info;
+import de.fleigm.ptmm.eval.GeneratedFeedInfo;
 import de.fleigm.ptmm.eval.Status;
 import io.quarkus.test.junit.QuarkusTest;
 import org.apache.commons.io.FileUtils;
@@ -59,7 +59,7 @@ public class EvaluationServiceTest {
 
     evaluation.process().get();
 
-    Info info = evaluation.info();
+    GeneratedFeedInfo info = evaluation.info();
 
     assertTrue(evaluation.process().isDone());
     assertFalse(evaluation.process().isCompletedExceptionally());
@@ -95,7 +95,7 @@ public class EvaluationServiceTest {
 
     evaluation.process().get();
 
-    Info info = evaluation.info();
+    GeneratedFeedInfo info = evaluation.info();
 
     assertEquals(Status.FAILED, info.getStatus());
     assertTrue(info.getErrors().stream().anyMatch(error -> error.getCode().equals("process.failed")));

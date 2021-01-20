@@ -1,5 +1,8 @@
 package de.fleigm.ptmm.eval;
 
+import lombok.Data;
+import lombok.experimental.Accessors;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -8,9 +11,9 @@ import java.util.stream.Collectors;
 
 public class Report {
 
-  private final List<ReportEntry> entries;
+  private final List<Entry> entries;
 
-  public Report(List<ReportEntry> entries) {
+  public Report(List<Entry> entries) {
     this.entries = entries;
   }
 
@@ -20,10 +23,10 @@ public class Report {
 
   public static Report read(String file) {
     try {
-      List<ReportEntry> entries = Files.lines(Path.of(file))
+      List<Entry> entries = Files.lines(Path.of(file))
           .map(line -> line.split("\t"))
           .map(values ->
-              new ReportEntry(
+              new Entry(
                   values[0],
                   Double.parseDouble(values[1]),
                   Double.parseDouble(values[2]),
@@ -36,7 +39,16 @@ public class Report {
     }
   }
 
-  public List<ReportEntry> entries() {
+  public List<Entry> entries() {
     return entries;
+  }
+
+  @Data
+  @Accessors(fluent = true)
+  public static class Entry {
+    public final String tripId;
+    public final double an;
+    public final double al;
+    public final double avgFd;
   }
 }

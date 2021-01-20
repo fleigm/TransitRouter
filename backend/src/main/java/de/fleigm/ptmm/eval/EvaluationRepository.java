@@ -26,7 +26,7 @@ import java.util.stream.Collectors;
 public class EvaluationRepository {
   @ConfigProperty(name = "evaluation.folder")
   String evaluationBasePath;
-  private List<Info> evaluations = new ArrayList<>();
+  private List<GeneratedFeedInfo> evaluations = new ArrayList<>();
 
   @PostConstruct
   public void init() {
@@ -37,7 +37,7 @@ public class EvaluationRepository {
     }
   }
 
-  public void save(Info info) {
+  public void save(GeneratedFeedInfo info) {
     info.setBasePath(Path.of(evaluationBasePath));
 
     if (!evaluations.contains(info)) {
@@ -52,7 +52,7 @@ public class EvaluationRepository {
   }
 
   public Optional<Exception> delete(UUID id) {
-    Optional<Info> info = find(id);
+    Optional<GeneratedFeedInfo> info = find(id);
 
     if (info.isEmpty()) {
       return Optional.empty();
@@ -74,11 +74,11 @@ public class EvaluationRepository {
     return Optional.empty();
   }
 
-  public List<Info> all() {
+  public List<GeneratedFeedInfo> all() {
     return evaluations;
   }
 
-  public Optional<Info> find(UUID id) {
+  public Optional<GeneratedFeedInfo> find(UUID id) {
     return evaluations.stream()
         .filter(info -> info.getId().equals(id))
         .findFirst();
@@ -86,17 +86,17 @@ public class EvaluationRepository {
 
   @CacheResult(cacheName = "evaluation-result-cache")
   public Optional<EvaluationResult> findEvaluationResult(UUID id) {
-    return find(id).filter(Info::hasFinished).map(EvaluationResult::load);
+    return find(id).filter(GeneratedFeedInfo::hasFinished).map(EvaluationResult::load);
   }
 
-  void writeToDisk(Info info) throws IOException {
+  void writeToDisk(GeneratedFeedInfo info) throws IOException {
     Jsonb json = JsonbBuilder.create(new JsonbConfig().withFormatting(true));
 
     Files.createDirectories(info.getPath());
     Files.writeString(info.getPath().resolve(Evaluation.INFO_FILE), json.toJson(info));
   }
 
-  List<Info> loadFromDisk(String baseFolder) throws IOException {
+  List<GeneratedFeedInfo> loadFromDisk(String baseFolder) throws IOException {
     Jsonb json = JsonbBuilder.create();
 
     Path root = Path.of(baseFolder);
@@ -109,7 +109,7 @@ public class EvaluationRepository {
             throw new RuntimeException(e);
           }
         })
-        .map(rawJson -> json.fromJson(rawJson, Info.class))
+        .map(rawJson -> json.fromJson(rawJson, GeneratedFeedInfo.class))
         .peek(info -> info.setBasePath(root))
         .collect(Collectors.toList());
 

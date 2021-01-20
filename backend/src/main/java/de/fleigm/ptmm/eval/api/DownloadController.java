@@ -2,7 +2,7 @@ package de.fleigm.ptmm.eval.api;
 
 import de.fleigm.ptmm.eval.Evaluation;
 import de.fleigm.ptmm.eval.EvaluationRepository;
-import de.fleigm.ptmm.eval.Info;
+import de.fleigm.ptmm.eval.GeneratedFeedInfo;
 import org.apache.commons.compress.archivers.ArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream;
@@ -66,7 +66,7 @@ public class DownloadController {
         .orElse(Response.status(Response.Status.NOT_FOUND).build());
   }
 
-  private void buildZipFile(OutputStream output, Info info) throws IOException {
+  private void buildZipFile(OutputStream output, GeneratedFeedInfo info) throws IOException {
     try (var archive = new ZipArchiveOutputStream(output)) {
       List<File> files = Arrays.stream(INCLUDED_FILES)
           .map(file -> info.getPath().resolve(file).toFile())

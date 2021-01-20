@@ -1,7 +1,7 @@
 package de.fleigm.ptmm.eval.api;
 
 import de.fleigm.ptmm.eval.Evaluation;
-import de.fleigm.ptmm.eval.Info;
+import de.fleigm.ptmm.eval.GeneratedFeedInfo;
 import io.quarkus.test.junit.QuarkusTest;
 import io.restassured.http.ContentType;
 import io.restassured.response.Response;
@@ -34,7 +34,7 @@ public class DownloadControllerTest {
   @ConfigProperty(name = "evaluation.folder")
   String evaluationFolder;
 
-  private Info info;
+  private GeneratedFeedInfo info;
 
   @BeforeEach
   void setup() throws IOException, ExecutionException, InterruptedException {

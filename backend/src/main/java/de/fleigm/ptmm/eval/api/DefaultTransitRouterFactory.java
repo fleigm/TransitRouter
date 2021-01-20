@@ -4,7 +4,6 @@ import com.graphhopper.GraphHopper;
 import com.graphhopper.util.PMap;
 import de.fleigm.ptmm.routing.DefaultTransitRouter;
 import de.fleigm.ptmm.routing.TransitRouter;
-import de.fleigm.ptmm.routing.TransitRouterFactory;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;

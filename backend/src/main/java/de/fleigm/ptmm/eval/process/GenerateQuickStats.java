@@ -1,9 +1,8 @@
 package de.fleigm.ptmm.eval.process;
 
 import de.fleigm.ptmm.eval.Evaluation;
-import de.fleigm.ptmm.eval.Info;
+import de.fleigm.ptmm.eval.GeneratedFeedInfo;
 import de.fleigm.ptmm.eval.Report;
-import de.fleigm.ptmm.eval.ReportEntry;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.json.Json;
@@ -13,7 +12,7 @@ import java.util.function.Consumer;
 import java.util.function.ToDoubleFunction;
 
 @Slf4j
-public class GenerateQuickStats implements Consumer<Info> {
+public class GenerateQuickStats implements Consumer<GeneratedFeedInfo> {
 
   private final String evaluationFolder;
 
@@ -22,20 +21,20 @@ public class GenerateQuickStats implements Consumer<Info> {
   }
 
   @Override
-  public void accept(Info info) {
+  public void accept(GeneratedFeedInfo info) {
     log.info("Start quick stats step.");
 
     Report report = Report.read(info.getPath().resolve(Evaluation.GTFS_FULL_REPORT));
 
     info.addStatistic("accuracy", computeAccuracy(report))
-        .addStatistic("fd", buildStatsFor(report, ReportEntry::avgFd))
-        .addStatistic("an", buildStatsFor(report, ReportEntry::an))
-        .addStatistic("al", buildStatsFor(report, ReportEntry::al));
+        .addStatistic("fd", buildStatsFor(report, Report.Entry::avgFd))
+        .addStatistic("an", buildStatsFor(report, Report.Entry::an))
+        .addStatistic("al", buildStatsFor(report, Report.Entry::al));
 
     log.info("Finished quick stats step.");
   }
 
-  private JsonObject buildStatsFor(Report report, ToDoubleFunction<ReportEntry> mapper) {
+  private JsonObject buildStatsFor(Report report, ToDoubleFunction<Report.Entry> mapper) {
     DoubleSummaryStatistics stats = report.entries()
         .stream()
         .mapToDouble(mapper)
@@ -51,7 +50,7 @@ public class GenerateQuickStats implements Consumer<Info> {
   private double[] computeAccuracy(Report report) {
     double[] accuracies = new double[10];
 
-    for (ReportEntry entry : report.entries()) {
+    for (Report.Entry entry : report.entries()) {
       for (int i = 0; i < accuracies.length; i++) {
         if (entry.an <= i * 0.1) {
           accuracies[i]++;

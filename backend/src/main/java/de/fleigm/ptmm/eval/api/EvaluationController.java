@@ -1,7 +1,7 @@
 package de.fleigm.ptmm.eval.api;
 
 import de.fleigm.ptmm.eval.EvaluationRepository;
-import de.fleigm.ptmm.eval.Info;
+import de.fleigm.ptmm.eval.GeneratedFeedInfo;
 import org.jboss.resteasy.annotations.providers.multipart.MultipartForm;
 
 import javax.inject.Inject;
@@ -45,9 +45,9 @@ public class EvaluationController {
   @GET
   @Produces(MediaType.APPLICATION_JSON)
   public Response index() {
-    List<Info> evaluations = evaluationRepository.all()
+    List<GeneratedFeedInfo> evaluations = evaluationRepository.all()
         .stream()
-        .sorted(Comparator.comparing(Info::getCreatedAt).reversed())
+        .sorted(Comparator.comparing(GeneratedFeedInfo::getCreatedAt).reversed())
         .collect(Collectors.toList());
 
     return Response.ok(evaluations).build();

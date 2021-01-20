@@ -13,7 +13,7 @@ public class EvaluationResult {
     this.generatedTransitFeed = generatedTransitFeed;
   }
 
-  public static EvaluationResult load(Info info) {
+  public static EvaluationResult load(GeneratedFeedInfo info) {
     if (info.getStatus() != Status.FINISHED) {
       throw new IllegalStateException("Cannot load EvaluationResult if evaluation has not finished successfully.");
     }

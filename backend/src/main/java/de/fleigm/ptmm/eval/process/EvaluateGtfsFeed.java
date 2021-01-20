@@ -1,10 +1,11 @@
 package de.fleigm.ptmm.eval.process;
 
 import de.fleigm.ptmm.eval.Evaluation;
-import de.fleigm.ptmm.eval.Info;
+import de.fleigm.ptmm.eval.GeneratedFeedInfo;
 import de.fleigm.ptmm.util.StopWatch;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.FilenameUtils;
 
 import java.io.File;
 import java.nio.file.Files;
@@ -12,7 +13,7 @@ import java.nio.file.Path;
 import java.util.function.Consumer;
 
 @Slf4j
-public class EvaluateGtfsFeed implements Consumer<Info> {
+public class EvaluateGtfsFeed implements Consumer<GeneratedFeedInfo> {
 
   private final String evaluationToolPath;
 
@@ -22,11 +23,11 @@ public class EvaluateGtfsFeed implements Consumer<Info> {
 
   @SneakyThrows
   @Override
-  public void accept(Info info) {
+  public void accept(GeneratedFeedInfo info) {
     log.info("Start evaluation step.");
 
     Path folder = info.getPath();
-    Path original = folder.resolve(Evaluation.ORIGINAL_GTFS_FOLDER);
+    Path original = info.getOriginalFeed().resolveSibling(FilenameUtils.removeExtension(info.getOriginalFeed().toString()));
     Path generated = folder.resolve(Evaluation.GENERATED_GTFS_FOLDER);
 
     String[] command = {
@@ -43,7 +44,7 @@ public class EvaluateGtfsFeed implements Consumer<Info> {
 
     Process process = new ProcessBuilder(command)
         .redirectInput(outputFile)
-        .redirectError(outputFile)
+        .redirectErrorStream(true)
         .start();
 
     process.waitFor();

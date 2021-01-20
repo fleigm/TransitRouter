@@ -9,11 +9,11 @@ import de.fleigm.ptmm.Shape;
 import de.fleigm.ptmm.TransitFeed;
 import de.fleigm.ptmm.eval.Error;
 import de.fleigm.ptmm.eval.Evaluation;
-import de.fleigm.ptmm.eval.Info;
+import de.fleigm.ptmm.eval.GeneratedFeedInfo;
+import de.fleigm.ptmm.eval.api.TransitRouterFactory;
 import de.fleigm.ptmm.routing.Observation;
 import de.fleigm.ptmm.routing.RoutingResult;
 import de.fleigm.ptmm.routing.TransitRouter;
-import de.fleigm.ptmm.routing.TransitRouterFactory;
 import de.fleigm.ptmm.util.StopWatch;
 import lombok.Value;
 import lombok.extern.slf4j.Slf4j;
@@ -27,7 +27,7 @@ import java.util.stream.DoubleStream;
 import java.util.stream.StreamSupport;
 
 @Slf4j
-public class GenerateNewGtfsFeed implements Consumer<Info> {
+public class GenerateNewGtfsFeed implements Consumer<GeneratedFeedInfo> {
 
   private final TransitRouterFactory transitRouterFactory;
 
@@ -36,8 +36,8 @@ public class GenerateNewGtfsFeed implements Consumer<Info> {
   }
 
   @Override
-  public void accept(Info info) {
-    TransitFeed transitFeed = new TransitFeed(info.getPath().resolve(Evaluation.ORIGINAL_GTFS_FEED));
+  public void accept(GeneratedFeedInfo info) {
+    TransitFeed transitFeed = new TransitFeed(info.getOriginalFeed());
     TransitRouter transitRouter = transitRouterFactory.create(info);
     TransitRouter transitRouterWithoutTurnRestrictions = transitRouterFactory.create(
         info.getParameters()
@@ -50,11 +50,11 @@ public class GenerateNewGtfsFeed implements Consumer<Info> {
   }
 
   private static class Runner {
-    private final Info info;
+    private final GeneratedFeedInfo info;
     private final TransitFeed transitFeed;
     private final List<TransitRouter> routers;
 
-    public Runner(Info info, TransitFeed transitFeed, List<TransitRouter> routers) {
+    public Runner(GeneratedFeedInfo info, TransitFeed transitFeed, List<TransitRouter> routers) {
       this.info = info;
       this.transitFeed = transitFeed;
       this.routers = routers;
