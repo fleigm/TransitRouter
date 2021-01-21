@@ -19,9 +19,9 @@ public class EvaluationResult {
     }
 
     return new EvaluationResult(
-        Report.read(info.getPath().resolve(Evaluation.GTFS_FULL_REPORT)),
+        Report.read(info.getPath().resolve(EvaluationExtension.SHAPEVL_REPORT)),
         new TransitFeed(info.getPath().resolve(Evaluation.ORIGINAL_GTFS_FEED)),
-        new TransitFeed(info.getPath().resolve(Evaluation.GENERATED_GTFS_FEED))
+        new TransitFeed(info.getPath().resolve(GeneratedFeedInfo.GENERATED_GTFS_FEED))
     );
   }
 

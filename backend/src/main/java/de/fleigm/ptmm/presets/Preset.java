@@ -12,26 +12,21 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
-import java.nio.file.Path;
 import java.time.LocalDateTime;
-import java.util.UUID;
 
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@EqualsAndHashCode(onlyExplicitlyIncluded = true)
-public class Preset implements Entity {
-
-  @Builder.Default
-  @EqualsAndHashCode.Include
-  private UUID id = UUID.randomUUID();
+@EqualsAndHashCode(callSuper = true)
+public class Preset extends Entity {
 
   private String name;
   private LocalDateTime createdAt;
-  private Path path;
 
   @ToString.Exclude
   @Setter(AccessLevel.NONE)
-  private transient Eval<TransitFeed> feed = Eval.later(() -> new TransitFeed(path.resolve("gtfs")));
+  private transient Eval<TransitFeed> feed = Eval.later(() -> new TransitFeed(getPath().resolve("gtfs")));
+
+
 }

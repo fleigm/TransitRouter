@@ -17,7 +17,6 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.util.concurrent.CompletableFuture;
 
@@ -51,8 +50,9 @@ public class EvaluationService {
         .status(Status.PENDING)
         .build();
 
-    info.setBasePath(Path.of(evaluationFolder));
+    info.setStoragePath(evaluationRepository.storagePath());
     info.setOriginalFeed(info.getPath().resolve(Evaluation.ORIGINAL_GTFS_FEED));
+    info.setGeneratedFeed(info.getPath().resolve(GeneratedFeedInfo.GENERATED_GTFS_FEED));
 
     try {
       File file = info.getPath().resolve(Evaluation.ORIGINAL_GTFS_FEED).toFile();

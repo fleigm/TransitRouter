@@ -1,6 +1,7 @@
 package de.fleigm.ptmm.eval.api;
 
 import de.fleigm.ptmm.eval.Evaluation;
+import de.fleigm.ptmm.eval.EvaluationExtension;
 import de.fleigm.ptmm.eval.GeneratedFeedInfo;
 import de.fleigm.ptmm.eval.Status;
 import io.quarkus.test.junit.QuarkusTest;
@@ -68,11 +69,10 @@ public class EvaluationServiceTest {
 
     assertTrue(Files.isDirectory(info.getPath()));
     assertTrue(Files.isDirectory(info.getPath().resolve(Evaluation.ORIGINAL_GTFS_FOLDER)));
-    assertTrue(Files.isDirectory(info.getPath().resolve(Evaluation.GENERATED_GTFS_FOLDER)));
+    assertTrue(Files.isDirectory(info.getPath().resolve(GeneratedFeedInfo.GENERATED_GTFS_FOLDER)));
     assertTrue(Files.exists(info.getPath().resolve(Evaluation.ORIGINAL_GTFS_FEED)));
-    assertTrue(Files.exists(info.getPath().resolve(Evaluation.GENERATED_GTFS_FEED)));
-    assertTrue(Files.exists(info.getPath().resolve(Evaluation.GTFS_FULL_REPORT)));
-    assertTrue(Files.exists(info.getPath().resolve(Evaluation.SHAPEVL_OUTPUT)));
+    assertTrue(Files.exists(info.getPath().resolve(GeneratedFeedInfo.GENERATED_GTFS_FEED)));
+    assertTrue(Files.exists(info.getPath().resolve(EvaluationExtension.SHAPEVL_REPORT)));
     assertTrue(Files.exists(info.getPath().resolve(Evaluation.INFO_FILE)));
   }
 

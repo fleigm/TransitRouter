@@ -1,15 +1,13 @@
 package de.fleigm.ptmm.eval.process;
 
-import de.fleigm.ptmm.eval.Evaluation;
+import de.fleigm.ptmm.eval.EvaluationExtension;
 import de.fleigm.ptmm.eval.GeneratedFeedInfo;
+import de.fleigm.ptmm.eval.Status;
 import de.fleigm.ptmm.util.StopWatch;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FilenameUtils;
 
-import java.io.File;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.function.Consumer;
 
 @Slf4j
@@ -26,32 +24,32 @@ public class EvaluateGtfsFeed implements Consumer<GeneratedFeedInfo> {
   public void accept(GeneratedFeedInfo info) {
     log.info("Start evaluation step.");
 
-    Path folder = info.getPath();
-    Path original = info.getOriginalFeed().resolveSibling(FilenameUtils.removeExtension(info.getOriginalFeed().toString()));
-    Path generated = folder.resolve(Evaluation.GENERATED_GTFS_FOLDER);
+    EvaluationExtension evaluation = info.getOrCreateExtension(EvaluationExtension.class, EvaluationExtension::new);
+
+    evaluation.setStatus(Status.PENDING);
 
     String[] command = {
         evaluationToolPath,
         "-m", "3",
-        "-f", folder.toString(),
-        "-g", original.toString(),
-        generated.toString()
+        "-f", info.getPath().toString(),
+        "-g", FilenameUtils.removeExtension(info.getOriginalFeed().toString()),
+        FilenameUtils.removeExtension(info.getGeneratedFeed().toString())
     };
-
-    File outputFile = Files.createFile(folder.resolve(Evaluation.SHAPEVL_OUTPUT)).toFile();
 
     StopWatch stopWatch = StopWatch.createAndStart();
 
-    Process process = new ProcessBuilder(command)
-        .redirectInput(outputFile)
-        .redirectErrorStream(true)
-        .start();
+    Process process = new ProcessBuilder(command).redirectErrorStream(true).start();
+
+    evaluation.setShapevlOutput(new String(process.getInputStream().readAllBytes()));
 
     process.waitFor();
 
     if (process.exitValue() != 0) {
+      evaluation.setStatus(Status.FAILED);
       throw new RuntimeException("Evaluation tool failed.");
     }
+
+    evaluation.setReport(info.getPath().resolve(EvaluationExtension.SHAPEVL_REPORT));
 
     stopWatch.stop();
 

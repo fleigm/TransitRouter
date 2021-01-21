@@ -1,6 +1,7 @@
 package de.fleigm.ptmm.eval.api;
 
 import de.fleigm.ptmm.eval.Evaluation;
+import de.fleigm.ptmm.eval.EvaluationExtension;
 import de.fleigm.ptmm.eval.EvaluationRepository;
 import de.fleigm.ptmm.eval.GeneratedFeedInfo;
 import org.apache.commons.compress.archivers.ArchiveEntry;
@@ -31,10 +32,9 @@ import java.util.stream.Collectors;
 public class DownloadController {
   private static final String[] INCLUDED_FILES = new String[]{
       Evaluation.INFO_FILE,
-      Evaluation.GTFS_FULL_REPORT,
+      EvaluationExtension.SHAPEVL_REPORT,
       Evaluation.ORIGINAL_GTFS_FEED,
-      Evaluation.GENERATED_GTFS_FEED,
-      Evaluation.SHAPEVL_OUTPUT
+      GeneratedFeedInfo.GENERATED_GTFS_FEED,
   };
 
   @Inject
@@ -49,8 +49,8 @@ public class DownloadController {
   public Response downloadGeneratedFeed(@PathParam("id") UUID id) {
     return evaluationRepository.find(id)
         .map(info -> Response
-            .ok(info.getPath().resolve(Evaluation.GENERATED_GTFS_FEED).toFile())
-            .header("Content-Disposition", "attachment;filename=" + info.getName() + "." + Evaluation.GENERATED_GTFS_FEED)
+            .ok(info.getPath().resolve(GeneratedFeedInfo.GENERATED_GTFS_FEED).toFile())
+            .header("Content-Disposition", "attachment;filename=" + info.getName() + "." + GeneratedFeedInfo.GENERATED_GTFS_FEED)
             .build())
         .orElse(Response.status(Response.Status.NOT_FOUND).build());
   }

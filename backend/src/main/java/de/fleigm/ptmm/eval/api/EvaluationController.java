@@ -2,6 +2,7 @@ package de.fleigm.ptmm.eval.api;
 
 import de.fleigm.ptmm.eval.EvaluationRepository;
 import de.fleigm.ptmm.eval.GeneratedFeedInfo;
+import de.fleigm.ptmm.eval.Status;
 import org.jboss.resteasy.annotations.providers.multipart.MultipartForm;
 
 import javax.inject.Inject;
@@ -66,13 +67,13 @@ public class EvaluationController {
   @Path("{id}")
   @Produces(MediaType.APPLICATION_JSON)
   public Response delete(@PathParam("id") UUID id) {
-    Optional<Exception> result = evaluationRepository.delete(id);
+    Optional<GeneratedFeedInfo> feedInfo = evaluationRepository.find(id);
 
-    if (result.isEmpty()) {
+    if (feedInfo.isEmpty()) {
       return Response.noContent().build();
     }
 
-    if (result.get().getClass().equals(IllegalStateException.class)) {
+    if (feedInfo.get().getStatus() == Status.PENDING) {
       return Response.status(Response.Status.CONFLICT)
           .entity(Json.createObjectBuilder()
               .add("message", "Can only delete finished or failed evaluations.")
@@ -80,6 +81,9 @@ public class EvaluationController {
           .build();
     }
 
-    return Response.serverError().build();
+    evaluationRepository.delete(id);
+
+    return Response.noContent().build();
+
   }
 }

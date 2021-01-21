@@ -1,6 +1,6 @@
 package de.fleigm.ptmm.eval.process;
 
-import de.fleigm.ptmm.eval.Evaluation;
+import de.fleigm.ptmm.eval.EvaluationExtension;
 import de.fleigm.ptmm.eval.GeneratedFeedInfo;
 import de.fleigm.ptmm.eval.Report;
 import lombok.extern.slf4j.Slf4j;
@@ -8,6 +8,8 @@ import lombok.extern.slf4j.Slf4j;
 import javax.json.Json;
 import javax.json.JsonObject;
 import java.util.DoubleSummaryStatistics;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.ToDoubleFunction;
 
@@ -24,12 +26,16 @@ public class GenerateQuickStats implements Consumer<GeneratedFeedInfo> {
   public void accept(GeneratedFeedInfo info) {
     log.info("Start quick stats step.");
 
-    Report report = Report.read(info.getPath().resolve(Evaluation.GTFS_FULL_REPORT));
+    EvaluationExtension evaluation = info.getExtension(EvaluationExtension.class).get();
 
-    info.addStatistic("accuracy", computeAccuracy(report))
-        .addStatistic("fd", buildStatsFor(report, Report.Entry::avgFd))
-        .addStatistic("an", buildStatsFor(report, Report.Entry::an))
-        .addStatistic("al", buildStatsFor(report, Report.Entry::al));
+    Report report = Report.read(evaluation.getReport());
+
+    Map<String, Object> stats = new HashMap<>();
+    stats.put("accuracy", computeAccuracy(report));
+    stats.put("fd", buildStatsFor(report, Report.Entry::avgFd));
+    stats.put("an", buildStatsFor(report, Report.Entry::an));
+    stats.put("al", buildStatsFor(report, Report.Entry::al));
+    evaluation.setQuickStats(stats);
 
     log.info("Finished quick stats step.");
   }

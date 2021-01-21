@@ -59,6 +59,7 @@ public abstract class Repository<T extends Entity> {
       Files.createDirectories(path);
       Files.writeString(path.resolve(entityFileName), toJson(entity));
 
+      entity.setPath(path);
       storage.put(entity.getId(), entity);
     } catch (IOException e) {
       logger.error("Failed to save entity {}", entity, e);
@@ -73,11 +74,15 @@ public abstract class Repository<T extends Entity> {
     return new ArrayList<>(storage.values());
   }
 
-  public void delete(T entity) {
-    if (find(entity.getId()).isEmpty()) {
-      return;
-    }
+  public void delete(UUID id) {
+    find(id).ifPresent(this::removeExistingEntity);
+  }
 
+  public void delete(T entity) {
+    find(entity.getId()).ifPresent(this::removeExistingEntity);
+  }
+
+  private void removeExistingEntity(T entity) {
     try {
       FileUtils.deleteDirectory(entityStoragePath(entity).toFile());
       storage.remove(entity.getId());

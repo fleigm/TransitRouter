@@ -1,5 +1,8 @@
 package de.fleigm.ptmm.eval;
 
+import de.fleigm.ptmm.data.Entity;
+import de.fleigm.ptmm.data.Extensions;
+import de.fleigm.ptmm.data.HasExtensions;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -18,30 +21,34 @@ import java.util.UUID;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode(onlyExplicitlyIncluded = true)
-public class GeneratedFeedInfo {
+@EqualsAndHashCode(callSuper=true)
+public class GeneratedFeedInfo extends Entity implements HasExtensions {
 
-  @EqualsAndHashCode.Include
-  @Builder.Default
-  private UUID id = UUID.randomUUID();
+  public static final String GENERATED_GTFS_FEED = "gtfs.generated.zip";
+  public static final String GENERATED_GTFS_FOLDER = "gtfs.generated";
 
   private String name;
   private Parameters parameters;
   private LocalDateTime createdAt;
   private Status status;
 
-  //@Setter(AccessLevel.NONE)
-  private Path path;
+  private Path generatedFeed;
   private Path originalFeed;
+  private UUID preset;
 
   @Builder.Default
   private Map<String, Object> statistics = new HashMap<>();
 
   @Builder.Default
-  private Map<String, Object> extension = new HashMap<>();
+  private Extensions extensions = new Extensions();
 
   @Builder.Default
   private List<Error> errors = new ArrayList<>();
+
+  @Override
+  public Extensions extensions() {
+    return extensions;
+  }
 
   public GeneratedFeedInfo addStatistic(String key, Object value) {
     statistics.put(key, value);
@@ -49,27 +56,9 @@ public class GeneratedFeedInfo {
     return this;
   }
 
-  public GeneratedFeedInfo addExtension(String key, Object value) {
-    extension.put(key, value);
-
-    return this;
-  }
-
-  public boolean hasExtension(String key) {
-    return extension.containsKey(key);
-  }
-
-  public Object getExtension(String key) {
-    return extension.get(key);
-  }
-
   public GeneratedFeedInfo addError(Error error) {
     this.errors.add(error);
     return this;
-  }
-
-  public void setBasePath(Path path) {
-    this.path = path.resolve(id.toString());
   }
 
   boolean hasFinished() {

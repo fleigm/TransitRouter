@@ -54,7 +54,7 @@ public class StuttgartTest {
         .sigma(10.0)
         .candidateSearchRadius(10.0)
         .beta(1.0)
-        .profile("bus_fastest")
+        .profile("bus_fastest_turn")
         .build();
 
     EvaluationService evaluationService = new EvaluationService();
@@ -122,6 +122,48 @@ public class StuttgartTest {
 
     assertTrue(result.process().isDone());
     assertFalse(result.process().isCompletedExceptionally());
+  }
+
+  @ParameterizedTest
+  @ValueSource(strings = {"bus_shortest_turn", "bus_fastest_turn"})
+  void ptmm(String profile) throws ExecutionException, InterruptedException, IOException {
+    File feed = Paths.get(homeDir, "/uni/bachelor/project/files/paris2.zip").toFile();
+
+    CreateEvaluationRequest ptmmRequest = CreateEvaluationRequest.builder()
+        .name(String.format("ptmm_paris_10_1_%s", profile))
+        .gtfsFeed(FileUtils.openInputStream(feed))
+        .sigma(10.0)
+        .candidateSearchRadius(10.0)
+        .beta(1.0)
+        .profile(profile)
+        .build();
+
+    CreateEvaluationRequest ghRequest = CreateEvaluationRequest.builder()
+        .name(String.format("graphHopper_paris_10_1_%s", profile))
+        .gtfsFeed(FileUtils.openInputStream(feed))
+        .sigma(10.0)
+        .candidateSearchRadius(10.0)
+        .beta(1.0)
+        .profile(profile)
+        .build();
+
+    EvaluationService service = new EvaluationService();
+    service.evaluationRepository = evaluationRepository;
+    service.evaluationTool = evaluationTool;
+    service.evaluationFolder = evaluationFolder;
+    service.transitRouterFactory = parameters -> new GraphHopperTransitRouter(graphHopper, parameters);
+
+    EvaluationResponse ptmmResult = evaluationService.createEvaluation(ptmmRequest);
+    EvaluationResponse ghResult = service.createEvaluation(ghRequest);
+
+    ptmmResult.process().get();
+    ghResult.process().get();
+
+    assertTrue(ptmmResult.process().isDone());
+    assertFalse(ptmmResult.process().isCompletedExceptionally());
+
+    assertTrue(ghResult.process().isDone());
+    assertFalse(ghResult.process().isCompletedExceptionally());
   }
 
   @Test

@@ -8,7 +8,6 @@ import de.fleigm.ptmm.Pattern;
 import de.fleigm.ptmm.Shape;
 import de.fleigm.ptmm.TransitFeed;
 import de.fleigm.ptmm.eval.Error;
-import de.fleigm.ptmm.eval.Evaluation;
 import de.fleigm.ptmm.eval.GeneratedFeedInfo;
 import de.fleigm.ptmm.eval.api.TransitRouterFactory;
 import de.fleigm.ptmm.routing.Observation;
@@ -77,7 +76,7 @@ public class GenerateNewGtfsFeed implements Consumer<GeneratedFeedInfo> {
           .peek(routedPattern -> trips.getAndAdd(routedPattern.pattern.trips().size()))
           .forEach(this::store);
 
-      transitFeed.internal().toFile(info.getPath().resolve(Evaluation.GENERATED_GTFS_FEED).toString());
+      transitFeed.internal().toFile(info.getGeneratedFeed().toString());
 
       stopWatch.stop();
 
