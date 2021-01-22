@@ -20,22 +20,20 @@ import org.mapdb.Fun;
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.DoubleStream;
 import java.util.stream.StreamSupport;
 
 @Slf4j
-public class GenerateNewGtfsFeed implements Consumer<GeneratedFeedInfo> {
+public class FeedGenerationStep {
 
   private final TransitRouterFactory transitRouterFactory;
 
-  public GenerateNewGtfsFeed(TransitRouterFactory transitRouterFactory) {
+  public FeedGenerationStep(TransitRouterFactory transitRouterFactory) {
     this.transitRouterFactory = transitRouterFactory;
   }
 
-  @Override
-  public void accept(GeneratedFeedInfo info) {
+  public void run(GeneratedFeedInfo info) {
     TransitFeed transitFeed = new TransitFeed(info.getOriginalFeed());
     TransitRouter transitRouter = transitRouterFactory.create(info);
     TransitRouter transitRouterWithoutTurnRestrictions = transitRouterFactory.create(

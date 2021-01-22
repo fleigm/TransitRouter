@@ -10,11 +10,10 @@ import javax.json.JsonObject;
 import java.util.DoubleSummaryStatistics;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.function.Consumer;
 import java.util.function.ToDoubleFunction;
 
 @Slf4j
-public class GenerateQuickStats implements Consumer<GeneratedFeedInfo> {
+public class GenerateQuickStats {
 
   private final String evaluationFolder;
 
@@ -22,8 +21,7 @@ public class GenerateQuickStats implements Consumer<GeneratedFeedInfo> {
     this.evaluationFolder = evaluationFolder;
   }
 
-  @Override
-  public void accept(GeneratedFeedInfo info) {
+  public void run(GeneratedFeedInfo info) {
     log.info("Start quick stats step.");
 
     EvaluationExtension evaluation = info.getExtension(EvaluationExtension.class).get();

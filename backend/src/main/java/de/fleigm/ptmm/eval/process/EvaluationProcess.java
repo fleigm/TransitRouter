@@ -9,13 +9,14 @@ import de.fleigm.ptmm.util.StopWatch;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;
 
+import java.nio.file.Path;
+
 @Slf4j
 public class EvaluationProcess {
 
   private final GeneratedFeedRepository generatedFeedRepository;
-  private final GenerateNewGtfsFeed generateNewGtfsFeed;
-  private final UnzipGtfsFeed unzipGtfsFeed;
-  private final EvaluateGtfsFeed evaluateGtfsFeed;
+  private final FeedGenerationStep feedGenerationStep;
+  private final FeedEvaluationStep feedEvaluationStep;
   private final GenerateQuickStats generateQuickStats;
 
   public EvaluationProcess(TransitRouterFactory transitRouterFactory,
@@ -24,9 +25,8 @@ public class EvaluationProcess {
                            String evaluationTool) {
 
     this.generatedFeedRepository = generatedFeedRepository;
-    this.generateNewGtfsFeed = new GenerateNewGtfsFeed(transitRouterFactory);
-    this.unzipGtfsFeed = new UnzipGtfsFeed(evaluationFolder);
-    this.evaluateGtfsFeed = new EvaluateGtfsFeed(evaluationTool);
+    this.feedGenerationStep = new FeedGenerationStep(transitRouterFactory);
+    this.feedEvaluationStep = new FeedEvaluationStep(Path.of(evaluationTool));
     this.generateQuickStats = new GenerateQuickStats(evaluationFolder);
   }
 
@@ -54,10 +54,9 @@ public class EvaluationProcess {
   }
 
   private void runEvaluationProcess(GeneratedFeedInfo info) {
-    generateNewGtfsFeed.accept(info);
-    unzipGtfsFeed.accept(info);
-    evaluateGtfsFeed.accept(info);
-    generateQuickStats.accept(info);
+    feedGenerationStep.run(info);
+    feedEvaluationStep.run(info);
+    generateQuickStats.run(info);
     info.setStatus(Status.FINISHED);
   }
 }

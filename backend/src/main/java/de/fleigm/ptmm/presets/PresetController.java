@@ -1,7 +1,7 @@
 package de.fleigm.ptmm.presets;
 
-import de.fleigm.ptmm.eval.process.ValidateGtfsFeed;
 import de.fleigm.ptmm.util.Unzip;
+import de.fleigm.ptmm.util.ValidateGtfsFeed;
 import org.apache.commons.io.FileUtils;
 import org.jboss.resteasy.annotations.providers.multipart.MultipartForm;
 

@@ -8,7 +8,9 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import org.apache.commons.io.FilenameUtils;
 
+import javax.json.bind.annotation.JsonbTransient;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -59,6 +61,16 @@ public class GeneratedFeedInfo extends Entity implements HasExtensions {
   public GeneratedFeedInfo addError(Error error) {
     this.errors.add(error);
     return this;
+  }
+
+  @JsonbTransient
+  public Path getOriginalFeedFolder() {
+    return Path.of(FilenameUtils.removeExtension(originalFeed.toString()));
+  }
+
+  @JsonbTransient
+  public Path getGeneratedFeedFolder() {
+    return Path.of(FilenameUtils.removeExtension(generatedFeed.toString()));
   }
 
   boolean hasFinished() {

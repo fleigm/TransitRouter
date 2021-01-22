@@ -1,5 +1,6 @@
 package de.fleigm.ptmm.eval.process;
 
+import de.fleigm.ptmm.util.ValidateGtfsFeed;
 import org.apache.commons.compress.archivers.ArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream;
