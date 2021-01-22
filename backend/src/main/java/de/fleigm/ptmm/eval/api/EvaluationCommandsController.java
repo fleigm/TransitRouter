@@ -1,6 +1,6 @@
 package de.fleigm.ptmm.eval.api;
 
-import de.fleigm.ptmm.eval.EvaluationRepository;
+import de.fleigm.ptmm.eval.GeneratedFeedRepository;
 
 import javax.inject.Inject;
 import javax.ws.rs.POST;
@@ -11,12 +11,12 @@ import javax.ws.rs.core.Response;
 public class EvaluationCommandsController {
 
   @Inject
-  EvaluationRepository evaluationRepository;
+  GeneratedFeedRepository generatedFeedRepository;
 
   @POST
   @Path("clear-cache")
   public Response clearInfoCache() {
-    evaluationRepository.invalidateCache();
+    generatedFeedRepository.invalidateCache();
 
     return Response.ok().build();
   }

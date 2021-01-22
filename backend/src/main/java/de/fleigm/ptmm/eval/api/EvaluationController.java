@@ -1,7 +1,7 @@
 package de.fleigm.ptmm.eval.api;
 
-import de.fleigm.ptmm.eval.EvaluationRepository;
 import de.fleigm.ptmm.eval.GeneratedFeedInfo;
+import de.fleigm.ptmm.eval.GeneratedFeedRepository;
 import de.fleigm.ptmm.eval.Status;
 import org.jboss.resteasy.annotations.providers.multipart.MultipartForm;
 
@@ -30,7 +30,7 @@ public class EvaluationController {
   EvaluationService evaluationService;
 
   @Inject
-  EvaluationRepository evaluationRepository;
+  GeneratedFeedRepository generatedFeedRepository;
 
   @POST
   @Consumes(MediaType.MULTIPART_FORM_DATA)
@@ -46,7 +46,7 @@ public class EvaluationController {
   @GET
   @Produces(MediaType.APPLICATION_JSON)
   public Response index() {
-    List<GeneratedFeedInfo> evaluations = evaluationRepository.all()
+    List<GeneratedFeedInfo> evaluations = generatedFeedRepository.all()
         .stream()
         .sorted(Comparator.comparing(GeneratedFeedInfo::getCreatedAt).reversed())
         .collect(Collectors.toList());
@@ -58,7 +58,7 @@ public class EvaluationController {
   @Path("{id}")
   @Produces(MediaType.APPLICATION_JSON)
   public Response show(@PathParam("id") UUID id) {
-    return evaluationRepository.find(id)
+    return generatedFeedRepository.find(id)
         .map(info -> Response.ok(info).build())
         .orElse(Response.status(Response.Status.NOT_FOUND).build());
   }
@@ -67,7 +67,7 @@ public class EvaluationController {
   @Path("{id}")
   @Produces(MediaType.APPLICATION_JSON)
   public Response delete(@PathParam("id") UUID id) {
-    Optional<GeneratedFeedInfo> feedInfo = evaluationRepository.find(id);
+    Optional<GeneratedFeedInfo> feedInfo = generatedFeedRepository.find(id);
 
     if (feedInfo.isEmpty()) {
       return Response.noContent().build();
@@ -81,7 +81,7 @@ public class EvaluationController {
           .build();
     }
 
-    evaluationRepository.delete(id);
+    generatedFeedRepository.delete(id);
 
     return Response.noContent().build();
 

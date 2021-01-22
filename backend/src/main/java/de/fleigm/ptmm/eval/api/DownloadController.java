@@ -2,8 +2,8 @@ package de.fleigm.ptmm.eval.api;
 
 import de.fleigm.ptmm.eval.Evaluation;
 import de.fleigm.ptmm.eval.EvaluationExtension;
-import de.fleigm.ptmm.eval.EvaluationRepository;
 import de.fleigm.ptmm.eval.GeneratedFeedInfo;
+import de.fleigm.ptmm.eval.GeneratedFeedRepository;
 import org.apache.commons.compress.archivers.ArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream;
@@ -38,7 +38,7 @@ public class DownloadController {
   };
 
   @Inject
-  EvaluationRepository evaluationRepository;
+  GeneratedFeedRepository generatedFeedRepository;
 
   @ConfigProperty(name = "evaluation.folder")
   String evaluationFolder;
@@ -47,7 +47,7 @@ public class DownloadController {
   @Path("generated")
   @Produces(MediaType.APPLICATION_OCTET_STREAM)
   public Response downloadGeneratedFeed(@PathParam("id") UUID id) {
-    return evaluationRepository.find(id)
+    return generatedFeedRepository.find(id)
         .map(info -> Response
             .ok(info.getPath().resolve(GeneratedFeedInfo.GENERATED_GTFS_FEED).toFile())
             .header("Content-Disposition", "attachment;filename=" + info.getName() + "." + GeneratedFeedInfo.GENERATED_GTFS_FEED)
@@ -58,7 +58,7 @@ public class DownloadController {
   @GET
   @Produces(MediaType.APPLICATION_OCTET_STREAM)
   public Response download(@PathParam("id") UUID id) {
-    return evaluationRepository.find(id)
+    return generatedFeedRepository.find(id)
         .map(info -> Response
             .ok((StreamingOutput) output -> buildZipFile(output, info))
             .header("Content-Disposition", "attachment;filename=" + info.getName() + ".zip")

@@ -1,8 +1,8 @@
 package de.fleigm.ptmm.eval.process;
 
 import de.fleigm.ptmm.eval.Error;
-import de.fleigm.ptmm.eval.EvaluationRepository;
 import de.fleigm.ptmm.eval.GeneratedFeedInfo;
+import de.fleigm.ptmm.eval.GeneratedFeedRepository;
 import de.fleigm.ptmm.eval.Status;
 import de.fleigm.ptmm.eval.api.TransitRouterFactory;
 import de.fleigm.ptmm.util.StopWatch;
@@ -12,18 +12,18 @@ import org.slf4j.MDC;
 @Slf4j
 public class EvaluationProcess {
 
-  private final EvaluationRepository evaluationRepository;
+  private final GeneratedFeedRepository generatedFeedRepository;
   private final GenerateNewGtfsFeed generateNewGtfsFeed;
   private final UnzipGtfsFeed unzipGtfsFeed;
   private final EvaluateGtfsFeed evaluateGtfsFeed;
   private final GenerateQuickStats generateQuickStats;
 
   public EvaluationProcess(TransitRouterFactory transitRouterFactory,
-                           EvaluationRepository evaluationRepository,
+                           GeneratedFeedRepository generatedFeedRepository,
                            String evaluationFolder,
                            String evaluationTool) {
 
-    this.evaluationRepository = evaluationRepository;
+    this.generatedFeedRepository = generatedFeedRepository;
     this.generateNewGtfsFeed = new GenerateNewGtfsFeed(transitRouterFactory);
     this.unzipGtfsFeed = new UnzipGtfsFeed(evaluationFolder);
     this.evaluateGtfsFeed = new EvaluateGtfsFeed(evaluationTool);
@@ -48,7 +48,7 @@ public class EvaluationProcess {
       MDC.clear();
       stopWatch.stop();
       info.addStatistic("executionTime.total", stopWatch.getMillis());
-      evaluationRepository.save(info);
+      generatedFeedRepository.save(info);
       log.info("Finished evaluation process. Took {}s", stopWatch.getSeconds());
     }
   }

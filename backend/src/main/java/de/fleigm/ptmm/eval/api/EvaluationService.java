@@ -2,8 +2,8 @@ package de.fleigm.ptmm.eval.api;
 
 import de.fleigm.ptmm.DistanceUnit;
 import de.fleigm.ptmm.eval.Evaluation;
-import de.fleigm.ptmm.eval.EvaluationRepository;
 import de.fleigm.ptmm.eval.GeneratedFeedInfo;
+import de.fleigm.ptmm.eval.GeneratedFeedRepository;
 import de.fleigm.ptmm.eval.Parameters;
 import de.fleigm.ptmm.eval.Status;
 import de.fleigm.ptmm.eval.process.EvaluationProcess;
@@ -31,7 +31,7 @@ public class EvaluationService {
   String evaluationTool;
 
   @Inject
-  EvaluationRepository evaluationRepository;
+  GeneratedFeedRepository generatedFeedRepository;
 
   @Inject
   TransitRouterFactory transitRouterFactory;
@@ -50,7 +50,7 @@ public class EvaluationService {
         .status(Status.PENDING)
         .build();
 
-    info.setStoragePath(evaluationRepository.storagePath());
+    info.setStoragePath(generatedFeedRepository.storagePath());
     info.setOriginalFeed(info.getPath().resolve(Evaluation.ORIGINAL_GTFS_FEED));
     info.setGeneratedFeed(info.getPath().resolve(GeneratedFeedInfo.GENERATED_GTFS_FEED));
 
@@ -71,11 +71,11 @@ public class EvaluationService {
       throw new RuntimeException(e);
     }
 
-    evaluationRepository.save(info);
+    generatedFeedRepository.save(info);
 
     EvaluationProcess process = new EvaluationProcess(
         transitRouterFactory,
-        evaluationRepository,
+        generatedFeedRepository,
         evaluationFolder,
         evaluationTool);
 

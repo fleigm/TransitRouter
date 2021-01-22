@@ -1,7 +1,7 @@
 package de.fleigm.ptmm.eval.api;
 
 import com.graphhopper.GraphHopper;
-import de.fleigm.ptmm.eval.EvaluationRepository;
+import de.fleigm.ptmm.eval.GeneratedFeedRepository;
 import de.fleigm.ptmm.routing.GraphHopperTransitRouter;
 import io.quarkus.test.junit.QuarkusTest;
 import org.apache.commons.io.FileUtils;
@@ -38,7 +38,7 @@ public class StuttgartTest {
   String evaluationTool;
 
   @Inject
-  EvaluationRepository evaluationRepository;
+  GeneratedFeedRepository generatedFeedRepository;
 
   @Inject
   GraphHopper graphHopper;
@@ -58,7 +58,7 @@ public class StuttgartTest {
         .build();
 
     EvaluationService evaluationService = new EvaluationService();
-    evaluationService.evaluationRepository = evaluationRepository;
+    evaluationService.generatedFeedRepository = generatedFeedRepository;
     evaluationService.evaluationTool = evaluationTool;
     evaluationService.evaluationFolder = evaluationFolder;
     evaluationService.transitRouterFactory = parameters -> new GraphHopperTransitRouter(graphHopper, parameters);
@@ -111,7 +111,7 @@ public class StuttgartTest {
         .build();
 
     EvaluationService service = new EvaluationService();
-    service.evaluationRepository = evaluationRepository;
+    service.generatedFeedRepository = generatedFeedRepository;
     service.evaluationTool = evaluationTool;
     service.evaluationFolder = evaluationFolder;
     service.transitRouterFactory = parameters -> new GraphHopperTransitRouter(graphHopper, parameters);
@@ -148,7 +148,7 @@ public class StuttgartTest {
         .build();
 
     EvaluationService service = new EvaluationService();
-    service.evaluationRepository = evaluationRepository;
+    service.generatedFeedRepository = generatedFeedRepository;
     service.evaluationTool = evaluationTool;
     service.evaluationFolder = evaluationFolder;
     service.transitRouterFactory = parameters -> new GraphHopperTransitRouter(graphHopper, parameters);
@@ -180,7 +180,7 @@ public class StuttgartTest {
         .build();
 
     EvaluationService service = new EvaluationService();
-    service.evaluationRepository = evaluationRepository;
+    service.generatedFeedRepository = generatedFeedRepository;
     service.evaluationTool = evaluationTool;
     service.evaluationFolder = evaluationFolder;
     service.transitRouterFactory = parameters -> new GraphHopperTransitRouter(graphHopper, parameters);

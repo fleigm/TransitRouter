@@ -1,9 +1,9 @@
 package de.fleigm.ptmm.eval.api;
 
 import de.fleigm.ptmm.TransitFeed;
-import de.fleigm.ptmm.eval.EvaluationRepository;
 import de.fleigm.ptmm.eval.EvaluationResult;
 import de.fleigm.ptmm.eval.GeneratedFeedInfo;
+import de.fleigm.ptmm.eval.GeneratedFeedRepository;
 import de.fleigm.ptmm.eval.Report;
 import de.fleigm.ptmm.eval.Status;
 import de.fleigm.ptmm.http.pagination.Page;
@@ -33,7 +33,7 @@ import java.util.stream.Stream;
 @Path("eval/{id}/report")
 public class EvaluationReportController {
   @Inject
-  EvaluationRepository evaluationRepository;
+  GeneratedFeedRepository generatedFeedRepository;
 
   @GET
   @Produces(MediaType.APPLICATION_JSON)
@@ -44,13 +44,13 @@ public class EvaluationReportController {
       @QueryParam("search") @DefaultValue("") String search,
       @QueryParam("sort") @DefaultValue("") String sort) {
 
-    Optional<GeneratedFeedInfo> info = evaluationRepository.find(id);
+    Optional<GeneratedFeedInfo> info = generatedFeedRepository.find(id);
 
     if (info.isEmpty() || info.get().getStatus() != Status.FINISHED) {
       return Response.status(Response.Status.NOT_FOUND).build();
     }
 
-    return evaluationRepository.findEvaluationResult(id)
+    return generatedFeedRepository.findEvaluationResult(id)
         .map(evaluationResult -> getPagedReport(evaluationResult, uriInfo, paged, search, sort))
         .orElse(Response.status(Response.Status.NOT_FOUND).build());
   }

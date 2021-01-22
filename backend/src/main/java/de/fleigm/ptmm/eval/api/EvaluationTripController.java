@@ -5,8 +5,8 @@ import com.conveyal.gtfs.model.Stop;
 import com.conveyal.gtfs.model.Trip;
 import com.vividsolutions.jts.geom.LineString;
 import de.fleigm.ptmm.TransitFeed;
-import de.fleigm.ptmm.eval.EvaluationRepository;
 import de.fleigm.ptmm.eval.EvaluationResult;
+import de.fleigm.ptmm.eval.GeneratedFeedRepository;
 import de.fleigm.ptmm.http.views.View;
 
 import javax.inject.Inject;
@@ -24,13 +24,13 @@ import java.util.UUID;
 public class EvaluationTripController {
 
   @Inject
-  EvaluationRepository evaluationRepository;
+  GeneratedFeedRepository generatedFeedRepository;
 
   @GET
   @Path("{tripId}")
   @Produces(MediaType.APPLICATION_JSON)
   public Response show(@PathParam("id") UUID id, @PathParam("tripId") String tripId) {
-    Optional<EvaluationResult> evaluationResult = evaluationRepository.findEvaluationResult(id);
+    Optional<EvaluationResult> evaluationResult = generatedFeedRepository.findEvaluationResult(id);
 
     if (evaluationResult.isEmpty()) {
       return Response.status(Response.Status.NOT_FOUND).build();

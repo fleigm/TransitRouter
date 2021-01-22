@@ -1,7 +1,7 @@
 package de.fleigm.ptmm.eval.api;
 
-import de.fleigm.ptmm.eval.EvaluationRepository;
 import de.fleigm.ptmm.eval.GeneratedFeedInfo;
+import de.fleigm.ptmm.eval.GeneratedFeedRepository;
 import de.fleigm.ptmm.eval.Parameters;
 import de.fleigm.ptmm.eval.Status;
 import io.quarkus.test.junit.QuarkusTest;
@@ -27,7 +27,7 @@ public class EvaluationEndpointTest {
   String evaluationFolder;
 
   @Inject
-  EvaluationRepository evaluationRepository;
+  GeneratedFeedRepository generatedFeedRepository;
 
   @Test
   void send_evaluation_request() throws IOException {
@@ -63,14 +63,14 @@ public class EvaluationEndpointTest {
         .status(status)
         .build();
 
-    evaluationRepository.save(info);
+    generatedFeedRepository.save(info);
 
     given().when()
         .delete("eval/" + info.getId())
         .then()
         .statusCode(204);
 
-    assertTrue(evaluationRepository.find(info.getId()).isEmpty());
+    assertTrue(generatedFeedRepository.find(info.getId()).isEmpty());
     assertFalse(Files.exists(info.getPath()));
   }
 
@@ -85,14 +85,14 @@ public class EvaluationEndpointTest {
         .status(Status.PENDING)
         .build();
 
-    evaluationRepository.save(info);
+    generatedFeedRepository.save(info);
 
     given().when()
         .delete("eval/" + info.getId())
         .then()
         .statusCode(409);
 
-    assertTrue(evaluationRepository.find(info.getId()).isPresent());
+    assertTrue(generatedFeedRepository.find(info.getId()).isPresent());
     assertTrue(Files.exists(info.getPath()));
   }
 }

@@ -14,15 +14,15 @@ import java.util.UUID;
 
 @Slf4j
 @ApplicationScoped
-public class EvaluationRepository extends Repository<GeneratedFeedInfo> {
+public class GeneratedFeedRepository extends Repository<GeneratedFeedInfo> {
 
   @ConfigProperty(name = "app.storage")
   Path storageLocation;
 
-  public EvaluationRepository() {
+  public GeneratedFeedRepository() {
   }
 
-  public EvaluationRepository(Path storageLocation) {
+  public GeneratedFeedRepository(Path storageLocation) {
     super(storageLocation);
     this.storageLocation = storageLocation;
   }
@@ -38,7 +38,7 @@ public class EvaluationRepository extends Repository<GeneratedFeedInfo> {
   }
 
   public Path storagePath() {
-    return storageLocation.resolve("presets");
+    return storageLocation.resolve("generated");
   }
 
   @CacheResult(cacheName = "evaluation-result-cache")
