@@ -1,5 +1,7 @@
 package de.fleigm.ptmm.presets;
 
+import de.fleigm.ptmm.events.CreatedQualifier;
+import de.fleigm.ptmm.events.Events;
 import de.fleigm.ptmm.util.Unzip;
 import de.fleigm.ptmm.util.ValidateGtfsFeed;
 import org.apache.commons.io.FileUtils;
@@ -29,6 +31,9 @@ public class PresetController {
 
   @Inject
   PresetRepository presets;
+
+  @Inject
+  Events events;
 
   @GET
   public Response index() {
@@ -66,6 +71,8 @@ public class PresetController {
     } catch (IOException e) {
       return Response.serverError().build();
     }
+
+    events.fire(preset, new CreatedQualifier());
 
     return Response.created(uriInfo.getAbsolutePathBuilder().build(preset.getId()))
         .entity(preset)
