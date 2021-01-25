@@ -1,5 +1,7 @@
 package de.fleigm.ptmm.data;
 
+import de.fleigm.ptmm.http.json.ExtensionsDeserializer;
+import de.fleigm.ptmm.http.json.ExtensionsSerializer;
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,11 +40,16 @@ public abstract class Repository<T extends Entity> {
 
   protected void init(Path storageLocation) {
     this.storageLocation = storageLocation;
-    this.jsonb = JsonbBuilder.create(new JsonbConfig().withFormatting(true));
+    this.jsonb = JsonbBuilder.create(new JsonbConfig()
+        .withSerializers(new ExtensionsSerializer())
+        .withDeserializers(new ExtensionsDeserializer())
+        .withFormatting(true));
 
     ensureStorageLocationExists(storageLocation);
 
-    storage.putAll(loadFromDisk());
+    storage.clear();
+    Map<UUID, T> reloadedEntities = loadFromDisk();
+    storage.putAll(reloadedEntities);
   }
 
   private void ensureStorageLocationExists(Path storageLocation) {

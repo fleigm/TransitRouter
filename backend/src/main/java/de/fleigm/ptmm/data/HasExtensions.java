@@ -20,7 +20,7 @@ public interface HasExtensions {
   }
 
   default <T> HasExtensions addExtension(T extension) {
-    addExtension(extension);
+    extensions().add(extension);
     return this;
   }
 }
