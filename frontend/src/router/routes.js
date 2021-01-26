@@ -5,6 +5,8 @@ import EvaluationView from '../pages/evaluation/view/Index';
 import EvaluationOverview from '../pages/evaluation/overview/Index';
 import RoutingIndex from '../pages/routing/Index';
 import WikiIndex from '../pages/wiki/Index';
+import FeedIndex from '../pages/feeds/Index';
+import FeedOverview from '../pages/feeds/overview/Index';
 
 const routes = [
     {
@@ -23,6 +25,14 @@ const routes = [
             name: 'evaluation.view',
             component: EvaluationView,
         }]
+    }, {
+        path: '/feeds',
+        component: FeedIndex,
+        children: [{
+            path: '',
+            name: 'feeds.index',
+            component: FeedOverview,
+        },]
     }, {
         path: '/routing',
         name: 'routing.index',

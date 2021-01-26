@@ -30,7 +30,30 @@
     <div class="flex">
       <div class="w-1/2">
 
-        <v-accuracy-chart :accuracies="info.statistics['accuracy']" class="h-64 relative"></v-accuracy-chart>
+        <div class="">
+          <div class="py-2 flex">
+            <div class="mr-4">acc-0:</div>
+            <div>{{ info.statistics['accuracy'][0] }}</div>
+          </div>
+          <div class="py-2 flex">
+            <div class="mr-4">acc-10:</div>
+            <div>{{ info.statistics['accuracy'][1] }}</div>
+          </div>
+          <div class="py-2 flex">
+            <div class="mr-4">acc-20:</div>
+            <div>{{ info.statistics['accuracy'][2] }}</div>
+          </div>
+          <div class="py-2 flex">
+            <div class="mr-4">acc-30:</div>
+            <div>{{ info.statistics['accuracy'][3] }}</div>
+          </div>
+          <div class="py-2 flex">
+            <div class="mr-4">acc-40:</div>
+            <div>{{ info.statistics['accuracy'][4] }}</div>
+          </div>
+        </div>
+
+<!--        <v-accuracy-chart :accuracies="info.statistics['accuracy']" class="h-64 relative"></v-accuracy-chart>-->
       </div>
       <div class="w-1/2">
         <div class="flex justify-center gap-4 mb-2">

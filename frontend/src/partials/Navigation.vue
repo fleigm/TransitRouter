@@ -34,6 +34,9 @@ export default {
           name: 'Dashboard',
           page: 'dashboard.index'
         }, {
+          name: 'Feeds',
+          page: 'feeds.index',
+        }, {
           name: 'Evaluation',
           page: 'evaluation.index'
         }, {
