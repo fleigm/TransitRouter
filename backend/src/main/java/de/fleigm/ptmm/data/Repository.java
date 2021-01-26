@@ -1,76 +1,27 @@
 package de.fleigm.ptmm.data;
 
-import de.fleigm.ptmm.http.json.ExtensionsDeserializer;
-import de.fleigm.ptmm.http.json.ExtensionsSerializer;
-import org.apache.commons.io.FileUtils;
+import de.fleigm.ptmm.App;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.json.bind.Jsonb;
-import javax.json.bind.JsonbBuilder;
-import javax.json.bind.JsonbConfig;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 public abstract class Repository<T extends Entity> {
   private final static Logger logger = LoggerFactory.getLogger(Repository.class);
 
-  protected String entityFileName = "entity.json";
-
-  private Path storageLocation;
-  private Jsonb jsonb;
-
   private final HashMap<UUID, T> storage = new HashMap<>();
 
-  protected Repository() {
-  }
-
-  public Repository(Path storageLocation) {
-    init(storageLocation);
-  }
-
-  protected void init(Path storageLocation) {
-    this.storageLocation = storageLocation;
-    this.jsonb = JsonbBuilder.create(new JsonbConfig()
-        .withSerializers(new ExtensionsSerializer())
-        .withDeserializers(new ExtensionsDeserializer())
-        .withFormatting(true));
-
-    ensureStorageLocationExists(storageLocation);
-
-    storage.clear();
-    Map<UUID, T> reloadedEntities = loadFromDisk();
-    storage.putAll(reloadedEntities);
-  }
-
-  private void ensureStorageLocationExists(Path storageLocation) {
-    try {
-      Files.createDirectories(storageLocation);
-    } catch (IOException e) {
-      e.printStackTrace();
-    }
+  private void persist() {
+    App.getInstance().storageManager().store(this.storage);
   }
 
   public void save(T entity) {
-    try {
-      Path path = entityStoragePath(entity);
-      Files.createDirectories(path);
-      Files.writeString(path.resolve(entityFileName), toJson(entity));
-
-      entity.setPath(path);
-      storage.put(entity.getId(), entity);
-    } catch (IOException e) {
-      logger.error("Failed to save entity {}", entity, e);
-    }
+    storage.put(entity.getId(), entity);
+    persist();
   }
 
   public Optional<T> find(UUID id) {
@@ -90,45 +41,7 @@ public abstract class Repository<T extends Entity> {
   }
 
   private void removeExistingEntity(T entity) {
-    try {
-      FileUtils.deleteDirectory(entityStoragePath(entity).toFile());
-      storage.remove(entity.getId());
-    } catch (IOException e) {
-      logger.error("Failed to delete entity {}", entity, e);
-    }
-  }
-
-  public Path entityStoragePath(T entity) {
-    return storageLocation.resolve(entity.getId().toString());
-  }
-
-  public String toJson(T entity) {
-    return jsonb.toJson(entity);
-  }
-
-  public T fromJson(String jsonEntity) {
-    return jsonb.fromJson(jsonEntity, entityClass());
-  }
-
-  public abstract Class<T> entityClass();
-
-  protected Map<UUID, T> loadFromDisk() {
-    try {
-      return Files.walk(storageLocation, 2)
-          .filter(path -> path.endsWith(entityFileName))
-          .map(this::loadEntityFile)
-          .map(this::fromJson)
-          .collect(Collectors.toMap(Entity::getId, Function.identity()));
-    } catch (IOException e) {
-      throw new RuntimeException(e);
-    }
-  }
-
-  protected String loadEntityFile(Path path) {
-    try {
-      return Files.readString(path);
-    } catch (IOException e) {
-      throw new RuntimeException(e);
-    }
+    storage.remove(entity.getId());
+    persist();
   }
 }

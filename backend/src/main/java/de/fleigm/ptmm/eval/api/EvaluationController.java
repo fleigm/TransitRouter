@@ -2,7 +2,6 @@ package de.fleigm.ptmm.eval.api;
 
 import de.fleigm.ptmm.eval.GeneratedFeedInfo;
 import de.fleigm.ptmm.eval.GeneratedFeedRepository;
-import de.fleigm.ptmm.eval.Status;
 import org.jboss.resteasy.annotations.providers.multipart.MultipartForm;
 
 import javax.inject.Inject;
@@ -73,7 +72,7 @@ public class EvaluationController {
       return Response.noContent().build();
     }
 
-    if (feedInfo.get().getStatus() == Status.PENDING) {
+    if (feedInfo.get().isPending()) {
       return Response.status(Response.Status.CONFLICT)
           .entity(Json.createObjectBuilder()
               .add("message", "Can only delete finished or failed evaluations.")

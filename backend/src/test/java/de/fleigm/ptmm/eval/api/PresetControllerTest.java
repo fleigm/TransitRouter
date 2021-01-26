@@ -53,7 +53,7 @@ class PresetControllerTest {
         .name("some preset")
         .createdAt(LocalDateTime.now())
         .build();
-    preset.setPath(presets.entityStoragePath(preset));
+    preset.setPath(appStorage.resolve("presets"));
     presets.save(preset);
 
     Response response = get("presets/" + preset.getId());
@@ -69,7 +69,7 @@ class PresetControllerTest {
         .name("some preset")
         .createdAt(LocalDateTime.now())
         .build();
-    preset.setPath(presets.entityStoragePath(preset));
+    preset.setPath(appStorage.resolve("presets"));
     presets.save(preset);
 
     delete("presets/" + preset.getId())
@@ -86,10 +86,10 @@ class PresetControllerTest {
         .name("some preset")
         .createdAt(LocalDateTime.now())
         .build();
-    preset.setPath(presets.entityStoragePath(preset));
+    preset.setPath(appStorage.resolve("presets"));
     presets.save(preset);
 
-    PresetRepository presetRepository = new PresetRepository(appStorage.resolve("presets"));
+    PresetRepository presetRepository = new PresetRepository();
 
     for (Preset p : presets.all()) {
       assertTrue(presetRepository.find(p.getId()).isPresent());

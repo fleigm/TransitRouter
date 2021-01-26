@@ -44,12 +44,35 @@
 
     </properties>
 
+    <repositories>
+        <repository>
+            <id>microstream-releases</id>
+            <url>https://repo.microstream.one/repository/maven-public/</url>
+        </repository>
+    </repositories>
+
     <dependencyManagement>
         <dependencies>
             <dependency>
                 <groupId>de.fleigm.ptmm</groupId>
                 <artifactId>core</artifactId>
                 <version>1.0-SNAPSHOT</version>
+            </dependency>
+
+            <dependency>
+                <groupId>one.microstream</groupId>
+                <artifactId>storage.embedded</artifactId>
+                <version>04.01.00-MS-GA</version>
+            </dependency>
+            <dependency>
+                <groupId>one.microstream</groupId>
+                <artifactId>storage.embedded.configuration</artifactId>
+                <version>04.01.00-MS-GA</version>
+            </dependency>
+            <dependency>
+                <groupId>one.microstream</groupId>
+                <artifactId>persistence.binary.jdk8</artifactId>
+                <version>04.01.00-MS-GA</version>
             </dependency>
 
             <dependency>

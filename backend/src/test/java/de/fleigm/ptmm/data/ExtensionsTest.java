@@ -24,7 +24,7 @@ class ExtensionsTest {
   @BeforeEach
   void beforeEach() throws IOException {
     this.path = Files.createTempDirectory("repositoryTest");
-    this.repository = new GeneratedFeedRepository(this.path);
+    this.repository = new GeneratedFeedRepository();
   }
 
   @Test
@@ -44,7 +44,7 @@ class ExtensionsTest {
 
     repository.save(info);
 
-    repository = new GeneratedFeedRepository(path);
+    repository = new GeneratedFeedRepository();
     GeneratedFeedInfo reloadedInfo = repository.find(info.getId()).get();
 
     assertTrue(reloadedInfo.hasExtension(EvaluationExtension.class));

@@ -6,10 +6,11 @@ services:
       context: .
       dockerfile: Dockerfile
     environment:
-      APP_RESOURCES: '/app/resources'
+      APP_RESOURCES: '/app/storage/resources'
+      APP_STORAGE: '/app/storage'
       EVALUATION_TOOL: '/app/shapevl'
       ROUTING_GRAPHHOPPER_CLEAN: 'false'
     volumes:
-      - /home/michi-pc/uni/bachelor/project/dr:/app/resources
+      - /home/michi-pc/uni/bachelor/project/dr:/app/storage
     ports:
       - 8080:8080

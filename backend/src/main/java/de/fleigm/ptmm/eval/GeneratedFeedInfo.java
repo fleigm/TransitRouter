@@ -73,15 +73,15 @@ public class GeneratedFeedInfo extends Entity implements HasExtensions {
     return Path.of(FilenameUtils.removeExtension(generatedFeed.toString()));
   }
 
-  boolean hasFinished() {
+  public boolean hasFinished() {
     return status == Status.FINISHED;
   }
 
-  boolean hasFailed() {
+  public boolean hasFailed() {
     return status == Status.FAILED;
   }
 
-  boolean isPending() {
+  public boolean isPending() {
     return status == Status.PENDING;
   }
 }

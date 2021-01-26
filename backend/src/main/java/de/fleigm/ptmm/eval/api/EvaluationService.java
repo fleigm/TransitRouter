@@ -17,6 +17,7 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.util.concurrent.CompletableFuture;
 
@@ -29,6 +30,9 @@ public class EvaluationService {
 
   @ConfigProperty(name = "evaluation.tool")
   String evaluationTool;
+
+  @ConfigProperty(name = "app.storage")
+  Path storagePath;
 
   @Inject
   GeneratedFeedRepository generatedFeedRepository;
@@ -50,7 +54,7 @@ public class EvaluationService {
         .status(Status.PENDING)
         .build();
 
-    info.setStoragePath(generatedFeedRepository.storagePath());
+    info.setStoragePath(storagePath.resolve("presets"));
     info.setOriginalFeed(info.getPath().resolve(Evaluation.ORIGINAL_GTFS_FEED));
     info.setGeneratedFeed(info.getPath().resolve(GeneratedFeedInfo.GENERATED_GTFS_FEED));
 

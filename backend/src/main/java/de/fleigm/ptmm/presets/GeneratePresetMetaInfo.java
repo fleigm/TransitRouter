@@ -4,6 +4,8 @@ import com.conveyal.gtfs.GTFSFeed;
 import de.fleigm.ptmm.TransitFeed;
 import de.fleigm.ptmm.events.Created;
 import de.fleigm.ptmm.feeds.TransitFeedService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.ObservesAsync;
@@ -14,6 +16,7 @@ import java.util.stream.Collectors;
 
 @ApplicationScoped
 public class GeneratePresetMetaInfo {
+  private static final Logger logger = LoggerFactory.getLogger(GeneratePresetMetaInfo.class);
 
   @Inject
   TransitFeedService transitFeedService;
@@ -43,5 +46,7 @@ public class GeneratePresetMetaInfo {
     preset.addExtension(details);
 
     presetRepository.save(preset);
+
+    logger.info("Generated meta info for preset {} - {}.", preset.getName(), preset.getId());
   }
 }

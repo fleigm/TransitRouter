@@ -37,3 +37,4 @@ release.properties
 
 node_modules/
 mix-manifest.json
+/backend/storage/
