@@ -87,6 +87,7 @@ public class App {
 
   public void shutdown() {
     storageManager().shutdown();
+    storageManager = null;
   }
 
   public void init(@Observes StartupEvent event) {
