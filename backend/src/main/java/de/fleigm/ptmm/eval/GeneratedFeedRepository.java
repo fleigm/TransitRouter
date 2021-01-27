@@ -1,10 +1,13 @@
 package de.fleigm.ptmm.eval;
 
+import de.fleigm.ptmm.data.DataRoot;
 import de.fleigm.ptmm.data.Repository;
 import io.quarkus.cache.CacheInvalidateAll;
 import io.quarkus.cache.CacheResult;
 import lombok.extern.slf4j.Slf4j;
 
+import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.inject.Produces;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -18,5 +21,13 @@ public class GeneratedFeedRepository extends Repository<GeneratedFeedInfo> {
 
   @CacheInvalidateAll(cacheName = "evaluation-result-cache")
   public void invalidateCache() {
+  }
+
+  public static class Producer {
+    @Produces
+    @ApplicationScoped
+    public GeneratedFeedRepository get(DataRoot dataRoot) {
+      return dataRoot.generatedFeeds();
+    }
   }
 }

@@ -1,6 +1,5 @@
 package de.fleigm.ptmm.presets;
 
-import de.fleigm.ptmm.App;
 import de.fleigm.ptmm.events.CreatedQualifier;
 import de.fleigm.ptmm.events.Events;
 import de.fleigm.ptmm.util.Unzip;
@@ -26,7 +25,6 @@ import java.io.File;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.Comparator;
-import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -38,22 +36,18 @@ public class PresetController {
   java.nio.file.Path storagePath;
 
   @Inject
-  PresetRepository presets;
-
-  @Inject
   Events events;
 
   @Inject
-  App app;
+  PresetRepository presets;
 
   @GET
   public Response index() {
-    List<Preset> collect = app.data().presets().all()
-        .stream()
-        .sorted(Comparator.comparing(Preset::getCreatedAt).reversed())
-        .collect(Collectors.toList());
     return Response.ok(
-        collect
+        presets.all()
+            .stream()
+            .sorted(Comparator.comparing(Preset::getCreatedAt).reversed())
+            .collect(Collectors.toList())
     ).build();
   }
 
@@ -80,7 +74,7 @@ public class PresetController {
 
       Unzip.apply(preset.getPath().resolve("gtfs.zip"), preset.getPath().resolve("gtfs"));
 
-      app.data().presets().save(preset);
+      presets.save(preset);
 
     } catch (IOException e) {
       return Response.serverError().build();
@@ -96,7 +90,7 @@ public class PresetController {
   @GET
   @Path("{id}")
   public Response get(@PathParam("id") UUID id) {
-    return app.data().presets().find(id)
+    return presets.find(id)
         .map(Response::ok)
         .orElse(Response.status(Response.Status.NOT_FOUND))
         .build();
@@ -105,7 +99,7 @@ public class PresetController {
   @DELETE
   @Path("{id}")
   public Response delete(@PathParam("id") UUID id) {
-    app.data().presets().find(id).ifPresent(app.data().presets()::delete);
+    presets.find(id).ifPresent(presets::delete);
 
     return Response.status(Response.Status.NO_CONTENT).build();
   }

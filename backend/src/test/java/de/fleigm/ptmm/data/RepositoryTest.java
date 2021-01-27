@@ -1,8 +1,5 @@
 package de.fleigm.ptmm.data;
 
-import de.fleigm.ptmm.App;
-import de.fleigm.ptmm.presets.Preset;
-import de.fleigm.ptmm.presets.PresetRepository;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.junit.jupiter.api.BeforeEach;
@@ -15,7 +12,6 @@ import java.nio.file.Path;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class RepositoryTest {
-  private static App app = new App();
 
   private Path path;
 
@@ -47,20 +43,6 @@ class RepositoryTest {
 
     assertEquals("new name", reloadedEntity.getName());*/
   }
-
-  @Test
-  void asd() {
-    PresetRepository presets = app.data().presets();
-
-    Preset preset = Preset.builder()
-        .name("asd")
-        .build();
-
-    presets.save(preset);
-
-    assertEquals(1, presets.all().size());
-  }
-
 
   private static class RepositoryStub extends Repository<EntityStub> {
   }

@@ -13,12 +13,12 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
 import javax.enterprise.inject.Produces;
+import javax.inject.Singleton;
 import java.nio.file.Path;
 
-@ApplicationScoped
+@Singleton
 public class App {
   private static final Logger logger = LoggerFactory.getLogger(App.class);
 
@@ -28,17 +28,11 @@ public class App {
     return instance;
   }
 
+  private final Path storagePath;
   private volatile EmbeddedStorageManager storageManager = null;
 
-  @ConfigProperty(name = "app.storage")
-  Path storagePath = Path.of("storage");
-
-  public App() {
+  public App(@ConfigProperty(name = "app.storage") Path storagePath) {
     App.instance = this;
-  }
-
-  public App(Path storagePath) {
-    this();
     this.storagePath = storagePath;
   }
 
@@ -57,7 +51,7 @@ public class App {
     final EmbeddedStorageManager storageManager = foundation.createEmbeddedStorageManager().start();
 
     if (storageManager.root() == null) {
-      final DataRoot data = new DataRoot();
+      final DataRoot data = DataRoot.create();
       storageManager.setRoot(data);
       storageManager.storeRoot();
       logger.info("created new store");
@@ -86,7 +80,7 @@ public class App {
   }
 
   @Produces
-  @ApplicationScoped
+  @Singleton
   public DataRoot data() {
     return (DataRoot) storageManager().root();
   }
