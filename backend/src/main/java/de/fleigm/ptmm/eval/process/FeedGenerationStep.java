@@ -10,6 +10,7 @@ import de.fleigm.ptmm.TransitFeed;
 import de.fleigm.ptmm.eval.Error;
 import de.fleigm.ptmm.eval.GeneratedFeedInfo;
 import de.fleigm.ptmm.eval.api.TransitRouterFactory;
+import de.fleigm.ptmm.feeds.Feed;
 import de.fleigm.ptmm.routing.Observation;
 import de.fleigm.ptmm.routing.RoutingResult;
 import de.fleigm.ptmm.routing.TransitRouter;
@@ -34,7 +35,7 @@ public class FeedGenerationStep {
   }
 
   public void run(GeneratedFeedInfo info) {
-    TransitFeed transitFeed = new TransitFeed(info.getOriginalFeed());
+    TransitFeed transitFeed = new TransitFeed(info.getOriginalFeed().getPath());
     TransitRouter transitRouter = transitRouterFactory.create(info);
     TransitRouter transitRouterWithoutTurnRestrictions = transitRouterFactory.create(
         info.getParameters()
@@ -74,7 +75,10 @@ public class FeedGenerationStep {
           .peek(routedPattern -> trips.getAndAdd(routedPattern.pattern.trips().size()))
           .forEach(this::store);
 
-      transitFeed.internal().toFile(info.getGeneratedFeed().toString());
+      info.setGeneratedFeed(
+          Feed.createFromTransitFeed(
+              info.getFileStoragePath().resolve(GeneratedFeedInfo.GENERATED_GTFS_FEED),
+              transitFeed));
 
       stopWatch.stop();
 

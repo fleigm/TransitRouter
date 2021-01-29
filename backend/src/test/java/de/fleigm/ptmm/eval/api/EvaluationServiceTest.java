@@ -3,8 +3,11 @@ package de.fleigm.ptmm.eval.api;
 import de.fleigm.ptmm.eval.Evaluation;
 import de.fleigm.ptmm.eval.EvaluationExtension;
 import de.fleigm.ptmm.eval.GeneratedFeedInfo;
+import de.fleigm.ptmm.eval.Parameters;
 import de.fleigm.ptmm.eval.Status;
+import de.fleigm.ptmm.presets.Preset;
 import io.quarkus.test.junit.QuarkusTest;
+import io.restassured.response.Response;
 import org.apache.commons.io.FileUtils;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.junit.jupiter.api.Test;
@@ -17,6 +20,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.concurrent.ExecutionException;
 
+import static io.restassured.RestAssured.given;
 import static org.junit.jupiter.api.Assertions.*;
 
 @QuarkusTest
@@ -67,13 +71,12 @@ public class EvaluationServiceTest {
 
     assertEquals(Status.FINISHED, info.getStatus());
 
-    assertTrue(Files.isDirectory(info.getPath()));
-    assertTrue(Files.isDirectory(info.getPath().resolve(Evaluation.ORIGINAL_GTFS_FOLDER)));
-    assertTrue(Files.isDirectory(info.getPath().resolve(GeneratedFeedInfo.GENERATED_GTFS_FOLDER)));
-    assertTrue(Files.exists(info.getPath().resolve(Evaluation.ORIGINAL_GTFS_FEED)));
-    assertTrue(Files.exists(info.getPath().resolve(GeneratedFeedInfo.GENERATED_GTFS_FEED)));
-    assertTrue(Files.exists(info.getPath().resolve(EvaluationExtension.SHAPEVL_REPORT)));
-    assertTrue(Files.exists(info.getPath().resolve(Evaluation.INFO_FILE)));
+    assertTrue(Files.isDirectory(info.getFileStoragePath()));
+    assertTrue(Files.isDirectory(info.getFileStoragePath().resolve(Evaluation.ORIGINAL_GTFS_FOLDER)));
+    assertTrue(Files.isDirectory(info.getFileStoragePath().resolve(GeneratedFeedInfo.GENERATED_GTFS_FOLDER)));
+    assertTrue(Files.exists(info.getFileStoragePath().resolve(Evaluation.ORIGINAL_GTFS_FEED)));
+    assertTrue(Files.exists(info.getFileStoragePath().resolve(GeneratedFeedInfo.GENERATED_GTFS_FEED)));
+    assertTrue(Files.exists(info.getFileStoragePath().resolve(EvaluationExtension.SHAPEVL_REPORT)));
   }
 
   @Test
@@ -117,7 +120,34 @@ public class EvaluationServiceTest {
     assertThrows(IllegalArgumentException.class, () -> evaluationService.createEvaluation(request));
 
     assertFalse(Files.exists(Path.of(evaluationFolder, "abort_and_remove_folder_if_gtfs_feed_is_invalid")));
+  }
 
+  @Test
+  void generate_from_preset() throws ExecutionException, InterruptedException {
+    String resourceAsStream = getClass().getClassLoader().getResource("test_feed.zip").getFile();
+    Response response = given()
+        .multiPart("feed", new File(resourceAsStream))
+        .multiPart("name", "preset")
+        .when()
+        .post("presets");
+    response.then().statusCode(201);
+    Preset preset = response.as(Preset.class);
 
+    EvaluationResponse evaluation = evaluationService.createFromPreset(preset, "test name", Parameters.defaultParameters());
+
+    evaluation.process().get();
+
+    GeneratedFeedInfo info = evaluation.info();
+
+    assertTrue(evaluation.process().isDone());
+    assertFalse(evaluation.process().isCompletedExceptionally());
+
+    assertEquals(Status.FINISHED, info.getStatus());
+
+    assertTrue(Files.isDirectory(info.getFileStoragePath()));
+    assertEquals(preset.getFileStoragePath().resolve("gtfs.zip"), info.getOriginalFeed().getPath());
+    assertEquals(preset.getFileStoragePath().resolve("gtfs"), info.getOriginalFeed().getFolder());
+    assertTrue(Files.exists(info.getFileStoragePath().resolve(GeneratedFeedInfo.GENERATED_GTFS_FEED)));
+    assertTrue(Files.exists(info.getFileStoragePath().resolve(EvaluationExtension.SHAPEVL_REPORT)));
   }
 }

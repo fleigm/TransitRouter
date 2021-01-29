@@ -1,40 +1,47 @@
 package de.fleigm.ptmm.presets;
 
-import cyclops.control.Eval;
-import de.fleigm.ptmm.TransitFeed;
 import de.fleigm.ptmm.data.Entity;
 import de.fleigm.ptmm.data.Extensions;
 import de.fleigm.ptmm.data.HasExtensions;
-import lombok.AccessLevel;
+import de.fleigm.ptmm.feeds.Feed;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
 
+import java.nio.file.Path;
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@EqualsAndHashCode(callSuper = true)
-public class Preset extends Entity implements HasExtensions {
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
+public class Preset implements Entity, HasExtensions {
+
+  @Builder.Default
+  @EqualsAndHashCode.Include
+  private UUID id = UUID.randomUUID();
+
+  @Builder.Default
+  private LocalDateTime createdAt = LocalDateTime.now();
 
   private String name;
-  private LocalDateTime createdAt;
+  private Feed feed;
+
+  private Path fileStoragePath;
 
   @Builder.Default
   private Extensions extensions = new Extensions();
 
-  @ToString.Exclude
-  @Setter(AccessLevel.NONE)
-  private transient Eval<TransitFeed> feed = Eval.later(() -> new TransitFeed(getPath().resolve("gtfs")));
-
   @Override
   public Extensions extensions() {
     return extensions;
+  }
+
+  public Path getFileStoragePath() {
+    return fileStoragePath.resolve(id.toString());
   }
 }

@@ -49,7 +49,7 @@ public class DownloadController {
   public Response downloadGeneratedFeed(@PathParam("id") UUID id) {
     return generatedFeedRepository.find(id)
         .map(info -> Response
-            .ok(info.getPath().resolve(GeneratedFeedInfo.GENERATED_GTFS_FEED).toFile())
+            .ok(info.getFileStoragePath().resolve(GeneratedFeedInfo.GENERATED_GTFS_FEED).toFile())
             .header("Content-Disposition", "attachment;filename=" + info.getName() + "." + GeneratedFeedInfo.GENERATED_GTFS_FEED)
             .build())
         .orElse(Response.status(Response.Status.NOT_FOUND).build());
@@ -69,7 +69,7 @@ public class DownloadController {
   private void buildZipFile(OutputStream output, GeneratedFeedInfo info) throws IOException {
     try (var archive = new ZipArchiveOutputStream(output)) {
       List<File> files = Arrays.stream(INCLUDED_FILES)
-          .map(file -> info.getPath().resolve(file).toFile())
+          .map(file -> info.getFileStoragePath().resolve(file).toFile())
           .collect(Collectors.toList());
 
       for (var file : files) {

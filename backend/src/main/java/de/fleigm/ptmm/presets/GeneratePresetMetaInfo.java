@@ -25,7 +25,7 @@ public class GeneratePresetMetaInfo {
   PresetRepository presetRepository;
 
   public void run(@ObservesAsync @Created Preset preset) {
-    TransitFeed transitFeed = transitFeedService.get(preset.getPath().resolve("gtfs.zip"));
+    TransitFeed transitFeed = transitFeedService.get(preset.getFeed().getPath());
     GTFSFeed feed = transitFeed.internal();
 
     Map<Integer, Long> routesPerType = transitFeed.routes().values().stream()

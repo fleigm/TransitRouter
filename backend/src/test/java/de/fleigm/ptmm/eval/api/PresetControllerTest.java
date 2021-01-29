@@ -11,7 +11,7 @@ import javax.inject.Inject;
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.time.LocalDateTime;
+import java.util.List;
 
 import static io.restassured.RestAssured.*;
 import static org.junit.jupiter.api.Assertions.*;
@@ -40,59 +40,42 @@ class PresetControllerTest {
 
     assertEquals("can_upload_gtfs_feed_as_preset", preset.getName());
 
+    List<Preset> all = presets.all();
+
     assertTrue(presets.find(preset.getId()).isPresent());
 
-    assertTrue(Files.exists(preset.getPath().resolve("entity.json")));
-    assertTrue(Files.exists(preset.getPath().resolve("gtfs.zip")));
-    assertTrue(Files.exists(preset.getPath().resolve("gtfs")));
+    assertTrue(Files.exists(preset.getFileStoragePath().resolve("gtfs.zip")));
+    assertTrue(Files.exists(preset.getFileStoragePath().resolve("gtfs")));
   }
 
   @Test
   void can_get_preset() {
     Preset preset = Preset.builder()
         .name("some preset")
-        .createdAt(LocalDateTime.now())
+        .fileStoragePath(appStorage.resolve("presets"))
         .build();
-    preset.setPath(appStorage.resolve("presets"));
     presets.save(preset);
 
     Response response = get("presets/" + preset.getId());
     response.then().statusCode(200);
 
     Preset presetFromRequest = response.as(Preset.class);
-    assertEquals(preset, presetFromRequest);
+    assertEquals(preset.getId(), presetFromRequest.getId());
   }
 
   @Test
   void can_delete_preset() {
     Preset preset = Preset.builder()
         .name("some preset")
-        .createdAt(LocalDateTime.now())
+        .fileStoragePath(appStorage.resolve("presets"))
         .build();
-    preset.setPath(appStorage.resolve("presets"));
     presets.save(preset);
 
     delete("presets/" + preset.getId())
         .then()
         .statusCode(204);
 
-    assertFalse(Files.exists(preset.getPath()));
+    assertFalse(Files.exists(preset.getFileStoragePath()));
     assertFalse(presets.find(preset.getId()).isPresent());
-  }
-
-  @Test
-  void load_presets_on_creation() {
-    Preset preset = Preset.builder()
-        .name("some preset")
-        .createdAt(LocalDateTime.now())
-        .build();
-    preset.setPath(appStorage.resolve("presets"));
-    presets.save(preset);
-
-    PresetRepository presetRepository = new PresetRepository();
-
-    for (Preset p : presets.all()) {
-      assertTrue(presetRepository.find(p.getId()).isPresent());
-    }
   }
 }

@@ -3,14 +3,13 @@ package de.fleigm.ptmm.eval;
 import de.fleigm.ptmm.data.Entity;
 import de.fleigm.ptmm.data.Extensions;
 import de.fleigm.ptmm.data.HasExtensions;
+import de.fleigm.ptmm.feeds.Feed;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
-import org.apache.commons.io.FilenameUtils;
 
-import javax.json.bind.annotation.JsonbTransient;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -23,19 +22,26 @@ import java.util.UUID;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode(callSuper=true)
-public class GeneratedFeedInfo extends Entity implements HasExtensions {
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
+public class GeneratedFeedInfo implements Entity, HasExtensions {
 
   public static final String GENERATED_GTFS_FEED = "gtfs.generated.zip";
   public static final String GENERATED_GTFS_FOLDER = "gtfs.generated";
 
+  @Builder.Default
+  @EqualsAndHashCode.Include
+  private UUID id = UUID.randomUUID();
+
+  @Builder.Default
+  private LocalDateTime createdAt = LocalDateTime.now();
+
   private String name;
   private Parameters parameters;
-  private LocalDateTime createdAt;
   private Status status;
 
-  private Path generatedFeed;
-  private Path originalFeed;
+  private Path fileStoragePath;
+  private Feed generatedFeed;
+  private Feed originalFeed;
   private UUID preset;
 
   @Builder.Default
@@ -63,16 +69,6 @@ public class GeneratedFeedInfo extends Entity implements HasExtensions {
     return this;
   }
 
-  @JsonbTransient
-  public Path getOriginalFeedFolder() {
-    return Path.of(FilenameUtils.removeExtension(originalFeed.toString()));
-  }
-
-  @JsonbTransient
-  public Path getGeneratedFeedFolder() {
-    return Path.of(FilenameUtils.removeExtension(generatedFeed.toString()));
-  }
-
   public boolean hasFinished() {
     return status == Status.FINISHED;
   }
@@ -83,5 +79,9 @@ public class GeneratedFeedInfo extends Entity implements HasExtensions {
 
   public boolean isPending() {
     return status == Status.PENDING;
+  }
+
+  public Path getFileStoragePath() {
+    return fileStoragePath.resolve(id.toString());
   }
 }
