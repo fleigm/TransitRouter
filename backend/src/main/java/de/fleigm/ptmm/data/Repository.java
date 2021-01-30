@@ -14,6 +14,12 @@ import java.util.UUID;
 public abstract class Repository<T extends Entity> {
   private final static Logger logger = LoggerFactory.getLogger(Repository.class);
 
+  protected final transient DataRoot dataRoot;
+
+  public Repository(DataRoot dataRoot) {
+    this.dataRoot = dataRoot;
+  }
+
   private final HashMap<UUID, T> storage = new HashMap<>();
 
   private void persist() {

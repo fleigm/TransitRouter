@@ -1,5 +1,6 @@
 package de.fleigm.ptmm.presets;
 
+import de.fleigm.ptmm.eval.Parameters;
 import de.fleigm.ptmm.eval.api.EvaluationService;
 import de.fleigm.ptmm.events.CreatedQualifier;
 import de.fleigm.ptmm.events.Events;
@@ -102,10 +103,26 @@ public class PresetController {
                 evaluationService.createFromPreset(
                     preset,
                     generateFeedRequest.getName(),
-                    generateFeedRequest.getParameters())))
+                    Parameters.builder()
+                        .sigma(generateFeedRequest.getSigma())
+                        .candidateSearchRadius(generateFeedRequest.getCandidateSearchRadius())
+                        .beta(generateFeedRequest.getBeta())
+                        .profile(generateFeedRequest.getProfile())
+                        .build())))
         .orElse(Response.status(Response.Status.NOT_FOUND))
         .build();
 
+  }
+
+  @GET
+  @Path("{id}/generated-feeds")
+  @Produces(MediaType.APPLICATION_JSON)
+  public Response getGeneratedFeeds(@PathParam("id") UUID id) {
+    if (presets.find(id).isEmpty()) {
+      return Response.status(Response.Status.NOT_FOUND).build();
+    }
+
+    return Response.ok(presets.generatedFeedsFromPreset(id)).build();
   }
 
 }

@@ -6,13 +6,17 @@ import io.quarkus.cache.CacheInvalidateAll;
 import io.quarkus.cache.CacheResult;
 import lombok.extern.slf4j.Slf4j;
 
-import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Produces;
+import javax.inject.Singleton;
 import java.util.Optional;
 import java.util.UUID;
 
 @Slf4j
 public class GeneratedFeedRepository extends Repository<GeneratedFeedInfo> {
+
+  public GeneratedFeedRepository(DataRoot dataRoot) {
+    super(dataRoot);
+  }
 
   @CacheResult(cacheName = "evaluation-result-cache")
   public Optional<EvaluationResult> findEvaluationResult(UUID id) {
@@ -25,7 +29,7 @@ public class GeneratedFeedRepository extends Repository<GeneratedFeedInfo> {
 
   public static class Producer {
     @Produces
-    @ApplicationScoped
+    @Singleton
     public GeneratedFeedRepository get(DataRoot dataRoot) {
       return dataRoot.generatedFeeds();
     }
