@@ -17,7 +17,7 @@ public class GeneratedFeedRepository extends Repository<GeneratedFeedInfo> {
 
 
   public GeneratedFeedRepository(@ConfigProperty(name = "app.storage") Path storageLocation) {
-    super(storageLocation);
+    super(storageLocation.resolve("generated"));
   }
 
   @Override

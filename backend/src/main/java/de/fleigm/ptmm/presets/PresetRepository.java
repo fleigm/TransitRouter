@@ -23,7 +23,7 @@ public class PresetRepository extends Repository<Preset> {
   @Inject
   public PresetRepository(@ConfigProperty(name = "app.storage") Path storageLocation,
                           GeneratedFeedRepository generatedFeeds) {
-    super(storageLocation);
+    super(storageLocation.resolve("presets"));
     this.generatedFeeds = generatedFeeds;
   }
 
