@@ -11,27 +11,15 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 import java.nio.file.Path;
-import java.time.LocalDateTime;
-import java.util.UUID;
 
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@EqualsAndHashCode(onlyExplicitlyIncluded = true)
-public class Preset implements Entity, HasExtensions {
-
-  @Builder.Default
-  @EqualsAndHashCode.Include
-  private UUID id = UUID.randomUUID();
-
-  @Builder.Default
-  private LocalDateTime createdAt = LocalDateTime.now();
-
+@EqualsAndHashCode(callSuper = true)
+public class Preset extends Entity implements HasExtensions {
   private String name;
   private Feed feed;
-
-  private Path fileStoragePath;
 
   @Builder.Default
   private Extensions extensions = new Extensions();
@@ -41,7 +29,8 @@ public class Preset implements Entity, HasExtensions {
     return extensions;
   }
 
-  public Path getFileStoragePath() {
-    return fileStoragePath.resolve(id.toString());
+  @Override
+  protected Path entityStorageRoot() {
+    return storageRoot().resolve("presets");
   }
 }

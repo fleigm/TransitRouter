@@ -60,7 +60,6 @@ public class PresetController {
 
     Preset preset = Preset.builder()
         .name(presetUploadForm.getName())
-        .fileStoragePath(storagePath.resolve("presets"))
         .build();
 
     preset.setFeed(Feed.create(preset.getFileStoragePath().resolve("gtfs.zip"), presetUploadForm.getGtfsFeed()));

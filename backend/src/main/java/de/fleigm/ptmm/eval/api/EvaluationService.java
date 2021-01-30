@@ -41,7 +41,6 @@ public class EvaluationService {
   public EvaluationResponse createEvaluation(CreateEvaluationRequest request) {
     GeneratedFeedInfo info = GeneratedFeedInfo.builder()
         .name(request.getName())
-        .fileStoragePath(storagePath.resolve("generated"))
         .parameters(Parameters.builder()
             .sigma(request.getSigma())
             .candidateSearchRadius(request.getCandidateSearchRadius())
@@ -71,7 +70,6 @@ public class EvaluationService {
   public EvaluationResponse createFromPreset(Preset preset, String name, Parameters parameters) {
     GeneratedFeedInfo info = GeneratedFeedInfo.builder()
         .name(name)
-        .fileStoragePath(storagePath.resolve("generated"))
         .parameters(parameters)
         .status(Status.PENDING)
         .preset(preset.getId())

@@ -1,28 +1,35 @@
 package de.fleigm.ptmm.presets;
 
-import de.fleigm.ptmm.App;
-import de.fleigm.ptmm.data.DataRoot;
 import de.fleigm.ptmm.data.Repository;
 import de.fleigm.ptmm.eval.GeneratedFeedInfo;
+import de.fleigm.ptmm.eval.GeneratedFeedRepository;
+import org.eclipse.microprofile.config.inject.ConfigProperty;
 
-import javax.enterprise.inject.Produces;
-import javax.inject.Singleton;
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+@ApplicationScoped
 public class PresetRepository extends Repository<Preset> {
 
-  public PresetRepository(DataRoot dataRoot) {
-    super(dataRoot);
+  private GeneratedFeedRepository generatedFeeds;
+
+  protected PresetRepository() {
   }
 
-  public static class Producer {
-    @Produces
-    @Singleton
-    public PresetRepository get(DataRoot dataRoot) {
-      return dataRoot.presets();
-    }
+  @Inject
+  public PresetRepository(@ConfigProperty(name = "app.storage") Path storageLocation,
+                          GeneratedFeedRepository generatedFeeds) {
+    super(storageLocation);
+    this.generatedFeeds = generatedFeeds;
+  }
+
+  @Override
+  public Class<Preset> entityClass() {
+    return Preset.class;
   }
 
   public List<GeneratedFeedInfo> generatedFeedsFromPreset(Preset preset) {
@@ -30,7 +37,8 @@ public class PresetRepository extends Repository<Preset> {
   }
 
   public List<GeneratedFeedInfo> generatedFeedsFromPreset(UUID id) {
-    return App.getInstance().data().generatedFeeds().all().stream()
+    return generatedFeeds.all()
+        .stream()
         .filter(info -> info.getPreset().equals(id))
         .collect(Collectors.toList());
   }

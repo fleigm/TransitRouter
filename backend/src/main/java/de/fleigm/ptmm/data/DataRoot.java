@@ -8,8 +8,8 @@ public class DataRoot {
   private final PresetRepository presets;
 
   private DataRoot() {
-    generatedFeeds = new GeneratedFeedRepository(this);
-    presets = new PresetRepository(this);
+    generatedFeeds = new GeneratedFeedRepository(null);
+    presets = new PresetRepository(null, generatedFeeds);
   }
 
   public static DataRoot create() {

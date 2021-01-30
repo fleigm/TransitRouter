@@ -32,7 +32,7 @@ public class Feed {
       FileUtils.copyInputStreamToFile(feed, path.toFile());
 
       if (!ValidateGtfsFeed.validate(path)) {
-        FileUtils.deleteDirectory(path.toFile());
+        Files.delete(path);
         throw new IllegalArgumentException("File is not a valid GTFS feed.");
       }
       Unzip.apply(path, Path.of(FilenameUtils.removeExtension(path.toString())));

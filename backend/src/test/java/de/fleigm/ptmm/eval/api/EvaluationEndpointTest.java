@@ -58,7 +58,6 @@ public class EvaluationEndpointTest {
 
     GeneratedFeedInfo info = GeneratedFeedInfo.builder()
         .name(evaluationName)
-        .fileStoragePath(storagePath.resolve("generated"))
         .parameters(Parameters.defaultParameters())
         .status(status)
         .build();
@@ -80,7 +79,6 @@ public class EvaluationEndpointTest {
 
     GeneratedFeedInfo info = GeneratedFeedInfo.builder()
         .name(evaluationName)
-        .fileStoragePath(storagePath.resolve("generated"))
         .parameters(Parameters.defaultParameters())
         .status(Status.PENDING)
         .build();

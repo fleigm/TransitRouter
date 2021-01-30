@@ -52,7 +52,6 @@ class PresetControllerTest {
   void can_get_preset() {
     Preset preset = Preset.builder()
         .name("some preset")
-        .fileStoragePath(appStorage.resolve("presets"))
         .build();
     presets.save(preset);
 
@@ -67,7 +66,6 @@ class PresetControllerTest {
   void can_delete_preset() {
     Preset preset = Preset.builder()
         .name("some preset")
-        .fileStoragePath(appStorage.resolve("presets"))
         .build();
     presets.save(preset);
 

@@ -11,7 +11,6 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 import java.nio.file.Path;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -23,23 +22,15 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
-public class GeneratedFeedInfo implements Entity, HasExtensions {
+public class GeneratedFeedInfo extends Entity implements HasExtensions {
 
   public static final String GENERATED_GTFS_FEED = "gtfs.generated.zip";
   public static final String GENERATED_GTFS_FOLDER = "gtfs.generated";
-
-  @Builder.Default
-  @EqualsAndHashCode.Include
-  private UUID id = UUID.randomUUID();
-
-  @Builder.Default
-  private LocalDateTime createdAt = LocalDateTime.now();
 
   private String name;
   private Parameters parameters;
   private Status status;
 
-  private Path fileStoragePath;
   private Feed generatedFeed;
   private Feed originalFeed;
   private UUID preset;
@@ -56,6 +47,11 @@ public class GeneratedFeedInfo implements Entity, HasExtensions {
   @Override
   public Extensions extensions() {
     return extensions;
+  }
+
+  @Override
+  protected Path entityStorageRoot() {
+    return storageRoot().resolve("generated");
   }
 
   public GeneratedFeedInfo addStatistic(String key, Object value) {
@@ -79,9 +75,5 @@ public class GeneratedFeedInfo implements Entity, HasExtensions {
 
   public boolean isPending() {
     return status == Status.PENDING;
-  }
-
-  public Path getFileStoragePath() {
-    return fileStoragePath.resolve(id.toString());
   }
 }
