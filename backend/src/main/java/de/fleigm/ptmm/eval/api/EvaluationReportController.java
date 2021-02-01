@@ -1,11 +1,13 @@
 package de.fleigm.ptmm.eval.api;
 
 import de.fleigm.ptmm.TransitFeed;
+import de.fleigm.ptmm.eval.EvaluationExtension;
 import de.fleigm.ptmm.eval.EvaluationResult;
 import de.fleigm.ptmm.eval.GeneratedFeedInfo;
 import de.fleigm.ptmm.eval.GeneratedFeedRepository;
 import de.fleigm.ptmm.eval.Report;
 import de.fleigm.ptmm.eval.Status;
+import de.fleigm.ptmm.feeds.TransitFeedService;
 import de.fleigm.ptmm.http.pagination.Page;
 import de.fleigm.ptmm.http.pagination.Paged;
 import de.fleigm.ptmm.http.sort.SortQuery;
@@ -35,6 +37,9 @@ public class EvaluationReportController {
   @Inject
   GeneratedFeedRepository generatedFeedRepository;
 
+  @Inject
+  TransitFeedService transitFeedService;
+
   @GET
   @Produces(MediaType.APPLICATION_JSON)
   public Response index(
@@ -50,9 +55,15 @@ public class EvaluationReportController {
       return Response.status(Response.Status.NOT_FOUND).build();
     }
 
-    return generatedFeedRepository.findEvaluationResult(id)
+    return info.flatMap(i -> i.getExtension(EvaluationExtension.class))
+        .map(evaluation -> Report.read(evaluation.getReport()))
+        .map(Response::ok)
+        .orElse(Response.status(Response.Status.NOT_FOUND))
+        .build();
+
+    /*return generatedFeedRepository.findEvaluationResult(id)
         .map(evaluationResult -> getPagedReport(evaluationResult, uriInfo, paged, search, sort))
-        .orElse(Response.status(Response.Status.NOT_FOUND).build());
+        .orElse(Response.status(Response.Status.NOT_FOUND).build());*/
   }
 
   private Response getPagedReport(EvaluationResult evaluationResult,

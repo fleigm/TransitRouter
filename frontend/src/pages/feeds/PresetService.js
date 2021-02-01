@@ -14,6 +14,10 @@ async function fetchPresets() {
     return response;
 }
 
+async function fetchPreset(id) {
+    return await http.get('presets/' + id);
+}
+
 async function clearCache() {
     await http.post('commands/presets/clear-cache');
     await fetchPresets();
@@ -83,6 +87,7 @@ async function createPreset(preset) {
 
 export default {
     fetchPresets,
+    fetchPreset,
     clearCache,
     deletePreset,
     createPreset,

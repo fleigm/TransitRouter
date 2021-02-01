@@ -7,6 +7,8 @@ import RoutingIndex from '../pages/routing/Index';
 import WikiIndex from '../pages/wiki/Index';
 import FeedIndex from '../pages/feeds/Index';
 import FeedOverview from '../pages/feeds/overview/Index';
+import FeedView from '../pages/feeds/view/Index';
+
 
 const routes = [
     {
@@ -32,7 +34,11 @@ const routes = [
             path: '',
             name: 'feeds.index',
             component: FeedOverview,
-        },]
+        }, {
+            path: ':id',
+            name: 'feeds.view',
+            component: FeedView,
+        }]
     }, {
         path: '/routing',
         name: 'routing.index',

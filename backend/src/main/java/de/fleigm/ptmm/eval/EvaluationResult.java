@@ -14,14 +14,16 @@ public class EvaluationResult {
   }
 
   public static EvaluationResult load(GeneratedFeedInfo info) {
-    if (info.getStatus() != Status.FINISHED) {
+    if (info.getStatus() != Status.FINISHED || !info.hasExtension(EvaluationExtension.class)) {
       throw new IllegalStateException("Cannot load EvaluationResult if evaluation has not finished successfully.");
     }
 
+    EvaluationExtension evaluation = info.getExtension(EvaluationExtension.class).get();
+
     return new EvaluationResult(
-        Report.read(info.getFileStoragePath().resolve(EvaluationExtension.SHAPEVL_REPORT)),
-        new TransitFeed(info.getFileStoragePath().resolve(Evaluation.ORIGINAL_GTFS_FEED)),
-        new TransitFeed(info.getFileStoragePath().resolve(GeneratedFeedInfo.GENERATED_GTFS_FEED))
+        Report.read(evaluation.getReport()),
+        new TransitFeed(info.getOriginalFeed().getPath()),
+        new TransitFeed(info.getGeneratedFeed().getPath())
     );
   }
 

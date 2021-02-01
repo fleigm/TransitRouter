@@ -14,6 +14,7 @@ import EventPlugin from "./plugins/EventPlugin";
 import Components from './components';
 import Filters from './filters';
 import App from './App';
+import BreadcrumbsPlugin from "./breadcrumbs/Plugin";
 
 Vue.use(VueRouter);
 Vue.use(ElementUI, {locale});
@@ -23,6 +24,7 @@ Vue.use(EventPlugin);
 Vue.use(LeafletPlugin);
 Vue.use(Components);
 Vue.use(Filters);
+Vue.use(BreadcrumbsPlugin)
 
 
 const app = new Vue({

@@ -1,6 +1,6 @@
 <script>
 import {Bar} from 'vue-chartjs';
-import {defaults, defaultsDeep} from 'lodash';
+import {defaultsDeep} from "lodash";
 
 const defaultOptions = {
   responsive: true,
@@ -20,18 +20,14 @@ const defaultDataSetOptions = {
 };
 
 export default {
-  name: "v-histogram",
+  name: "v-accuracy-chart",
 
   extends: Bar,
 
   props: {
     dataSets: {
-      type: Array | Object,
+      type: Array,
       required: true,
-    },
-    convertFromD3js: {
-      type: Boolean,
-      default: true,
     },
     options: Object,
     xLabel: String,
@@ -60,34 +56,13 @@ export default {
     },
   },
 
+
   methods: {
-    getLabels() {
-      if (Array.isArray(this.dataSets)) {
-        return this.dataSets[0].data.map(bin => bin.x1);
-      }
-
-      return this.dataSets.data.map(bin => bin.x1);
-    },
-
-    buildDataSets() {
-      if (Array.isArray(this.dataSets)) {
-        return this.dataSets.map(this.buildDataSet);
-      }
-      return [this.buildDataSet(this.dataSets)];
-    },
-
-    buildDataSet(dataSet) {
-      const d = defaults(dataSet, defaultDataSetOptions);
-      d.data = dataSet.data.map(bin => bin.length);
-
-      return d;
-    },
-
     render() {
       this.renderChart({
-        labels: this.getLabels(),
-        datasets: this.buildDataSets(),
-      }, this.chartOptions);
+        labels: ['0', '10', '20', '30', '40', '50', '60', '70', '80', '90'],
+        datasets: this.dataSets
+      }, this.chartOptions)
     }
   },
 
@@ -101,7 +76,3 @@ export default {
   }
 }
 </script>
-
-<style scoped>
-
-</style>

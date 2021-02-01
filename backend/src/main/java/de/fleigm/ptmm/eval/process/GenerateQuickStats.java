@@ -30,9 +30,9 @@ public class GenerateQuickStats {
 
     Map<String, Object> stats = new HashMap<>();
     stats.put("accuracy", computeAccuracy(report));
-    stats.put("fd", buildStatsFor(report, Report.Entry::avgFd).toString());
-    stats.put("an", buildStatsFor(report, Report.Entry::an).toString());
-    stats.put("al", buildStatsFor(report, Report.Entry::al).toString());
+    stats.put("fd", buildStatsFor(report, Report.Entry::avgFd));
+    stats.put("an", buildStatsFor(report, Report.Entry::an));
+    stats.put("al", buildStatsFor(report, Report.Entry::al));
     evaluation.setQuickStats(stats);
 
     log.info("Finished quick stats step.");
