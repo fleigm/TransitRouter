@@ -1,6 +1,7 @@
 package de.fleigm.ptmm.presets;
 
 import de.fleigm.ptmm.eval.Parameters;
+import de.fleigm.ptmm.eval.api.EvaluationResponse;
 import de.fleigm.ptmm.eval.api.EvaluationService;
 import de.fleigm.ptmm.events.CreatedQualifier;
 import de.fleigm.ptmm.events.Events;
@@ -23,6 +24,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 import java.util.Comparator;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -95,21 +97,24 @@ public class PresetController {
   @Consumes(MediaType.APPLICATION_JSON)
   @Produces(MediaType.APPLICATION_JSON)
   public Response generateFeed(@PathParam("id") UUID id, @NotNull @Valid GenerateFeedRequest generateFeedRequest) {
-    return presets.find(id)
-        .map(preset -> Response
-            .status(Response.Status.CREATED)
-            .entity(
-                evaluationService.createFromPreset(
-                    preset,
-                    generateFeedRequest.getName(),
-                    Parameters.builder()
-                        .sigma(generateFeedRequest.getSigma())
-                        .candidateSearchRadius(generateFeedRequest.getCandidateSearchRadius())
-                        .beta(generateFeedRequest.getBeta())
-                        .profile(generateFeedRequest.getProfile())
-                        .build())))
-        .orElse(Response.status(Response.Status.NOT_FOUND))
-        .build();
+
+    Optional<Preset> preset = presets.find(id);
+
+    if (preset.isEmpty()) {
+      return Response.status(Response.Status.NOT_FOUND).build();
+    }
+
+    EvaluationResponse evaluationResponse = evaluationService.createFromPreset(
+        preset.get(),
+        generateFeedRequest.getName(),
+        Parameters.builder()
+            .sigma(generateFeedRequest.getSigma())
+            .candidateSearchRadius(generateFeedRequest.getCandidateSearchRadius())
+            .beta(generateFeedRequest.getBeta())
+            .profile(generateFeedRequest.getProfile())
+            .build());
+
+    return Response.ok(evaluationResponse.info()).build();
 
   }
 

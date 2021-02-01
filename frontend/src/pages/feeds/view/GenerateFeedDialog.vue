@@ -125,6 +125,7 @@ export default {
     sendRequest() {
       this.$http.post(`presets/${this.preset.id}/generated-feeds`, this.formData)
           .then(({data}) => {
+            this.$events.$emit('presets.generatedFeed', data);
             console.log(data);
           })
     }
