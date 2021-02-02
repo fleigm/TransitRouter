@@ -24,16 +24,18 @@
         <template slot-scope="reports">
           <div class="my-8 ">
             <div class="text-secondary">Generated Feeds</div>
-
             <div class="grid grid-cols-3 gap-4">
               <v-card class="">
-                <el-table ref="finishedFeedsTable" :data="finishedFeeds" size="mini" @selection-change="selectionChanged">
+                <el-table ref="finishedFeedsTable"
+                          :data="sortedFinishedFeeds"
+                          size="mini"
+                          @selection-change="selectionChanged">
                   <el-table-column type="selection" width="30"></el-table-column>
                   <el-table-column prop="name" label="Name">
                     <template slot-scope="scope">
-                  <span :style="{background: scope.row._color}" class="px-2 rounded-full text-white inline-block">{{
-                      scope.row.name
-                    }}</span>
+                      <span :style="{background: scope.row._color}"
+                            class="px-2 rounded-full text-white inline-block"
+                      >{{ scope.row.name }}</span>
                     </template>
                   </el-table-column>
                   <el-table-column label="parameters">
@@ -46,11 +48,18 @@
                   </el-table-column>
                   <el-table-column width="40">
                     <template slot-scope="scope">
-                      <el-button icon="el-icon-delete" circle size="mini"></el-button>
+                      <el-popconfirm
+                          cancel-button-text='No, Thanks'
+                          confirm-button-text='Yes'
+                          title="Are you sure to delete this feed?"
+                          @confirm="deleteFeed(scope.row.id)">
+                        <el-button slot="reference" icon="el-icon-delete" circle size="mini"></el-button>
+                      </el-popconfirm>
                     </template>
                   </el-table-column>
                 </el-table>
               </v-card>
+
 
               <template v-if="reports.reports.length">
                 <v-card class="col-span-2" header="Average Frechet Distance">
@@ -113,12 +122,9 @@ export default {
   },
 
   computed: {
-    /*finishedFeeds() {
-      return this.feeds.filter(Filters.isFinished)
-    },
-    pendingFeeds() {
-      return this.feeds.filter(Filters.isPending)
-    }*/
+    sortedFinishedFeeds() {
+      return this.finishedFeeds.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+    }
   },
 
 
@@ -177,12 +183,33 @@ export default {
                 this.addFinishedFeed(feed);
               }
             })
-        .finally(() => {
-          // cannot remove feed with lodash because it is not reactive
-          this.pendingFeeds = this.pendingFeeds.filter(feed => !newlyFinished.includes(feed.id));
-        })
+            .finally(() => {
+              // cannot remove feed with lodash because it is not reactive
+              this.pendingFeeds = this.pendingFeeds.filter(feed => !newlyFinished.includes(feed.id));
+            })
       })
     },
+
+    deleteFeed(id) {
+      this.$http.delete(`eval/${id}`)
+          .then((response) => {
+            this.$notify.success({
+              title: 'Success.',
+              message: 'Feed deleted.',
+              duration: 5000,
+            });
+            const index = this.finishedFeeds.findIndex(feed => feed.id === id);
+            this.finishedFeeds.splice(index, 1);
+          })
+          .catch((response) => {
+            console.log(response);
+            this.$notify.error({
+              title: 'Oops, something went wrong',
+              message: 'Could not delete feed.',
+              duration: 5000,
+            })
+          })
+    }
 
 
   },
@@ -198,7 +225,7 @@ export default {
 
   beforeDestroy() {
     this.$events.$off('presets.generatedFeed', this.onGeneratedFeed);
-    clearInterval(this.checkPendingFeeds);
+    clearInterval(this.pollingPendingFeeds);
   },
 }
 </script>
