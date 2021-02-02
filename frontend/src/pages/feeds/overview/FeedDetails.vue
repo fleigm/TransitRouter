@@ -11,6 +11,9 @@
       </el-table>
     </div>
   </div>
+  <div v-else>
+    <div class="w-full text-xl text-secondary font-thin my-8 text-center">Generating feed info...</div>
+  </div>
 </template>
 
 <script>

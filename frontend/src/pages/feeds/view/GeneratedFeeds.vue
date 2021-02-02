@@ -3,7 +3,7 @@
     <div v-if="loading" v-loading="true" class="w-full h-128"></div>
     <div v-else>
 
-      <div class="my-8">
+      <div class="my-8" v-show="pendingFeeds.length">
         <div class="text-secondary">Currently generating feeds...</div>
         <div class="flex gap-x-4">
           <v-card v-for="feed in pendingFeeds" :key="feed.id"
@@ -180,7 +180,7 @@ export default {
             .then(({data}) => {
               if (data.status === 'FINISHED') {
                 newlyFinished.push(feed.id);
-                this.addFinishedFeed(feed);
+                this.addFinishedFeed(data);
               }
             })
             .finally(() => {

@@ -44,7 +44,7 @@ export default {
     accuracyDataSets() {
       return this.reports.map(report => {
         return {
-          label: 'accuracy',
+          label: report.name,
           data: this.feeds.find(feed => feed.id === report.id).extensions['de.fleigm.ptmm.eval.EvaluationExtension'].quickStats.accuracy,
           backgroundColor: report.color,
         }
@@ -56,7 +56,7 @@ export default {
 
       return this.reports.map(report => {
         return {
-          label: 'vehicle count',
+          label: report.name,
           data: histogram(report.entries.map(e => e.avgFd)),
           backgroundColor: report.color,
         };
@@ -68,7 +68,7 @@ export default {
 
       return this.reports.map(report => {
         return {
-          label: 'vehicle count',
+          label: report.name,
           data: histogram(report.entries.map(e => e.an)),
           backgroundColor: report.color,
         };
@@ -80,7 +80,7 @@ export default {
 
       return this.reports.map(report => {
         return {
-          label: 'vehicle count',
+          label: report.name,
           data: histogram(report.entries.map(e => e.al)),
           backgroundColor: report.color,
         };
@@ -103,7 +103,7 @@ export default {
       this.loading.push({id: feed.id});
       this.$http.get(`eval/${feed.id}/report?limit=999999`)
           .then(({data}) => {
-            this.cache.push({id: feed.id, entries: data.entries, color: feed._color})
+            this.cache.push({id: feed.id, name: feed.name, entries: data.entries, color: feed._color})
           })
           .finally(() => {
             _.remove(this.loading, idFilter)
