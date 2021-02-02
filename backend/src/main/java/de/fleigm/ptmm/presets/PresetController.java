@@ -112,6 +112,7 @@ public class PresetController {
             .candidateSearchRadius(generateFeedRequest.getCandidateSearchRadius())
             .beta(generateFeedRequest.getBeta())
             .profile(generateFeedRequest.getProfile())
+            .useGraphHopperMapMatching(generateFeedRequest.isUseGraphHopperMapMatching())
             .build());
 
     return Response.ok(evaluationResponse.info()).build();

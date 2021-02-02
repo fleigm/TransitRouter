@@ -14,7 +14,10 @@
             <div>{{ feed.name }}</div>
             <div class="">
               <div>{{ feed.parameters.profile }}</div>
-              <div>{{ feed.parameters.sigma }} - {{ feed.parameters.beta }}</div>
+              <div>
+                {{ feed.parameters.sigma }} - {{ feed.parameters.beta }} -
+                <span>{{ feed.parameters.useGraphHopperMapMatching ? 'GHMM' : 'TR'}}</span>
+              </div>
             </div>
           </v-card>
         </div>
@@ -42,7 +45,10 @@
                     <template slot-scope="scope">
                       <div class="">
                         <div>{{ scope.row.parameters.profile }}</div>
-                        <div>{{ scope.row.parameters.sigma }} - {{ scope.row.parameters.beta }}</div>
+                        <div>
+                          {{ scope.row.parameters.sigma }} - {{ scope.row.parameters.beta }} -
+                          <span>{{ scope.row.parameters.useGraphHopperMapMatching ? 'GHMM' : 'TR'}}</span>
+                        </div>
                       </div>
                     </template>
                   </el-table-column>

@@ -17,6 +17,7 @@ public class Parameters {
   private double sigma;
   private double beta;
   private boolean disableTurnCosts;
+  private boolean useGraphHopperMapMatching;
 
   @Builder.Default
   private DistanceUnit distanceUnit = DistanceUnit.METERS;
@@ -37,7 +38,8 @@ public class Parameters {
         .putObject("measurement_error_sigma", sigma)
         .putObject("candidate_search_radius", candidateSearchRadius)
         .putObject("beta", beta)
-        .putObject("disable_turn_costs", disableTurnCosts);
+        .putObject("disable_turn_costs", disableTurnCosts)
+        .putObject("use_graph_hopper_map_matching", useGraphHopperMapMatching);
   }
 }
 

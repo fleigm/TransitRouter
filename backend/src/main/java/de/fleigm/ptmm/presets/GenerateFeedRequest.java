@@ -30,4 +30,6 @@ public class GenerateFeedRequest {
   @NotNull
   @Positive
   private Double beta;
+
+  private boolean useGraphHopperMapMatching;
 }

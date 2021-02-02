@@ -30,6 +30,9 @@
           <el-form-item label="csr" prop="candidateSearchRadius">
             <el-input-number v-model="formData.candidateSearchRadius" :precision="2"></el-input-number>
           </el-form-item>
+          <el-form-item label="use GHMM">
+            <el-checkbox v-model="formData.useGraphHopperMapMatching"></el-checkbox>
+          </el-form-item>
 
           <el-form-item>
             <el-button type="primary" @click="submit">Generate</el-button>
@@ -95,6 +98,7 @@ export default {
         sigma: 25.0,
         beta: 2.0,
         candidateSearchRadius: 25.0,
+        useGraphHopperMapMatching: false,
       },
     }
   },
