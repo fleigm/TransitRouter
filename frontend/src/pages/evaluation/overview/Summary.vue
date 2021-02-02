@@ -1,17 +1,17 @@
 <template>
   <div class="flex flex-col gap-4 p-2">
     <div class="flex justify-between gap-4">
-      <v-metric :value="info.statistics.fd.max | number('0.00')"
+      <v-metric :value="evaluation.quickStats.fd.max | number('0.00')"
                 class="text-red-400"
                 title="Highest avgFd"
                 unit="m"
       ></v-metric>
-      <v-metric :value="info.statistics.fd.min | number('0.00')"
+      <v-metric :value="evaluation.quickStats.fd.min | number('0.00')"
                 class="text-green-400"
                 title="Lowest avgFd"
                 unit="m"
       ></v-metric>
-      <v-metric :value="info.statistics.fd.average| number('0.00')"
+      <v-metric :value="evaluation.quickStats.fd.average| number('0.00')"
                 class=""
                 title="Average avgFd"
                 unit="m"
@@ -33,23 +33,23 @@
         <div class="">
           <div class="py-2 flex">
             <div class="mr-4">acc-0:</div>
-            <div>{{ info.statistics['accuracy'][0] }}</div>
+            <div>{{ evaluation.quickStats.accuracy[0] }}</div>
           </div>
           <div class="py-2 flex">
             <div class="mr-4">acc-10:</div>
-            <div>{{ info.statistics['accuracy'][1] }}</div>
+            <div>{{ evaluation.quickStats.accuracy[1] }}</div>
           </div>
           <div class="py-2 flex">
             <div class="mr-4">acc-20:</div>
-            <div>{{ info.statistics['accuracy'][2] }}</div>
+            <div>{{ evaluation.quickStats.accuracy[2] }}</div>
           </div>
           <div class="py-2 flex">
             <div class="mr-4">acc-30:</div>
-            <div>{{ info.statistics['accuracy'][3] }}</div>
+            <div>{{ evaluation.quickStats.accuracy[3] }}</div>
           </div>
           <div class="py-2 flex">
             <div class="mr-4">acc-40:</div>
-            <div>{{ info.statistics['accuracy'][4] }}</div>
+            <div>{{ evaluation.quickStats.accuracy[4] }}</div>
           </div>
         </div>
 
@@ -107,6 +107,10 @@ export default {
   },
 
   computed: {
+    evaluation() {
+      return this.info.extensions['de.fleigm.ptmm.eval.EvaluationExtension'];
+    },
+
     shapeGenerationErrors() {
       return this.info.errors.filter(error => error.code === 'shape_generation_failed') ?? [];
     },

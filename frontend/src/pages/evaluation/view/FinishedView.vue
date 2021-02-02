@@ -2,9 +2,8 @@
   <div class="pb-8">
     <div class="grid grid-cols-3 gap-4 px-4">
       <EvaluationCard header="accuracy">
-        <v-accuracy-chart :accuracies="info.statistics.accuracy" class="h-48"></v-accuracy-chart>
+        <v-accuracy-chart :accuracies="evaluation.quickStats.accuracy" class="h-48"></v-accuracy-chart>
       </EvaluationCard>
-
 
       <EvaluationCard header="configuration">
         <div class="flex flex-col justify-between gap-4">
@@ -36,17 +35,17 @@
           ></HistogramAverageFrechetDistance>
         </div>
         <div slot="footer" class="flex w-full justify-between">
-          <v-metric :value="info.statistics.fd['max'] | number('0.0')"
+          <v-metric :value="evaluation.quickStats.fd.max | number('0.0')"
                     class="text-red-400"
                     title="max"
                     unit="m"
           ></v-metric>
-          <v-metric :value="info.statistics.fd['min'] | number('0.0')"
+          <v-metric :value="evaluation.quickStats.fd.min | number('0.0')"
                     class="text-green-400"
                     title="min"
                     unit="m"
           ></v-metric>
-          <v-metric :value="info.statistics.fd['average'] | number('0.0')"
+          <v-metric :value="evaluation.quickStats.fd.average | number('0.0')"
                     class=""
                     title="avg"
                     unit="m"
@@ -65,17 +64,17 @@
           </HistogramMismatchedHopSegments>
         </div>
         <div slot="footer" class="flex w-full justify-between">
-          <v-metric :value="info.statistics.an['max'] | number('0.000')"
+          <v-metric :value="evaluation.quickStats.an.max | number('0.000')"
                     class="text-red-400"
                     title="max"
                     unit=""
           ></v-metric>
-          <v-metric :value="info.statistics.an['min'] | number('0.000')"
+          <v-metric :value="evaluation.quickStats.an.min | number('0.000')"
                     class="text-green-400"
                     title="min"
                     unit=""
           ></v-metric>
-          <v-metric :value="info.statistics.an['average'] | number('0.000')"
+          <v-metric :value="evaluation.quickStats.an.average | number('0.000')"
                     class=""
                     title="avg"
                     unit=""
@@ -95,17 +94,17 @@
           </HistogramLengthMismatchedHopSegments>
         </div>
         <div slot="footer" class="flex w-full justify-between">
-          <v-metric :value="info.statistics.al['max'] | number('0.000')"
+          <v-metric :value="evaluation.quickStats.al.max | number('0.000')"
                     class="text-red-400"
                     title="max"
                     unit=""
           ></v-metric>
-          <v-metric :value="info.statistics.al['min'] | number('0.000')"
+          <v-metric :value="evaluation.quickStats.al.min | number('0.000')"
                     class="text-green-400"
                     title="min"
                     unit=""
           ></v-metric>
-          <v-metric :value="info.statistics.al['average'] | number('0.000')"
+          <v-metric :value="evaluation.quickStats.al.average | number('0.000')"
                     class=""
                     title="avg"
                     unit=""
@@ -175,6 +174,10 @@ export default {
   },
 
   computed: {
+    evaluation() {
+      return this.info.extensions['de.fleigm.ptmm.eval.EvaluationExtension'];
+    },
+
     shapeGenerationErrors() {
       return this.info.errors.filter(error => error.code === 'shape_generation_failed') ?? [];
     },
@@ -189,8 +192,8 @@ export default {
     fetchReport() {
       const name = this.$route.params.name;
       this.$http.get(`eval/${name}/report?page=1&limit=${999999}`)
-          .then(({data: page}) => {
-            this.report = page.data;
+          .then(({data}) => {
+            this.report = data.entries;
           })
     }
   },
