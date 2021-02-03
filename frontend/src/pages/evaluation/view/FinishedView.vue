@@ -191,7 +191,7 @@ export default {
   methods: {
     fetchReport() {
       const name = this.$route.params.name;
-      this.$http.get(`eval/${name}/report?page=1&limit=${999999}`)
+      this.$http.get(`eval/${name}/report`)
           .then(({data}) => {
             this.report = data.entries;
           })

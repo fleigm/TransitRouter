@@ -101,7 +101,7 @@ export default {
       }
 
       this.loading.push({id: feed.id});
-      this.$http.get(`eval/${feed.id}/report?limit=999999`)
+      this.$http.get(`eval/${feed.id}/report`)
           .then(({data}) => {
             this.cache.push({id: feed.id, name: feed.name, entries: data.entries, color: feed._color})
           })
