@@ -11,7 +11,7 @@ import java.util.List;
 @ToString
 @AllArgsConstructor
 @Accessors(fluent = true)
-public class ObservationWithCandidates {
+class ObservationWithCandidates {
   private final Observation observation;
   private final List<DirectedCandidate> candidates;
 }

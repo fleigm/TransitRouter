@@ -52,7 +52,6 @@ import PresetService from "../PresetService";
 import FeedDetails from "../overview/FeedDetails";
 import VGenerateFeedDialog from "./GenerateFeedDialog";
 import GeneratedFeeds from "./GeneratedFeeds";
-import PresetFeeds from "../PresetFeeds";
 
 export default {
   name: "Index",
@@ -71,10 +70,6 @@ export default {
   computed: {
     id() {
       return this.$route.params.id
-    },
-
-    presetFeeds() {
-      return PresetFeeds.state
     },
 
     downloadLink() {
@@ -100,7 +95,6 @@ export default {
 
   mounted() {
     this.fetchPreset();
-    PresetFeeds.fetchFeeds(this.id);
   }
 
 }

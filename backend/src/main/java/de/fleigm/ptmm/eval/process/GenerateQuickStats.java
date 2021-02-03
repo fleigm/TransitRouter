@@ -3,7 +3,7 @@ package de.fleigm.ptmm.eval.process;
 import de.fleigm.ptmm.eval.EvaluationExtension;
 import de.fleigm.ptmm.eval.GeneratedFeedInfo;
 import de.fleigm.ptmm.eval.Report;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
 
 import javax.json.Json;
 import javax.json.JsonObject;
@@ -12,11 +12,14 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.ToDoubleFunction;
 
-@Slf4j
+/**
+ * Generate evaluation quick stats from {@link Report}
+ */
 public class GenerateQuickStats {
+  private static final Logger logger = org.slf4j.LoggerFactory.getLogger(GenerateQuickStats.class);
 
   public void run(GeneratedFeedInfo info) {
-    log.info("Start quick stats step.");
+    logger.info("Start quick stats step.");
 
     EvaluationExtension evaluation = info.getExtension(EvaluationExtension.class).get();
 
@@ -29,7 +32,7 @@ public class GenerateQuickStats {
     stats.put("al", buildStatsFor(report, Report.Entry::al));
     evaluation.setQuickStats(stats);
 
-    log.info("Finished quick stats step.");
+    logger.info("Finished quick stats step.");
   }
 
   private JsonObject buildStatsFor(Report report, ToDoubleFunction<Report.Entry> mapper) {

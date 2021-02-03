@@ -1,9 +1,10 @@
-package de.fleigm.ptmm;
+package de.fleigm.ptmm.feeds;
 
 import com.conveyal.gtfs.GTFSFeed;
 import com.conveyal.gtfs.model.Route;
 import com.conveyal.gtfs.model.Stop;
 import com.conveyal.gtfs.model.Trip;
+import de.fleigm.ptmm.Pattern;
 
 import java.nio.file.Path;
 import java.util.List;
@@ -11,63 +12,91 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
- * This wrapper class is required for injecting a gtfs feed.
- * The CDI proxy does not work with the public fields of the GTFSFeed class.
+ * Wrapper class for conveyals GTFSFeed that provides some convenient methods.
  */
 public class TransitFeed {
 
   private final GTFSFeed feed;
 
-  public TransitFeed(String file) {
-   this(GTFSFeed.fromFile(file));
-  }
-
-
-
-  public TransitFeed(GTFSFeed gtfsFeed) {
-    this.feed = gtfsFeed;
-  }
-
+  /**
+   * Create TransitFeed and load zipped GTFS file.
+   *
+   * @param gtfsFeed path to GTFS feed
+   */
   public TransitFeed(Path gtfsFeed) {
     this(gtfsFeed.toString());
   }
 
+  /**
+   * @see TransitFeed#TransitFeed(Path)
+   */
+  public TransitFeed(String file) {
+    this(GTFSFeed.fromFile(file));
+  }
+
+  /**
+   * Create a TransitFeed from a given {@link GTFSFeed}.
+   *
+   * @param gtfsFeed GTFS feed.
+   */
+  public TransitFeed(GTFSFeed gtfsFeed) {
+    this.feed = gtfsFeed;
+  }
+
+  /**
+   * @return original GTFSFeed
+   * @see GTFSFeed
+   */
   public GTFSFeed internal() {
     return feed;
   }
 
+  /**
+   * @return routes
+   */
   public Map<String, Route> routes() {
     return feed.routes;
   }
 
+  /**
+   * @return all bus routes (route_type 3)
+   */
   public Map<String, Route> busRoutes() {
     return feed.routes.entrySet().stream()
         .filter(entry -> entry.getValue().route_type == 3)
         .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
   }
 
-  public Map<String, Trip> getTripsForRoute(Route route) {
-    return feed.trips.values().stream()
-        .filter(trip -> trip.route_id.equals(route.route_id))
-        .collect(Collectors.toMap(trip -> trip.trip_id, trip -> trip));
-  }
-
+  /**
+   * Get route of a given trip.
+   *
+   * @param tripId trip.
+   * @return route.
+   */
   public Route getRouteForTrip(String tripId) {
     return feed.routes.get(feed.trips.get(tripId).route_id);
   }
 
+  /**
+   * @return trips.
+   */
   public Map<String, Trip> trips() {
     return feed.trips;
   }
 
-  public List<String> getOrderedStopIdsForTrip(Trip trip) {
-    return feed.getOrderedStopListForTrip(trip.trip_id);
-  }
-
+  /**
+   * @see TransitFeed#getOrderedStopsForTrip(String)
+   */
   public List<Stop> getOrderedStopsForTrip(Trip trip) {
     return getOrderedStopsForTrip(trip.trip_id);
   }
 
+  /**
+   * Get the ordered stops if a given trip.
+   *
+   * @param tripId id.
+   * @return ordered stops.
+   */
   public List<Stop> getOrderedStopsForTrip(String tripId) {
     return feed.getOrderedStopListForTrip(tripId)
         .stream()
@@ -75,6 +104,12 @@ public class TransitFeed {
         .collect(Collectors.toList());
   }
 
+  /**
+   * Find all patterns of a given route.
+   *
+   * @param route route.
+   * @return patterns of given route.
+   */
   public List<Pattern> findPatterns(Route route) {
     List<Trip> trips = trips().values().stream()
         .filter(trip -> trip.route_id.equals(route.route_id))

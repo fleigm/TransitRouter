@@ -11,6 +11,10 @@ import lombok.experimental.Accessors;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * A pattern combines all trips of a route that visit the same stations in the same sequence.
+ * During shape generation instead of generating one shape per trip we generate only one per pattern.
+ */
 @Data
 @Accessors(fluent = true)
 public class Pattern {
@@ -18,6 +22,9 @@ public class Pattern {
   private final List<Stop> stops;
   private final List<Trip> trips;
 
+  /**
+   * @return ordered stops of this pattern as observations
+   */
   public List<Observation> observations() {
     return stops.stream()
         .map(stop -> new GHPoint(stop.stop_lat, stop.stop_lon))

@@ -1,6 +1,7 @@
 package de.fleigm.ptmm.util;
 
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -9,8 +10,8 @@ import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
-@Slf4j
 public final class ValidateGtfsFeed {
+  private static final Logger logger = LoggerFactory.getLogger(ValidateGtfsFeed.class);
 
   private static final List<String> REQUIRED_FILES = List.of(
       "agency.txt",
@@ -40,6 +41,13 @@ public final class ValidateGtfsFeed {
       "attributions.txt"
   );
 
+  /**
+   * Check if a given GTFS zip file contains only files defined in the GTFS specification and
+   * contains all required files.
+   *
+   * @param path to GTFS zip file
+   * @return if the feed is valid.
+   */
   public static boolean validate(Path path) {
     try (ZipFile archive = new ZipFile(path.toFile())) {
       List<String> entries = archive.stream().map(ZipEntry::getName).collect(Collectors.toList());
@@ -50,7 +58,7 @@ public final class ValidateGtfsFeed {
 
       return entries.containsAll(REQUIRED_FILES);
     } catch (IOException e) {
-      log.error("GTFS feed validation failed.", e);
+      logger.error("GTFS feed validation failed.", e);
       return false;
     }
   }

@@ -4,12 +4,25 @@ import com.graphhopper.util.DistanceCalc;
 
 import java.util.Collection;
 
+/**
+ * This exception is thrown if no path could be found between
+ * any two candidates of two observations.
+ */
 public class BrokenSequenceException extends RuntimeException {
 
   public BrokenSequenceException(String message) {
     super(message);
   }
 
+  /**
+   * Create BrokenSequenceException.
+   *
+   * @param timeStepCounter at which step we could not find any path
+   * @param prevTimeStep    previous time step
+   * @param timeStep        current time step
+   * @param distanceCalc    distance calc
+   * @return BrokenSequenceException
+   */
   public static BrokenSequenceException create(int timeStepCounter,
                                                ObservationWithCandidates prevTimeStep,
                                                ObservationWithCandidates timeStep,

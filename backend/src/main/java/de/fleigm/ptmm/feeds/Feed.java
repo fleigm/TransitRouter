@@ -1,6 +1,5 @@
 package de.fleigm.ptmm.feeds;
 
-import de.fleigm.ptmm.TransitFeed;
 import de.fleigm.ptmm.util.Unzip;
 import de.fleigm.ptmm.util.ValidateGtfsFeed;
 import lombok.Data;
@@ -14,6 +13,11 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
+/**
+ * This class represent stored GTFS feed.
+ * The feed is stored as zip (for {@link com.conveyal.gtfs.GTFSFeed})
+ * and unzip (for {@link de.fleigm.ptmm.eval.process.Shapevl}).
+ */
 @Data
 public class Feed {
   private final Path path;
@@ -23,6 +27,13 @@ public class Feed {
     this.path = path;
   }
 
+  /**
+   * Store zipped GTFS feed and unzip it.
+   *
+   * @param path zip file storage path (must include file name eg. gtfs.zip).
+   * @param feed input stream of the zipped GTFS feed.
+   * @return Feed.
+   */
   public static Feed create(Path path, InputStream feed) {
     try {
       if (Files.exists(path)) {
@@ -44,6 +55,13 @@ public class Feed {
     return new Feed(path);
   }
 
+  /**
+   * Store a GTFS feed and unzip it.
+   *
+   * @param path        zip file storage path (must include file name eg. gtfs.zip).
+   * @param transitFeed GTFS feed.
+   * @return Feed.
+   */
   public static Feed createFromTransitFeed(Path path, TransitFeed transitFeed) {
     try {
       transitFeed.internal().toFile(path.toString());
@@ -54,10 +72,9 @@ public class Feed {
     }
   }
 
-  public static Feed load(Path path) {
-    return new Feed(path);
-  }
-
+  /**
+   * @return path to GTFS feed folder (for {@link de.fleigm.ptmm.eval.process.Shapevl}).
+   */
   public Path getFolder() {
     return Path.of(FilenameUtils.removeExtension(path.toString()));
   }

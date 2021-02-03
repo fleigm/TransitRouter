@@ -7,6 +7,9 @@ import java.time.Duration;
 import java.util.Map;
 
 
+/**
+ * Contains evaluation data of a generated GTFS feed.
+ */
 @Data
 public class EvaluationExtension {
 

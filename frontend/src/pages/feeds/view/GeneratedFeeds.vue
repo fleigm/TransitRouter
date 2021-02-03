@@ -32,6 +32,7 @@
                 <el-table ref="finishedFeedsTable"
                           :data="sortedFinishedFeeds"
                           size="mini"
+                          height="440"
                           @selection-change="selectionChanged">
                   <el-table-column type="selection" width="30"></el-table-column>
                   <el-table-column prop="name" label="Name">

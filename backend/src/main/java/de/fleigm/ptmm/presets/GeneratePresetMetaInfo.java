@@ -1,8 +1,8 @@
 package de.fleigm.ptmm.presets;
 
 import com.conveyal.gtfs.GTFSFeed;
-import de.fleigm.ptmm.TransitFeed;
 import de.fleigm.ptmm.events.Created;
+import de.fleigm.ptmm.feeds.TransitFeed;
 import de.fleigm.ptmm.feeds.TransitFeedService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,6 +14,9 @@ import java.util.ArrayList;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+/**
+ * Generate {@link FeedDetails} for the GTFS feed of a newly created {@link Preset}.
+ */
 @ApplicationScoped
 public class GeneratePresetMetaInfo {
   private static final Logger logger = LoggerFactory.getLogger(GeneratePresetMetaInfo.class);
@@ -24,6 +27,12 @@ public class GeneratePresetMetaInfo {
   @Inject
   PresetRepository presetRepository;
 
+  /**
+   * Generate {@link FeedDetails} for the GTFS feed of a newly created {@link Preset}.
+   * This is done async.
+   *
+   * @param preset newly created preset
+   */
   public void run(@ObservesAsync @Created Preset preset) {
     TransitFeed transitFeed = transitFeedService.get(preset.getFeed().getPath());
     GTFSFeed feed = transitFeed.internal();

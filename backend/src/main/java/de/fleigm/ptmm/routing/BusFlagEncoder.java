@@ -18,7 +18,8 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- *
+ * Vehicle profile optimized for public transport via bus.
+ * This is based on the {@link com.graphhopper.routing.util.CarFlagEncoder} from GraphHopper.
  */
 public class BusFlagEncoder extends AbstractFlagEncoder {
   protected final Map<String, Integer> trackTypeSpeedMap = new HashMap<>();
@@ -33,10 +34,6 @@ public class BusFlagEncoder extends AbstractFlagEncoder {
    * http://wiki.openstreetmap.org/wiki/OSM_tags_for_routing/Maxspeed
    */
   protected final Map<String, Integer> defaultSpeedMap = new HashMap<>();
-
-  public BusFlagEncoder() {
-    this(8, 1, 0);
-  }
 
   public BusFlagEncoder(PMap properties) {
     this(properties.getInt("speed_bits", 8),
@@ -135,7 +132,7 @@ public class BusFlagEncoder extends AbstractFlagEncoder {
     speedDefault = defaultSpeedMap.get("secondary");
   }
 
-  public BusFlagEncoder setSpeedTwoDirections(boolean value) {
+  private BusFlagEncoder setSpeedTwoDirections(boolean value) {
     speedTwoDirections = value;
     return this;
   }

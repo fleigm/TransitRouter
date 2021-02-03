@@ -4,6 +4,7 @@ import com.conveyal.gtfs.GTFSFeed;
 import com.conveyal.gtfs.model.Route;
 import com.conveyal.gtfs.model.ShapePoint;
 import com.conveyal.gtfs.model.Trip;
+import de.fleigm.ptmm.feeds.TransitFeed;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.mapdb.Fun;

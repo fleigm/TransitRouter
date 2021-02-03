@@ -52,24 +52,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
-/**
- * This class matches real world GPX entries to the digital road network stored
- * in GraphHopper. The Viterbi algorithm is used to compute the most likely
- * sequence of map matching candidates. The Viterbi algorithm takes into account
- * the distance between GPX entries and map matching candidates as well as the
- * routing distances between consecutive map matching candidates.
- * <p>
- * <p>
- * See http://en.wikipedia.org/wiki/Map_matching and Newson, Paul, and John
- * Krumm. "Hidden Markov map matching through noise and sparseness." Proceedings
- * of the 17th ACM SIGSPATIAL International Conference on Advances in Geographic
- * Information Systems. ACM, 2009.
- *
- * @author Peter Karich
- * @author Michael Zilske
- * @author Stefan Holder
- * @author kodonnell
- */
 public class DefaultTransitRouter implements TransitRouter {
   private static final String DEFAULT_PROFILE = "bus_custom_shortest";
 

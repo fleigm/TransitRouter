@@ -6,7 +6,7 @@ import com.graphhopper.routing.Path;
 import java.util.HashMap;
 import java.util.Map;
 
-public class HMMStep {
+class HMMStep {
 
   private final Map<DirectedCandidate, Double> emissionProbabilities;
   private final Map<Transition<DirectedCandidate>, Double> transitionProbabilities;

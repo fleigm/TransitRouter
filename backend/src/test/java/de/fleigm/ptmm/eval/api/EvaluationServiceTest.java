@@ -1,6 +1,5 @@
 package de.fleigm.ptmm.eval.api;
 
-import de.fleigm.ptmm.eval.Evaluation;
 import de.fleigm.ptmm.eval.EvaluationExtension;
 import de.fleigm.ptmm.eval.GeneratedFeedInfo;
 import de.fleigm.ptmm.eval.Parameters;
@@ -51,9 +50,9 @@ public class EvaluationServiceTest {
     assertEquals(Status.FINISHED, info.getStatus());
 
     assertTrue(Files.isDirectory(info.getFileStoragePath()));
-    assertTrue(Files.isDirectory(info.getFileStoragePath().resolve(Evaluation.ORIGINAL_GTFS_FOLDER)));
+    assertTrue(Files.isDirectory(info.getFileStoragePath().resolve(GeneratedFeedInfo.ORIGINAL_GTFS_FOLDER)));
     assertTrue(Files.isDirectory(info.getFileStoragePath().resolve(GeneratedFeedInfo.GENERATED_GTFS_FOLDER)));
-    assertTrue(Files.exists(info.getFileStoragePath().resolve(Evaluation.ORIGINAL_GTFS_FEED)));
+    assertTrue(Files.exists(info.getFileStoragePath().resolve(GeneratedFeedInfo.ORIGINAL_GTFS_FEED)));
     assertTrue(Files.exists(info.getFileStoragePath().resolve(GeneratedFeedInfo.GENERATED_GTFS_FEED)));
     assertTrue(Files.exists(info.getFileStoragePath().resolve(EvaluationExtension.SHAPEVL_REPORT)));
   }

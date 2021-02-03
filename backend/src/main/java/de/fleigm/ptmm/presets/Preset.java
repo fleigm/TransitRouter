@@ -12,6 +12,9 @@ import lombok.NoArgsConstructor;
 
 import java.nio.file.Path;
 
+/**
+ * Preset of a GTFS feed that allow the generation and comparison of new GTFS feeds.
+ */
 @Data
 @Builder
 @AllArgsConstructor

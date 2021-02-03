@@ -17,6 +17,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+/**
+ * Contains all information of a generated GTFS feed.
+ */
 @Data
 @Builder
 @NoArgsConstructor
@@ -26,6 +29,8 @@ public class GeneratedFeedInfo extends Entity implements HasExtensions {
 
   public static final String GENERATED_GTFS_FEED = "gtfs.generated.zip";
   public static final String GENERATED_GTFS_FOLDER = "gtfs.generated";
+  public static final String ORIGINAL_GTFS_FEED = "gtfs.original.zip";
+  public static final String ORIGINAL_GTFS_FOLDER = "gtfs.original";
 
   private String name;
   private Parameters parameters;

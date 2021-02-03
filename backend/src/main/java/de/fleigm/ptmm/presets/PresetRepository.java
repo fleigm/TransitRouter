@@ -32,10 +32,19 @@ public class PresetRepository extends Repository<Preset> {
     return Preset.class;
   }
 
+  /**
+   * Find all generated feeds of a given preset.
+   *
+   * @param preset preset.
+   * @return generated feeds of preset.
+   */
   public List<GeneratedFeedInfo> generatedFeedsFromPreset(Preset preset) {
     return generatedFeedsFromPreset(preset.getId());
   }
 
+  /**
+   * @see PresetRepository#generatedFeedsFromPreset(Preset)
+   */
   public List<GeneratedFeedInfo> generatedFeedsFromPreset(UUID id) {
     return generatedFeeds.all()
         .stream()

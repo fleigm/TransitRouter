@@ -22,7 +22,12 @@ import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-
+/**
+ * Base repository for data access to entities.
+ * Entities are serialized to json and stored on the file system.
+ *
+ * @param <T> entity type.
+ */
 public abstract class Repository<T extends Entity> {
   private final static Logger logger = LoggerFactory.getLogger(Repository.class);
 
@@ -36,10 +41,21 @@ public abstract class Repository<T extends Entity> {
   protected Repository() {
   }
 
+  /**
+   * Create a new Repository and initialize it.
+   *
+   * @param storageLocation storage location.
+   */
   public Repository(@ConfigProperty(name = "app.storage") Path storageLocation) {
     init(storageLocation);
   }
 
+  /**
+   * Initialize entity repository.
+   * Ensures that the storage location exists and that all existing entities are loaded.
+   *
+   * @param storageLocation storage location.
+   */
   protected void init(Path storageLocation) {
     logger.info("init repo for {}", entityClass());
     this.storageLocation = storageLocation;
@@ -63,9 +79,13 @@ public abstract class Repository<T extends Entity> {
     }
   }
 
+  /**
+   * Persist entity to file and add it to the repository.
+   *
+   * @param entity entity to be saved.
+   */
   public void save(T entity) {
     try {
-      //entity.setStorageLocation(storageLocation);
       Files.createDirectories(entity.getFileStoragePath());
       Files.writeString(entity.getFileStoragePath().resolve(entityFileName), toJson(entity));
 
@@ -75,10 +95,23 @@ public abstract class Repository<T extends Entity> {
     }
   }
 
+  /**
+   * Find an entity by its id.
+   *
+   * @param id entity id
+   * @return optional entity.
+   */
   public Optional<T> find(UUID id) {
     return Optional.ofNullable(storage.get(id));
   }
 
+  /**
+   * Return an existing entity by its id or throw an {@link EntityNotFoundException}
+   * if no entity with the given id exists.
+   *
+   * @param id entity id
+   * @return existing entity
+   */
   public T findOrFail(UUID id) {
     T entity = storage.get(id);
 
@@ -89,14 +122,31 @@ public abstract class Repository<T extends Entity> {
     return entity;
   }
 
+  /**
+   * Return a new list of all entities in the repository.
+   *
+   * @return entities
+   */
   public List<T> all() {
     return new ArrayList<>(storage.values());
   }
 
+  /**
+   * Remove an entity from the repository and delete all its files.
+   * If the entity does not exists in the repository nothing happens.
+   *
+   * @param id entity to be deleted.
+   */
   public void delete(UUID id) {
     find(id).ifPresent(this::removeExistingEntity);
   }
 
+  /**
+   * Remove an entity from the repository and delete all its files.
+   * If the entity does not exists in the repository nothing happens.
+   *
+   * @param entity entity to be deleted.
+   */
   public void delete(T entity) {
     find(entity.getId()).ifPresent(this::removeExistingEntity);
   }
@@ -110,16 +160,36 @@ public abstract class Repository<T extends Entity> {
     }
   }
 
+  /**
+   * Serialize an given entity to json.
+   *
+   * @param entity entity to be serialized.
+   * @return json representation of entity.
+   */
   public String toJson(T entity) {
     return jsonb.toJson(entity);
   }
 
+  /**
+   * Create an entity of type T from json.
+   *
+   * @param jsonEntity json representation of entity.
+   * @return deserialized entity
+   */
   public T fromJson(String jsonEntity) {
     return jsonb.fromJson(jsonEntity, entityClass());
   }
 
+  /**
+   * @return entity type of the repository
+   */
   public abstract Class<T> entityClass();
 
+  /**
+   * Load and deserialize entities from file storage.
+   *
+   * @return deserialized entities.
+   */
   protected Map<UUID, T> loadFromDisk() {
     try {
       return Files.walk(storageLocation, 2)
@@ -132,6 +202,12 @@ public abstract class Repository<T extends Entity> {
     }
   }
 
+  /**
+   * Load json representation of a single entity from the file storage.
+   *
+   * @param path to entity file
+   * @return json representation of entity
+   */
   protected String loadEntityFile(Path path) {
     try {
       return Files.readString(path);

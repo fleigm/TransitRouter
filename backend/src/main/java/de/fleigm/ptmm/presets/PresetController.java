@@ -7,7 +7,6 @@ import de.fleigm.ptmm.events.CreatedQualifier;
 import de.fleigm.ptmm.events.Events;
 import de.fleigm.ptmm.feeds.Feed;
 import de.fleigm.ptmm.util.Helper;
-import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.jboss.resteasy.annotations.providers.multipart.MultipartForm;
 
 import javax.inject.Inject;
@@ -35,10 +34,6 @@ import java.util.stream.Collectors;
 @Path("presets")
 @Produces(MediaType.APPLICATION_JSON)
 public class PresetController {
-
-  @ConfigProperty(name = "app.storage")
-  java.nio.file.Path storagePath;
-
   @Inject
   Events events;
 

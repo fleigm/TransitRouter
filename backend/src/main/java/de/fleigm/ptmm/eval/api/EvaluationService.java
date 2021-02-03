@@ -1,7 +1,5 @@
 package de.fleigm.ptmm.eval.api;
 
-import de.fleigm.ptmm.DistanceUnit;
-import de.fleigm.ptmm.eval.Evaluation;
 import de.fleigm.ptmm.eval.GeneratedFeedInfo;
 import de.fleigm.ptmm.eval.GeneratedFeedRepository;
 import de.fleigm.ptmm.eval.Parameters;
@@ -43,14 +41,13 @@ public class EvaluationService {
             .candidateSearchRadius(request.getCandidateSearchRadius())
             .beta(request.getBeta())
             .profile(request.getProfile())
-            .distanceUnit(request.getDistanceUnit() != null ? request.getDistanceUnit() : DistanceUnit.METERS)
             .build())
         .status(Status.PENDING)
         .build();
 
     info.setOriginalFeed(
         Feed.create(
-            info.getFileStoragePath().resolve(Evaluation.ORIGINAL_GTFS_FEED),
+            info.getFileStoragePath().resolve(GeneratedFeedInfo.ORIGINAL_GTFS_FEED),
             request.getGtfsFeed()));
 
     generatedFeedRepository.save(info);

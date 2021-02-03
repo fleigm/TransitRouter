@@ -8,11 +8,29 @@ import java.nio.file.Path;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
+/**
+ * Helper class for unzipping files.
+ */
 public final class Unzip {
 
+  /**
+   * Unzip a given zip file to a given destination.
+   *
+   * @param source      file to unzip.
+   * @param destination folder.
+   * @throws IOException if the file cannot be unzipped.
+   */
   public static void apply(Path source, Path destination) throws IOException {
     apply(source.toString(), destination.toString());
   }
+
+  /**
+   * Unzip a given zip file to a given destination.
+   *
+   * @param source      file to unzip.
+   * @param destination folder.
+   * @throws IOException if the file cannot be unzipped.
+   */
   public static void apply(String source, String destination) throws IOException {
     byte[] buffer = new byte[1024];
     File destDir = new File(destination);

@@ -18,6 +18,12 @@ import java.util.stream.Collectors;
 
 public abstract class Helper {
 
+  /**
+   * Convert a given list of {@link Observation}s into a {@link PointList}.
+   *
+   * @param observations observations.
+   * @return pointlist of observations.
+   */
   public static PointList toPointList(List<Observation> observations) {
     PointList points = new PointList();
     for (var observation : observations) {
@@ -26,6 +32,14 @@ public abstract class Helper {
     return points;
   }
 
+  /**
+   * Add files as a zip archive to a given {@link OutputStream}.
+   * This is used to allow streaming download.
+   *
+   * @param output    output stream
+   * @param filePaths files to add
+   * @throws IOException if something goes wrong.
+   */
   public static void buildZipFile(OutputStream output, List<Path> filePaths) throws IOException {
     try (var archive = new ZipArchiveOutputStream(output)) {
       List<File> files = filePaths.stream().map(Path::toFile).collect(Collectors.toList());

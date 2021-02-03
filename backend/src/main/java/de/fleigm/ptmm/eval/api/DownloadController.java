@@ -1,7 +1,5 @@
 package de.fleigm.ptmm.eval.api;
 
-import de.fleigm.ptmm.eval.Evaluation;
-import de.fleigm.ptmm.eval.EvaluationExtension;
 import de.fleigm.ptmm.eval.GeneratedFeedInfo;
 import de.fleigm.ptmm.eval.GeneratedFeedRepository;
 import de.fleigm.ptmm.util.Helper;
@@ -22,13 +20,6 @@ import java.util.stream.Collectors;
 
 @Path("eval/{id}/download")
 public class DownloadController {
-  private static final String[] INCLUDED_FILES = new String[]{
-      Evaluation.INFO_FILE,
-      EvaluationExtension.SHAPEVL_REPORT,
-      Evaluation.ORIGINAL_GTFS_FEED,
-      GeneratedFeedInfo.GENERATED_GTFS_FEED,
-  };
-
   @Inject
   GeneratedFeedRepository generatedFeedRepository;
 

@@ -8,6 +8,9 @@ import lombok.Data;
 
 import java.util.List;
 
+/**
+ * Most likely route through a street graph given a list of observations.
+ */
 @Data
 @Builder
 @AllArgsConstructor

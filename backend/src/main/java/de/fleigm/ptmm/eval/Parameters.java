@@ -1,12 +1,14 @@
 package de.fleigm.ptmm.eval;
 
 import com.graphhopper.util.PMap;
-import de.fleigm.ptmm.DistanceUnit;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * Available parameters for shape generation of a GTFS feed.
+ */
 @Data
 @Builder
 @NoArgsConstructor
@@ -18,9 +20,6 @@ public class Parameters {
   private double beta;
   private boolean disableTurnCosts;
   private boolean useGraphHopperMapMatching;
-
-  @Builder.Default
-  private DistanceUnit distanceUnit = DistanceUnit.METERS;
 
   public static Parameters defaultParameters() {
     return Parameters.builder()

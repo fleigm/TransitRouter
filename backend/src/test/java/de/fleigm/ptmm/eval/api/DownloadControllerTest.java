@@ -1,6 +1,5 @@
 package de.fleigm.ptmm.eval.api;
 
-import de.fleigm.ptmm.eval.Evaluation;
 import de.fleigm.ptmm.eval.EvaluationExtension;
 import de.fleigm.ptmm.eval.GeneratedFeedInfo;
 import io.quarkus.test.junit.QuarkusTest;
@@ -88,8 +87,8 @@ public class DownloadControllerTest {
         .collect(Collectors.toList());
 
     assertTrue(fileNames.contains(GeneratedFeedInfo.GENERATED_GTFS_FEED));
-    assertTrue(fileNames.contains(Evaluation.ORIGINAL_GTFS_FEED));
-    assertTrue(fileNames.contains(Evaluation.INFO_FILE));
+    assertTrue(fileNames.contains(GeneratedFeedInfo.ORIGINAL_GTFS_FEED));
+    assertTrue(fileNames.contains("entity.json"));
     assertTrue(fileNames.contains(EvaluationExtension.SHAPEVL_REPORT));
   }
 

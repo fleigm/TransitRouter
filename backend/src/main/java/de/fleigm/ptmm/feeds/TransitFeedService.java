@@ -1,7 +1,6 @@
 package de.fleigm.ptmm.feeds;
 
 
-import de.fleigm.ptmm.TransitFeed;
 import io.quarkus.cache.CacheInvalidate;
 import io.quarkus.cache.CacheInvalidateAll;
 import io.quarkus.cache.CacheResult;
@@ -11,6 +10,9 @@ import org.slf4j.LoggerFactory;
 import javax.enterprise.context.ApplicationScoped;
 import java.nio.file.Path;
 
+/**
+ *
+ */
 @ApplicationScoped
 public class TransitFeedService {
 

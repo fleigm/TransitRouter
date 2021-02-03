@@ -10,6 +10,9 @@ import lombok.NoArgsConstructor;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Contains details of a GTFS feed.
+ */
 @Data
 @Builder
 @AllArgsConstructor

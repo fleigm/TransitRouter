@@ -13,7 +13,7 @@ import lombok.experimental.Accessors;
 @Builder
 @AllArgsConstructor
 @Accessors(fluent = true)
-public class DirectedCandidate {
+class DirectedCandidate {
   private final Observation observation;
   private final Snap snap;
   private final EdgeIteratorState outgoingEdge;
