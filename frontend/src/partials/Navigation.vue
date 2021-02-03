@@ -29,15 +29,11 @@ export default {
 
   data() {
     return {
-      navigation: [
-        {
-          name: 'Dashboard',
-          page: 'dashboard.index'
-        }, {
-          name: 'Feeds',
+      navigation: [{
+          name: 'feed presets',
           page: 'feeds.index',
         }, {
-          name: 'Evaluation',
+          name: 'generated feeds',
           page: 'evaluation.index'
         }, {
           name: 'Routing',
@@ -45,9 +41,6 @@ export default {
         }, {
           name: 'Candidate Finder',
           page: 'candidateFinder.index'
-        }, {
-          name: 'Wiki',
-          page: 'wiki.index',
         }
       ]
     }

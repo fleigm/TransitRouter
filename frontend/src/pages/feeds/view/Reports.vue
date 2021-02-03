@@ -1,5 +1,4 @@
 <script>
-import _ from 'lodash';
 import {bin} from "d3-array";
 import VAccuracyChart from "./AccuracyChart";
 
@@ -16,6 +15,7 @@ export default {
   render() {
     return this.$scopedSlots.default({
       reports: this.reports,
+      loading: this.loading,
       accuracyDataSets: this.accuracyDataSets,
       avgFrechetDistanceDataSets: this.avgFrechetDistanceDataSets,
       anDataSets: this.anDataSets,
@@ -106,7 +106,8 @@ export default {
             this.cache.push({id: feed.id, name: feed.name, entries: data.entries, color: feed._color})
           })
           .finally(() => {
-            _.remove(this.loading, idFilter)
+            const index = this.loading.indexOf(x => x.id === feed.id);
+            this.loading.splice(index, 1);
           });
     },
   },

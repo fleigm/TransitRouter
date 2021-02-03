@@ -1,10 +1,8 @@
-import Dashboard from '../pages/dashboard/Index'
 import CandidateFinder from "../pages/CandidateFinder";
 import EvaluationIndex from '../pages/evaluation/Index';
 import EvaluationView from '../pages/evaluation/view/Index';
 import EvaluationOverview from '../pages/evaluation/overview/Index';
 import RoutingIndex from '../pages/routing/Index';
-import WikiIndex from '../pages/wiki/Index';
 import FeedIndex from '../pages/feeds/Index';
 import FeedOverview from '../pages/feeds/overview/Index';
 import FeedView from '../pages/feeds/view/Index';
@@ -13,8 +11,9 @@ import FeedView from '../pages/feeds/view/Index';
 const routes = [
     {
         path: '/',
-        name: 'dashboard.index',
-        component: Dashboard,
+        redirect: {
+            name: 'feeds.index'
+        }
     }, {
         path: '/eval',
         component: EvaluationIndex,
@@ -47,11 +46,7 @@ const routes = [
         path: '/candidate-finder',
         name: 'candidateFinder.index',
         component: CandidateFinder,
-    }, {
-        path: '/wiki',
-        name: 'wiki.index',
-        component: WikiIndex,
-    }
+    },
 ]
 
 export default routes
