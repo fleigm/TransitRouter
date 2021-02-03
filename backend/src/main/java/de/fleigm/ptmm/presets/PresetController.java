@@ -6,6 +6,7 @@ import de.fleigm.ptmm.eval.api.EvaluationService;
 import de.fleigm.ptmm.events.CreatedQualifier;
 import de.fleigm.ptmm.events.Events;
 import de.fleigm.ptmm.feeds.Feed;
+import de.fleigm.ptmm.util.Helper;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.jboss.resteasy.annotations.providers.multipart.MultipartForm;
 
@@ -22,8 +23,12 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.StreamingOutput;
 import javax.ws.rs.core.UriInfo;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.util.Comparator;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -129,5 +134,22 @@ public class PresetController {
 
     return Response.ok(presets.generatedFeedsFromPreset(id)).build();
   }
+
+  @GET
+  @Path("{id}/download")
+  @Produces(MediaType.APPLICATION_OCTET_STREAM)
+  public Response download(@PathParam("id") UUID id) throws IOException {
+    Preset preset = presets.findOrFail(id);
+
+    List<java.nio.file.Path> files = Files.list(preset.getFileStoragePath())
+        .filter(path -> !Files.isDirectory(path))
+        .collect(Collectors.toList());
+
+    return Response
+        .ok((StreamingOutput) output -> Helper.buildZipFile(output, files))
+        .header("Content-Disposition", "attachment;filename=" + preset.getName() + ".zip")
+        .build();
+  }
+
 
 }

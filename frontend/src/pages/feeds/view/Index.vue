@@ -15,19 +15,13 @@
           </el-breadcrumb>
           <div v-if="!notFound && !loading">
             <v-generate-feed-dialog :preset="preset"></v-generate-feed-dialog>
-            <el-dropdown>
-              <el-button size="mini">
-                Download<i class="el-icon-arrow-down el-icon--right"></i>
-              </el-button>
-              <el-dropdown-menu slot="dropdown">
-                <el-dropdown-item>
-                  <el-link :underline="false" :href="downloadLinkGeneratedFeed">Generated GTFS Feed</el-link>
-                </el-dropdown-item>
-                <el-dropdown-item>
-                  <el-link :underline="false" :href="downloadLinkFull">All Files</el-link>
-                </el-dropdown-item>
-              </el-dropdown-menu>
-            </el-dropdown>
+
+            <el-button size="mini">
+              <el-link :underline="false" :href="downloadLink">
+                Download<i class="el-icon-download el-icon--right"></i>
+              </el-link>
+
+            </el-button>
 
             <el-popconfirm
                 cancel-button-text='No, Thanks'
@@ -53,6 +47,7 @@
 </template>
 
 <script>
+import Config from '../../../config';
 import PresetService from "../PresetService";
 import FeedDetails from "../overview/FeedDetails";
 import VGenerateFeedDialog from "./GenerateFeedDialog";
@@ -82,13 +77,9 @@ export default {
       return PresetFeeds.state
     },
 
-    downloadLinkFull() {
-      return `eval/${this.id}/download`;
+    downloadLink() {
+      return `${Config.apiEndpoint}/presets/${this.id}/download`;
     },
-
-    downloadLinkGeneratedFeed() {
-      return `eval/${this.id}/download/generated`;
-    }
   },
 
   methods: {

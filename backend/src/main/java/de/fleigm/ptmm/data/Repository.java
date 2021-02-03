@@ -79,6 +79,16 @@ public abstract class Repository<T extends Entity> {
     return Optional.ofNullable(storage.get(id));
   }
 
+  public T findOrFail(UUID id) {
+    T entity = storage.get(id);
+
+    if (entity == null) {
+      throw EntityNotFoundException.of(id, entityClass());
+    }
+
+    return entity;
+  }
+
   public List<T> all() {
     return new ArrayList<>(storage.values());
   }

@@ -45,6 +45,7 @@
 </template>
 
 <script>
+import Config from '../../../config';
 import VReportList from "./ReportList";
 import VFinishedView from "./FinishedView";
 import VFailedView from "./FailedView";
@@ -79,10 +80,10 @@ export default {
     },
 
     downloadLinkFull() {
-      return `eval/${this.id}/download`;
+      return `${Config.apiEndpoint}/eval/${this.id}/download`;
     },
     downloadLinkGeneratedFeed() {
-      return `eval/${this.id}/download/generated`;
+      return `${Config.apiEndpoint}/eval/${this.id}/download/generated`;
     }
   },
 
