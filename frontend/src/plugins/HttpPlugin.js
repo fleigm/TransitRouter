@@ -1,7 +1,8 @@
 import axios from "axios/index";
+import Config from "../config";
 
 export const http = axios.create( {
-    baseURL: 'http://localhost:8080',
+    baseURL: Config.apiEndpoint,
     crossdomain: true,
 });
 
