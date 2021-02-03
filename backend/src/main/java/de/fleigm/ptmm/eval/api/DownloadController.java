@@ -36,12 +36,12 @@ public class DownloadController {
   @Path("generated")
   @Produces(MediaType.APPLICATION_OCTET_STREAM)
   public Response downloadGeneratedFeed(@PathParam("id") UUID id) {
-    return generatedFeedRepository.find(id)
-        .map(info -> Response
+    GeneratedFeedInfo info = generatedFeedRepository.findOrFail(id);
+
+    return Response
             .ok(info.getFileStoragePath().resolve(GeneratedFeedInfo.GENERATED_GTFS_FEED).toFile())
             .header("Content-Disposition", "attachment;filename=" + info.getName() + "." + GeneratedFeedInfo.GENERATED_GTFS_FEED)
-            .build())
-        .orElse(Response.status(Response.Status.NOT_FOUND).build());
+            .build();
   }
 
   @GET

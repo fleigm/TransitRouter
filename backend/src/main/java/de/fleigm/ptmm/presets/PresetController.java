@@ -29,7 +29,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -102,15 +101,10 @@ public class PresetController {
   @Consumes(MediaType.APPLICATION_JSON)
   @Produces(MediaType.APPLICATION_JSON)
   public Response generateFeed(@PathParam("id") UUID id, @NotNull @Valid GenerateFeedRequest generateFeedRequest) {
-
-    Optional<Preset> preset = presets.find(id);
-
-    if (preset.isEmpty()) {
-      return Response.status(Response.Status.NOT_FOUND).build();
-    }
+    Preset preset = presets.findOrFail(id);
 
     EvaluationResponse evaluationResponse = evaluationService.createFromPreset(
-        preset.get(),
+        preset,
         generateFeedRequest.getName(),
         Parameters.builder()
             .sigma(generateFeedRequest.getSigma())
@@ -128,11 +122,11 @@ public class PresetController {
   @Path("{id}/generated-feeds")
   @Produces(MediaType.APPLICATION_JSON)
   public Response getGeneratedFeeds(@PathParam("id") UUID id) {
-    if (presets.find(id).isEmpty()) {
-      return Response.status(Response.Status.NOT_FOUND).build();
-    }
-
-    return Response.ok(presets.generatedFeedsFromPreset(id)).build();
+    return presets.find(id)
+        .map(presets::generatedFeedsFromPreset)
+        .map(Response::ok)
+        .orElse(Response.status(Response.Status.NOT_FOUND))
+        .build();
   }
 
   @GET

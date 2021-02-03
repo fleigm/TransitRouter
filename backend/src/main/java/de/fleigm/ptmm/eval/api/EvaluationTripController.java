@@ -30,7 +30,6 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -87,13 +86,13 @@ public class EvaluationTripController {
                         @QueryParam("search") @DefaultValue("") String search,
                         @QueryParam("sort") @DefaultValue("") String sort) {
 
-    Optional<GeneratedFeedInfo> info = generatedFeedRepository.find(id);
+    GeneratedFeedInfo info = generatedFeedRepository.findOrFail(id);
 
-    if (info.isEmpty() || info.get().getStatus() != Status.FINISHED) {
+    if (info.getStatus() != Status.FINISHED) {
       return Response.status(Response.Status.NOT_FOUND).build();
     }
 
-    EvaluationExtension evaluation = info.get().getExtension(EvaluationExtension.class).get();
+    EvaluationExtension evaluation = info.getExtension(EvaluationExtension.class).get();
     Report report = reportService.get(evaluation.getReport());
     Stream<Report.Entry> entryQueryStream = report.entries().stream();
 
@@ -111,7 +110,7 @@ public class EvaluationTripController {
       }
     }
 
-    TransitFeed transitFeed = transitFeedService.get(info.get().getGeneratedFeed().getPath());
+    TransitFeed transitFeed = transitFeedService.get(info.getGeneratedFeed().getPath());
 
     List<Report.Entry> entries = entryQueryStream.collect(Collectors.toList());
 

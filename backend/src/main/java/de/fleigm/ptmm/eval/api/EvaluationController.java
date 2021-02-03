@@ -18,7 +18,6 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -58,21 +57,19 @@ public class EvaluationController {
   @Produces(MediaType.APPLICATION_JSON)
   public Response show(@PathParam("id") UUID id) {
     return generatedFeedRepository.find(id)
-        .map(info -> Response.ok(info).build())
-        .orElse(Response.status(Response.Status.NOT_FOUND).build());
+        .map(Response::ok)
+        .orElse(Response.status(Response.Status.NOT_FOUND))
+        .build();
   }
 
   @DELETE
   @Path("{id}")
   @Produces(MediaType.APPLICATION_JSON)
   public Response delete(@PathParam("id") UUID id) {
-    Optional<GeneratedFeedInfo> feedInfo = generatedFeedRepository.find(id);
+    GeneratedFeedInfo feedInfo = generatedFeedRepository.findOrFail(id);
 
-    if (feedInfo.isEmpty()) {
-      return Response.noContent().build();
-    }
 
-    if (feedInfo.get().isPending()) {
+    if (feedInfo.isPending()) {
       return Response.status(Response.Status.CONFLICT)
           .entity(Json.createObjectBuilder()
               .add("message", "Can only delete finished or failed evaluations.")
