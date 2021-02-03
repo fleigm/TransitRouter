@@ -9,15 +9,24 @@ The goal of this project is to automatically generate shape files for bus routes
 - osm file for Baden-Württemberg: [download](http://download.geofabrik.de/europe/germany/baden-wuerttemberg-latest.osm.pbf)
 - GTFS Feed Stuttgart: [download](https://www.openvvs.de/dataset/e66f03e4-79f2-41d0-90f1-166ca609e491/resource/bfbb59c7-767c-4bca-bbb2-d8d32a3e0378/download/vvs_gtfs.zip)
 
- Set the correct paths in **backend/src/main/resources/application.properties**
+Set the *app.gh.osm* property to your osm file path. This can be done in application.properties file or via env variables.
  
 ## Development
-run `npm run watch` inside the frontend module. The compiled code is copied into the backend resource folder automatically.
+run `.\mvnw clean quarkus:dev` to start the quarkus backend. The API is available via localhost:8080
 
-run `.\mvnw quarkus:dev` in the root folder
+run `npm run hot` inside the frontend module to. You can visit the site via localhost:9000
+Inside *frontend/src/Config.js* set *apiEndpoint* to http://localhost:8080
+
+
+## Production
+The frontend will is served by the quarkus backend.
+
+Inside *frontend/src/Config.js* set *apiEndpoint* to an empty string and run `npm run prod` inside the frontend module. This compiles and copies all files inside the backend resource folder.
+
+run `\.mvnw clean package` to compile the project
+
 
 ## Docker
-
 compile project: `./mvnw clean package -Dmaven.test.skip=true`
 
 ### with docker-compose
@@ -30,4 +39,6 @@ run `docker-compose build` and `docker-compose up -d`
 
 `
 sudo docker run -i --rm -p 8080:8080 --name <name> <name>`
+
+make sure to set the env variables (see docker-compose.yaml)
  

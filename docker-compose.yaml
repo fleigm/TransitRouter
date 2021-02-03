@@ -6,11 +6,11 @@ services:
       context: .
       dockerfile: Dockerfile
     environment:
-      APP_RESOURCES: '/app/storage/resources'
+      APP_GH_OSM: '/app/resources/bw.osm.pbf'
       APP_STORAGE: '/app/storage'
       EVALUATION_TOOL: '/app/shapevl'
-      ROUTING_GRAPHHOPPER_CLEAN: 'false'
     volumes:
-      - /home/michi-pc/uni/bachelor/project/dr:/app/storage
+      #- /home/michi-pc/uni/bachelor/project/dr:/app/storage
+      - /home/michi-pc/uni/bachelor/project/resources:/app/resources
     ports:
       - 8080:8080

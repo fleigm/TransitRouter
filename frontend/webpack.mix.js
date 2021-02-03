@@ -17,6 +17,10 @@ mix.setPublicPath('dist/')
     .copyDirectory('fonts', dist + '/fonts')
     .copyDirectory('images', dist + '/images');
 
+if (mix.inProduction()) {
+    mix.copyDirectory(dist, backendAssetFolder);
+}
+
 mix.browserSync({
     proxy: 'localhost:9000',
     injectChanges: true,
