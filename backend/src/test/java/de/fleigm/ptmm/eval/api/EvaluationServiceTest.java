@@ -9,15 +9,12 @@ import de.fleigm.ptmm.presets.Preset;
 import io.quarkus.test.junit.QuarkusTest;
 import io.restassured.response.Response;
 import org.apache.commons.io.FileUtils;
-import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.junit.jupiter.api.Test;
 
 import javax.inject.Inject;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.concurrent.ExecutionException;
 
 import static io.restassured.RestAssured.given;
@@ -29,26 +26,8 @@ public class EvaluationServiceTest {
   @Inject
   EvaluationService evaluationService;
 
-  @ConfigProperty(name = "evaluation.folder")
-  String evaluationFolder;
-
-  //@BeforeEach
-  void cleanUp() throws IOException {
-    FileUtils.deleteDirectory(Paths.get(evaluationFolder, "happy_path").toFile());
-  }
-
-  private void deleteFolder(String name) {
-    try {
-      FileUtils.deleteDirectory(Paths.get(evaluationFolder, name).toFile());
-    } catch (IOException e) {
-      throw new RuntimeException(e);
-    }
-  }
-
   @Test
   void happy_path() throws IOException, ExecutionException, InterruptedException {
-    deleteFolder("happy_path");
-
     File testFeed = new File(getClass().getClassLoader().getResource("test_feed.zip").getFile());
 
     CreateEvaluationRequest request = CreateEvaluationRequest.builder()
@@ -81,8 +60,6 @@ public class EvaluationServiceTest {
 
   @Test
   void handle_failure() throws IOException, ExecutionException, InterruptedException {
-    deleteFolder("test_handle_failure");
-
     File testFeed = new File(getClass().getClassLoader().getResource("test_feed.zip").getFile());
 
     CreateEvaluationRequest request = CreateEvaluationRequest.builder()
@@ -119,7 +96,8 @@ public class EvaluationServiceTest {
 
     assertThrows(IllegalArgumentException.class, () -> evaluationService.createEvaluation(request));
 
-    assertFalse(Files.exists(Path.of(evaluationFolder, "abort_and_remove_folder_if_gtfs_feed_is_invalid")));
+    //assertFalse(Files.exists(Path.of(evaluationFolder, "abort_and_remove_folder_if_gtfs_feed_is_invalid")));
+    assertFalse(true);
   }
 
   @Test

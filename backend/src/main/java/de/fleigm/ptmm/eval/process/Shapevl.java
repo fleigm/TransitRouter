@@ -10,7 +10,7 @@ import java.nio.file.Path;
 public class Shapevl {
   private final Path shapevlCommandPath;
 
-  public Shapevl(@ConfigProperty(name = "evaluation.tool") Path shapevlCommandPath) {
+  public Shapevl(@ConfigProperty(name = "app.evaluation-tool") Path shapevlCommandPath) {
     this.shapevlCommandPath = shapevlCommandPath;
   }
 

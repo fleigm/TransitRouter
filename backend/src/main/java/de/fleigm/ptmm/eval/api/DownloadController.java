@@ -8,7 +8,6 @@ import org.apache.commons.compress.archivers.ArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream;
 import org.apache.commons.io.IOUtils;
-import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 import javax.inject.Inject;
 import javax.ws.rs.GET;
@@ -39,9 +38,6 @@ public class DownloadController {
 
   @Inject
   GeneratedFeedRepository generatedFeedRepository;
-
-  @ConfigProperty(name = "evaluation.folder")
-  String evaluationFolder;
 
   @GET
   @Path("generated")

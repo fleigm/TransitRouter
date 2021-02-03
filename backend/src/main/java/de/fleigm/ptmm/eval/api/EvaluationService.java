@@ -23,10 +23,7 @@ import java.util.concurrent.CompletableFuture;
 @ApplicationScoped
 public class EvaluationService {
 
-  @ConfigProperty(name = "evaluation.folder")
-  String evaluationFolder;
-
-  @ConfigProperty(name = "evaluation.tool")
+  @ConfigProperty(name = "app.evaluation-tool")
   String evaluationTool;
 
   @ConfigProperty(name = "app.storage")
@@ -61,7 +58,6 @@ public class EvaluationService {
     EvaluationProcess process = new EvaluationProcess(
         transitRouterFactory,
         generatedFeedRepository,
-        evaluationFolder,
         evaluationTool);
 
     return new EvaluationResponse(info, CompletableFuture.runAsync(() -> process.run(info)));
@@ -87,7 +83,6 @@ public class EvaluationService {
     EvaluationProcess process = new EvaluationProcess(
         transitRouterFactory,
         generatedFeedRepository,
-        evaluationFolder,
         evaluationTool);
 
     return new EvaluationResponse(info, CompletableFuture.runAsync(() -> process.run(info)));

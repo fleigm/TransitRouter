@@ -15,12 +15,6 @@ import java.util.function.ToDoubleFunction;
 @Slf4j
 public class GenerateQuickStats {
 
-  private final String evaluationFolder;
-
-  public GenerateQuickStats(String evaluationFolder) {
-    this.evaluationFolder = evaluationFolder;
-  }
-
   public void run(GeneratedFeedInfo info) {
     log.info("Start quick stats step.");
 

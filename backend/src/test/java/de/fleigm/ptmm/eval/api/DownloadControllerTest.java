@@ -9,14 +9,12 @@ import io.restassured.response.Response;
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream;
 import org.apache.commons.io.FileUtils;
-import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import javax.inject.Inject;
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -32,8 +30,6 @@ public class DownloadControllerTest {
   @Inject
   EvaluationService evaluationService;
 
-  @ConfigProperty(name = "evaluation.folder")
-  String evaluationFolder;
 
   private GeneratedFeedInfo info;
 
@@ -43,7 +39,6 @@ public class DownloadControllerTest {
       return;
     }
 
-    FileUtils.deleteDirectory(Paths.get(evaluationFolder, "download_test").toFile());
     File testFeed = new File(getClass().getClassLoader().getResource("test_feed.zip").getFile());
 
     CreateEvaluationRequest request = CreateEvaluationRequest.builder()

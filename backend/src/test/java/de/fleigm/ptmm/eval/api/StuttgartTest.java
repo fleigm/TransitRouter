@@ -31,10 +31,7 @@ public class StuttgartTest {
   @ConfigProperty(name = "user.home")
   String homeDir;
 
-  @ConfigProperty(name = "evaluation.folder")
-  String evaluationFolder;
-
-  @ConfigProperty(name = "evaluation.tool")
+  @ConfigProperty(name = "app.evaluation-tool")
   String evaluationTool;
 
   @Inject
@@ -45,7 +42,6 @@ public class StuttgartTest {
 
   @Test
   void run_evaluation() throws IOException, ExecutionException, InterruptedException {
-    FileUtils.deleteDirectory(Paths.get(evaluationFolder, "st_complete").toFile());
     File testFeed = Paths.get(homeDir, "/uni/bachelor/project/files/stuttgart.zip").toFile();
 
     CreateEvaluationRequest request = CreateEvaluationRequest.builder()
@@ -60,7 +56,6 @@ public class StuttgartTest {
     EvaluationService evaluationService = new EvaluationService();
     evaluationService.generatedFeedRepository = generatedFeedRepository;
     evaluationService.evaluationTool = evaluationTool;
-    evaluationService.evaluationFolder = evaluationFolder;
     evaluationService.transitRouterFactory = parameters -> new GraphHopperTransitRouter(graphHopper, parameters);
 
     EvaluationResponse result = evaluationService.createEvaluation(request);
@@ -73,7 +68,6 @@ public class StuttgartTest {
   @ParameterizedTest
   @ValueSource(strings = {"bus_fastest", "bus_fastest_turn", "bus_shortest", "bus_shortest_turn"})
   void run_all_evaluations(String profile) throws IOException, ExecutionException, InterruptedException {
-    FileUtils.deleteDirectory(Paths.get(evaluationFolder, profile).toFile());
     File testFeed = Paths.get(homeDir, "/uni/bachelor/project/files/stuttgart_bus_only.zip").toFile();
 
     CreateEvaluationRequest request = CreateEvaluationRequest.builder()
@@ -113,7 +107,6 @@ public class StuttgartTest {
     EvaluationService service = new EvaluationService();
     service.generatedFeedRepository = generatedFeedRepository;
     service.evaluationTool = evaluationTool;
-    service.evaluationFolder = evaluationFolder;
     service.transitRouterFactory = parameters -> new GraphHopperTransitRouter(graphHopper, parameters);
 
     EvaluationResponse result = service.createEvaluation(request);
@@ -150,7 +143,6 @@ public class StuttgartTest {
     EvaluationService service = new EvaluationService();
     service.generatedFeedRepository = generatedFeedRepository;
     service.evaluationTool = evaluationTool;
-    service.evaluationFolder = evaluationFolder;
     service.transitRouterFactory = parameters -> new GraphHopperTransitRouter(graphHopper, parameters);
 
     EvaluationResponse ptmmResult = evaluationService.createEvaluation(ptmmRequest);
@@ -182,7 +174,6 @@ public class StuttgartTest {
     EvaluationService service = new EvaluationService();
     service.generatedFeedRepository = generatedFeedRepository;
     service.evaluationTool = evaluationTool;
-    service.evaluationFolder = evaluationFolder;
     service.transitRouterFactory = parameters -> new GraphHopperTransitRouter(graphHopper, parameters);
 
     EvaluationResponse result = service.createEvaluation(request);

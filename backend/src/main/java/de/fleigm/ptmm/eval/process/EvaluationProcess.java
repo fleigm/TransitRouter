@@ -21,13 +21,12 @@ public class EvaluationProcess {
 
   public EvaluationProcess(TransitRouterFactory transitRouterFactory,
                            GeneratedFeedRepository generatedFeedRepository,
-                           String evaluationFolder,
                            String evaluationTool) {
 
     this.generatedFeedRepository = generatedFeedRepository;
     this.feedGenerationStep = new FeedGenerationStep(transitRouterFactory);
     this.feedEvaluationStep = new FeedEvaluationStep(Path.of(evaluationTool));
-    this.generateQuickStats = new GenerateQuickStats(evaluationFolder);
+    this.generateQuickStats = new GenerateQuickStats();
   }
 
   public void run(GeneratedFeedInfo info) {

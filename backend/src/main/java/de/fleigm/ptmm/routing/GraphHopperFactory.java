@@ -22,13 +22,13 @@ public class GraphHopperFactory {
   @Startup
   @ApplicationScoped
   public GraphHopper create(
-      @ConfigProperty(name = "routing.graphHopper.osm-file") String osmFile,
-      @ConfigProperty(name = "routing.graphHopper.location") String storagePath,
-      @ConfigProperty(name = "routing.graphHopper.clean") boolean cleanTemporaryFiles) {
+      @ConfigProperty(name = "app.gh.osm") Path osmFile,
+      @ConfigProperty(name = "app.storage") Path storagePath,
+      @ConfigProperty(name = "app.gh.clean") boolean cleanTemporaryFiles) {
 
     if (cleanTemporaryFiles) {
       try {
-        FileUtils.deleteDirectory(Path.of(storagePath).toFile());
+        FileUtils.deleteDirectory(storagePath.resolve("gh").toFile());
       } catch (IOException e) {
         e.printStackTrace();
       }
@@ -45,7 +45,7 @@ public class GraphHopperFactory {
 
     GraphHopper graphHopper = new GraphHopperOSM()
         .forServer()
-        .setGraphHopperLocation(storagePath)
+        .setGraphHopperLocation(storagePath.resolve("gh").toString())
         .setEncodingManager(encodingManager)
         .setProfiles(
             new Profile("bus_fastest").setVehicle("bus").setWeighting("fastest").setTurnCosts(false),
@@ -54,7 +54,7 @@ public class GraphHopperFactory {
             new Profile("bus_shortest").setVehicle("bus").setWeighting("shortest").setTurnCosts(false)
         );
 
-    graphHopper.setDataReaderFile(osmFile);
+    graphHopper.setDataReaderFile(osmFile.toString());
 
     graphHopper.importOrLoad();
 
