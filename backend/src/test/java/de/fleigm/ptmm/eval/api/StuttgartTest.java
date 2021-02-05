@@ -104,12 +104,7 @@ public class StuttgartTest {
         .profile("bus_fastest_turn")
         .build();
 
-    EvaluationService service = new EvaluationService();
-    service.generatedFeedRepository = generatedFeedRepository;
-    service.evaluationTool = evaluationTool;
-    service.transitRouterFactory = parameters -> new GraphHopperTransitRouter(graphHopper, parameters);
-
-    EvaluationResponse result = service.createEvaluation(request);
+    EvaluationResponse result = evaluationService.createEvaluation(request);
 
     result.process().get();
 
@@ -138,15 +133,11 @@ public class StuttgartTest {
         .candidateSearchRadius(10.0)
         .beta(1.0)
         .profile(profile)
+        .useGraphHopperMapMatching(true)
         .build();
 
-    EvaluationService service = new EvaluationService();
-    service.generatedFeedRepository = generatedFeedRepository;
-    service.evaluationTool = evaluationTool;
-    service.transitRouterFactory = parameters -> new GraphHopperTransitRouter(graphHopper, parameters);
-
     EvaluationResponse ptmmResult = evaluationService.createEvaluation(ptmmRequest);
-    EvaluationResponse ghResult = service.createEvaluation(ghRequest);
+    EvaluationResponse ghResult = evaluationService.createEvaluation(ghRequest);
 
     ptmmResult.process().get();
     ghResult.process().get();

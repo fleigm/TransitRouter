@@ -48,4 +48,7 @@ public class CreateEvaluationRequest {
   @Positive
   private Double beta;
 
+  @FormParam("useGraphHopperMapMatching")
+  private boolean useGraphHopperMapMatching;
+
 }

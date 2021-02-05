@@ -35,14 +35,8 @@
       <el-form-item label="csr" prop="candidateSearchRadius">
         <el-input-number v-model="formData.candidateSearchRadius" :precision="2"></el-input-number>
       </el-form-item>
-      <el-form-item label="distance unit" prop="distanceUnit">
-        <el-select v-model="formData.distanceUnit">
-          <el-option v-for="option in availableDistanceUnits"
-                     :key="option.value"
-                     :label="option.label"
-                     :value="option.value">
-          </el-option>
-        </el-select>
+      <el-form-item label="use GHMM">
+        <el-checkbox v-model="formData.useGraphHopperMapMatching"></el-checkbox>
       </el-form-item>
       <el-form-item>
         <el-button type="primary" @click="submit">Start evaluation</el-button>
@@ -79,18 +73,6 @@ export default {
           label: 'fastest path with turn restrictions',
         }
       ],
-      availableDistanceUnits: [
-        {
-          value: 'METER',
-          label: 'meter',
-        }, {
-          value: 'KILOMETER',
-          label: 'kilometer',
-        }, {
-          value: 'MILES',
-          label: 'miles',
-        }
-      ],
       rules: {
         name: [
           {required: true, message: 'Please enter a name', trigger: 'blur'}
@@ -107,9 +89,6 @@ export default {
         candidateSearchRadius: [
           {type: 'number', required: true, min: 0, message: 'Csr value must be positive', trigger: 'blur'}
         ],
-        distanceUnit: [
-          {required: true, message: 'Please enter a distance unit', trigger: 'blur'}
-        ],
         feed: [
           {required: true, message: 'Please add a gtfs feed', trigger: 'change'}
         ]
@@ -121,8 +100,7 @@ export default {
         sigma: 25.0,
         beta: 2.0,
         candidateSearchRadius: 25.0,
-        distanceUnit: 'METER',
-
+        useGraphHopperMapMatching: false,
         feed: null
       },
     }

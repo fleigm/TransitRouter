@@ -41,6 +41,7 @@ public class EvaluationService {
             .candidateSearchRadius(request.getCandidateSearchRadius())
             .beta(request.getBeta())
             .profile(request.getProfile())
+            .useGraphHopperMapMatching(request.isUseGraphHopperMapMatching())
             .build())
         .status(Status.PENDING)
         .build();
