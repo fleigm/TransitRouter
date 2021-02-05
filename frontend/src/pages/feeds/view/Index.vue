@@ -89,7 +89,7 @@ export default {
     },
 
     download() {
-      this.$http.get(`eval/${this.id}/download`);
+      this.$http.get(`feeds/${this.id}/download`);
     }
   },
 

@@ -108,7 +108,7 @@ export default {
 
   computed: {
     evaluation() {
-      return this.info.extensions['de.fleigm.ptmm.eval.EvaluationExtension'];
+      return this.info.extensions['de.fleigm.ptmm.feeds.evaluation.Evaluation'];
     },
 
     shapeGenerationErrors() {

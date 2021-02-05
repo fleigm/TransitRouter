@@ -2,6 +2,7 @@ package de.fleigm.ptmm.presets;
 
 import com.conveyal.gtfs.model.Agency;
 import com.conveyal.gtfs.model.FeedInfo;
+import de.fleigm.ptmm.data.Extension;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -17,7 +18,7 @@ import java.util.Map;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class FeedDetails {
+public class FeedDetails implements Extension {
   private FeedInfo info;
   private List<Agency> agencies;
   private int routes;

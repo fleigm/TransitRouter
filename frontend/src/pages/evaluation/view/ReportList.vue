@@ -75,7 +75,7 @@ export default {
 
   computed: {
     endpoint() {
-      return `eval/${this.name}/trips`
+      return `feeds/${this.name}/trips`
     }
   },
 
@@ -96,7 +96,7 @@ export default {
       const tripId = entry.tripId;
 
       this.$http
-          .get(`eval/${name}/trips/${tripId}`)
+          .get(`feeds/${name}/trips/${tripId}`)
           .then(({data}) => {
             this.loadingDetails = false;
             this.details = data;

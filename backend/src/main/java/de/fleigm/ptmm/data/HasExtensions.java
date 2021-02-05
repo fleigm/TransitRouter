@@ -16,28 +16,28 @@ public interface HasExtensions {
   /**
    * @see Extensions#get(Class)
    */
-  default <T> Optional<T> getExtension(Class<T> extension) {
+  default <T extends Extension> Optional<T> getExtension(Class<T> extension) {
     return extensions().get(extension);
   }
 
   /**
    * @see Extensions#getOrCreate(Class, Supplier)
    */
-  default <T> T getOrCreateExtension(Class<T> extension, Supplier<T> defaultSupplier) {
+  default <T extends Extension> T getOrCreateExtension(Class<T> extension, Supplier<T> defaultSupplier) {
     return extensions().getOrCreate(extension, defaultSupplier);
   }
 
   /**
    * @see Extensions#has(Class)
    */
-  default <T> boolean hasExtension(Class<T> extension) {
+  default <T extends Extension> boolean hasExtension(Class<T> extension) {
     return extensions().has(extension);
   }
 
   /**
-   * @see Extensions#add(Object)
+   * @see Extensions#add(Extension) 
    */
-  default <T> HasExtensions addExtension(T extension) {
+  default <T extends Extension> HasExtensions addExtension(T extension) {
     extensions().add(extension);
     return this;
   }

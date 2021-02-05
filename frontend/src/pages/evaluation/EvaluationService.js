@@ -9,13 +9,13 @@ const state = reactive({
 });
 
 async function fetchEvaluations() {
-    const response = await http.get('eval');
+    const response = await http.get('feeds');
     state.evaluations = response.data;
     return response;
 }
 
 async function clearCache() {
-    await http.post('commands/eval/clear-cache');
+    await http.post('commands/feeds/clear-cache');
     await fetchEvaluations();
 
     Notification.success({
@@ -27,7 +27,7 @@ async function clearCache() {
 
 async function deleteEvaluation(id) {
     try {
-        const response = await http.delete(`eval/${id}`);
+        const response = await http.delete(`feeds/${id}`);
         Notification.success(`Deleted evaluation.`);
         return response;
     } catch (error) {
@@ -53,7 +53,7 @@ async function createEvaluation(evaluation) {
     events.$emit('evaluation:createdRequest', event);
 
     try {
-        const response = await http.post('eval', objectToFormData(evaluation), {
+        const response = await http.post('feeds', objectToFormData(evaluation), {
             headers: {
                 'Content-Type': 'multipart/form-data'
             },

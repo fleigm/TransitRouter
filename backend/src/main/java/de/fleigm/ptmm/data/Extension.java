@@ -1,5 +1,5 @@
 package de.fleigm.ptmm.data;
 
-public class Extension {
+public interface Extension {
 
 }

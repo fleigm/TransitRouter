@@ -15,7 +15,7 @@ const routes = [
             name: 'feeds.index'
         }
     }, {
-        path: '/eval',
+        path: '/feeds',
         component: EvaluationIndex,
         children: [{
             path: '',

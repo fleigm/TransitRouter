@@ -3,7 +3,7 @@ package de.fleigm.ptmm.presets;
 import de.fleigm.ptmm.data.Entity;
 import de.fleigm.ptmm.data.Extensions;
 import de.fleigm.ptmm.data.HasExtensions;
-import de.fleigm.ptmm.feeds.Feed;
+import de.fleigm.ptmm.gtfs.Feed;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

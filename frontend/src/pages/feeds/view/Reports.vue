@@ -45,7 +45,7 @@ export default {
       return this.reports.map(report => {
         return {
           label: report.name,
-          data: this.feeds.find(feed => feed.id === report.id).extensions['de.fleigm.ptmm.eval.EvaluationExtension'].quickStats.accuracy,
+          data: this.feeds.find(feed => feed.id === report.id).extensions['de.fleigm.ptmm.feeds.evaluation.Evaluation'].quickStats.accuracy,
           backgroundColor: report.color,
         }
       })
@@ -101,7 +101,7 @@ export default {
       }
 
       this.loading.push({id: feed.id});
-      this.$http.get(`eval/${feed.id}/report`)
+      this.$http.get(`feeds/${feed.id}/report`)
           .then(({data}) => {
             this.cache.push({id: feed.id, name: feed.name, entries: data.entries, color: feed._color})
           })

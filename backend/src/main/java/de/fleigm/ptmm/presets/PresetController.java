@@ -1,11 +1,11 @@
 package de.fleigm.ptmm.presets;
 
-import de.fleigm.ptmm.eval.Parameters;
-import de.fleigm.ptmm.eval.api.EvaluationResponse;
-import de.fleigm.ptmm.eval.api.EvaluationService;
 import de.fleigm.ptmm.events.CreatedQualifier;
 import de.fleigm.ptmm.events.Events;
-import de.fleigm.ptmm.feeds.Feed;
+import de.fleigm.ptmm.feeds.Parameters;
+import de.fleigm.ptmm.feeds.api.FeedGenerationResponse;
+import de.fleigm.ptmm.feeds.api.FeedGenerationService;
+import de.fleigm.ptmm.gtfs.Feed;
 import de.fleigm.ptmm.util.Helper;
 import org.jboss.resteasy.annotations.providers.multipart.MultipartForm;
 
@@ -41,7 +41,7 @@ public class PresetController {
   PresetRepository presets;
 
   @Inject
-  EvaluationService evaluationService;
+  FeedGenerationService feedGenerationService;
 
   @GET
   public Response index() {
@@ -98,7 +98,7 @@ public class PresetController {
   public Response generateFeed(@PathParam("id") UUID id, @NotNull @Valid GenerateFeedRequest generateFeedRequest) {
     Preset preset = presets.findOrFail(id);
 
-    EvaluationResponse evaluationResponse = evaluationService.createFromPreset(
+    FeedGenerationResponse feedGenerationResponse = feedGenerationService.createFromPreset(
         preset,
         generateFeedRequest.getName(),
         Parameters.builder()
@@ -109,7 +109,7 @@ public class PresetController {
             .useGraphHopperMapMatching(generateFeedRequest.isUseGraphHopperMapMatching())
             .build());
 
-    return Response.ok(evaluationResponse.info()).build();
+    return Response.ok(feedGenerationResponse.generatedFeed()).build();
 
   }
 

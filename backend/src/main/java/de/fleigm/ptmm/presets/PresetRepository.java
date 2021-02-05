@@ -1,8 +1,8 @@
 package de.fleigm.ptmm.presets;
 
 import de.fleigm.ptmm.data.Repository;
-import de.fleigm.ptmm.eval.GeneratedFeedInfo;
-import de.fleigm.ptmm.eval.GeneratedFeedRepository;
+import de.fleigm.ptmm.feeds.GeneratedFeed;
+import de.fleigm.ptmm.feeds.GeneratedFeedRepository;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -38,14 +38,14 @@ public class PresetRepository extends Repository<Preset> {
    * @param preset preset.
    * @return generated feeds of preset.
    */
-  public List<GeneratedFeedInfo> generatedFeedsFromPreset(Preset preset) {
+  public List<GeneratedFeed> generatedFeedsFromPreset(Preset preset) {
     return generatedFeedsFromPreset(preset.getId());
   }
 
   /**
    * @see PresetRepository#generatedFeedsFromPreset(Preset)
    */
-  public List<GeneratedFeedInfo> generatedFeedsFromPreset(UUID id) {
+  public List<GeneratedFeed> generatedFeedsFromPreset(UUID id) {
     return generatedFeeds.all()
         .stream()
         .filter(info -> info.getPreset().equals(id))

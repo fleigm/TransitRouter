@@ -1,5 +1,6 @@
 package de.fleigm.ptmm.http.json;
 
+import de.fleigm.ptmm.data.Extension;
 import de.fleigm.ptmm.data.Extensions;
 
 import javax.json.bind.serializer.DeserializationContext;
@@ -20,7 +21,11 @@ public class ExtensionsDeserializer implements JsonbDeserializer<Extensions> {
         parser.next();
         try {
           Object extension = context.deserialize(Class.forName(className), parser);
-          extensions.add(extension);
+          if (Extension.class.isAssignableFrom(extension.getClass())) {
+            extensions.add((Extension) extension);
+          } else {
+            throw new IllegalArgumentException("not a valid extension!");
+          }
         } catch (ClassNotFoundException e) {
           throw new RuntimeException(e);
         }

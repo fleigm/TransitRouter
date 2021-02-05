@@ -102,7 +102,7 @@ const Filters = {
   isFinished: (feed) => feed.status === 'FINISHED',
   isPending: (feed) => feed.status === 'PENDING',
   hasFailed: (feed) => feed.status === 'FAILED',
-  hasEvaluation: (feed) => feed.extensions.hasOwnProperty('de.fleigm.ptmm.eval.EvaluationExtension'),
+  hasEvaluation: (feed) => feed.extensions.hasOwnProperty('de.fleigm.ptmm.feeds.evaluation.Evaluation'),
 }
 
 const colors = ['#1E3A8A', '#3B82F6', '#D97706', '#F59E0B', '#991B1B', '#EF4444', '#064E3B', '#059669', '#4F46E5', '#7C3AED'];
@@ -183,7 +183,7 @@ export default {
     checkPendingFeeds() {
       const newlyFinished = [];
       this.pendingFeeds.forEach(feed => {
-        this.$http.get(`eval/${feed.id}`)
+        this.$http.get(`feeds/${feed.id}`)
             .then(({data}) => {
               if (data.status === 'FINISHED') {
                 newlyFinished.push(feed.id);
@@ -198,7 +198,7 @@ export default {
     },
 
     deleteFeed(id) {
-      this.$http.delete(`eval/${id}`)
+      this.$http.delete(`feeds/${id}`)
           .then((response) => {
             this.$notify.success({
               title: 'Success.',

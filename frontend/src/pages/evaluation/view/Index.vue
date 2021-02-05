@@ -80,17 +80,17 @@ export default {
     },
 
     downloadLinkFull() {
-      return `${Config.apiEndpoint}/eval/${this.id}/download`;
+      return `${Config.apiEndpoint}/feeds/${this.id}/download`;
     },
     downloadLinkGeneratedFeed() {
-      return `${Config.apiEndpoint}/eval/${this.id}/download/generated`;
+      return `${Config.apiEndpoint}/feeds/${this.id}/download/generated`;
     }
   },
 
   methods: {
     fetchInfo() {
       this.loading = true;
-      this.$http.get(`eval/${this.id}`)
+      this.$http.get(`feeds/${this.id}`)
           .then(({data}) => {
             this.info = data;
           })
@@ -112,7 +112,7 @@ export default {
     },
 
     download() {
-      this.$http.get(`eval/${this.id}/download`);
+      this.$http.get(`feeds/${this.id}/download`);
     }
   },
 

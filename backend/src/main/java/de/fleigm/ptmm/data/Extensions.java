@@ -11,7 +11,7 @@ import java.util.function.Supplier;
  */
 public class Extensions {
 
-  private final Map<Class<?>, Object> extensions;
+  private final Map<Class<?>, Extension> extensions;
 
   /**
    * Create new empty extension container.
@@ -24,7 +24,7 @@ public class Extensions {
    * Create a new extension container with the given extensions.
    * @param extensions extensions to add
    */
-  public Extensions(Map<Class<?>, Object> extensions) {
+  public Extensions(Map<Class<?>, Extension> extensions) {
     this.extensions = new HashMap<>();
     extensions.forEach((type, extension) -> add(extension));
   }
@@ -37,7 +37,7 @@ public class Extensions {
    * @return extension
    */
   @SuppressWarnings("unchecked")
-  public <T> Optional<T> get(Class<T> extension) {
+  public <T extends Extension> Optional<T> get(Class<T> extension) {
     return (Optional<T>) Optional.ofNullable(extensions.get(extension));
   }
 
@@ -50,7 +50,7 @@ public class Extensions {
    * @return extension
    */
   @SuppressWarnings("unchecked")
-  public <T> T getOrCreate(Class<T> extension, Supplier<T> defaultSupplier) {
+  public <T extends Extension> T getOrCreate(Class<T> extension, Supplier<T> defaultSupplier) {
     return (T) extensions.computeIfAbsent(extension, x -> defaultSupplier.get());
   }
 
@@ -73,7 +73,7 @@ public class Extensions {
    * @param <T>       type
    * @return this
    */
-  public <T> Extensions add(T extension) {
+  public <T extends Extension> Extensions add(T extension) {
     extensions.put(extension.getClass(), extension);
     return this;
   }
@@ -84,7 +84,7 @@ public class Extensions {
    *
    * @return raw extensions.
    */
-  public Map<Class<?>, Object> unwrap() {
+  public Map<Class<?>, Extension> unwrap() {
     return new HashMap<>(extensions);
   }
 }

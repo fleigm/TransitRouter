@@ -2,8 +2,8 @@ package de.fleigm.ptmm.presets;
 
 import com.conveyal.gtfs.GTFSFeed;
 import de.fleigm.ptmm.events.Created;
-import de.fleigm.ptmm.feeds.TransitFeed;
-import de.fleigm.ptmm.feeds.TransitFeedService;
+import de.fleigm.ptmm.gtfs.TransitFeed;
+import de.fleigm.ptmm.gtfs.TransitFeedService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

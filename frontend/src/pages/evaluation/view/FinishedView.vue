@@ -175,7 +175,7 @@ export default {
 
   computed: {
     evaluation() {
-      return this.info.extensions['de.fleigm.ptmm.eval.EvaluationExtension'];
+      return this.info.extensions['de.fleigm.ptmm.feeds.evaluation.Evaluation'];
     },
 
     shapeGenerationErrors() {
@@ -191,7 +191,7 @@ export default {
   methods: {
     fetchReport() {
       const name = this.$route.params.name;
-      this.$http.get(`eval/${name}/report`)
+      this.$http.get(`feeds/${name}/report`)
           .then(({data}) => {
             this.report = data.entries;
           })
