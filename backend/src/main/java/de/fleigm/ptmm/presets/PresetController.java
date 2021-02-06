@@ -107,7 +107,8 @@ public class PresetController {
             .beta(generateFeedRequest.getBeta())
             .profile(generateFeedRequest.getProfile())
             .useGraphHopperMapMatching(generateFeedRequest.isUseGraphHopperMapMatching())
-            .build());
+            .build(),
+        generateFeedRequest.isWithEvaluation());
 
     return Response.ok(feedGenerationResponse.generatedFeed()).build();
 

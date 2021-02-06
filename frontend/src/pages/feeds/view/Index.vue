@@ -10,7 +10,7 @@
       <div slot-scope="{data : preset}">
         <div class="flex justify-between items-center">
           <el-breadcrumb separator-class="el-icon-arrow-right" class="my-8">
-            <el-breadcrumb-item :to="{ name: 'feeds.index' }">Feeds</el-breadcrumb-item>
+            <el-breadcrumb-item :to="{ name: 'presets.index' }">Feeds</el-breadcrumb-item>
             <el-breadcrumb-item>{{ preset.name }}</el-breadcrumb-item>
           </el-breadcrumb>
           <div v-if="!notFound && !loading">
@@ -85,7 +85,7 @@ export default {
     deletePreset() {
       PresetService
           .deleteEvaluation(this.id)
-          .then(() => this.$router.push({name: 'feeds.index'}))
+          .then(() => this.$router.push({name: 'presets.index'}))
     },
 
     download() {

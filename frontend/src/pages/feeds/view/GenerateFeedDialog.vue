@@ -8,31 +8,47 @@
           :visible.sync="showDialog"
           title="Generate new feed">
 
-        <el-form ref="generate-feed-form" :model="formData" :rules="rules" label-width="120px" size="mini">
+        <el-form ref="generate-feed-form" :model="formData" :rules="rules" label-width="150px" size="mini">
           <el-form-item label="name" prop="name">
             <el-input v-model="formData.name"></el-input>
           </el-form-item>
-          <el-form-item label="profile" prop="profile">
-            <el-select v-model="formData.profile">
-              <el-option v-for="option in availableProfiles"
-                         :key="option.value"
-                         :label="option.label"
-                         :value="option.value">
-              </el-option>
-            </el-select>
-          </el-form-item>
-          <el-form-item label="sigma" prop="sigma">
-            <el-input-number v-model="formData.sigma" :precision="2"></el-input-number>
-          </el-form-item>
-          <el-form-item label="beta" prop="beta">
-            <el-input-number v-model="formData.beta" :precision="2"></el-input-number>
-          </el-form-item>
-          <el-form-item label="csr" prop="candidateSearchRadius">
-            <el-input-number v-model="formData.candidateSearchRadius" :precision="2"></el-input-number>
-          </el-form-item>
-          <el-form-item label="use GHMM">
-            <el-checkbox v-model="formData.useGraphHopperMapMatching"></el-checkbox>
-          </el-form-item>
+
+          <div class="my-12">
+            <el-divider content-position="left">Tuning parameters</el-divider>
+            <el-form-item label="profile" prop="profile">
+              <el-select v-model="formData.profile">
+                <el-option v-for="option in availableProfiles"
+                           :key="option.value"
+                           :label="option.label"
+                           :value="option.value">
+                </el-option>
+              </el-select>
+            </el-form-item>
+            <el-form-item label="sigma" prop="sigma">
+              <el-input-number v-model="formData.sigma" :precision="2"></el-input-number>
+            </el-form-item>
+            <el-form-item label="beta" prop="beta">
+              <el-input-number v-model="formData.beta" :precision="2"></el-input-number>
+            </el-form-item>
+            <el-form-item label="csr" prop="candidateSearchRadius">
+              <el-input-number v-model="formData.candidateSearchRadius" :precision="2"></el-input-number>
+            </el-form-item>
+          </div>
+
+
+          <div class="my-12">
+            <el-divider content-position="left">Options</el-divider>
+            <el-form-item label="Router">
+              <el-switch
+                  v-model="formData.useGraphHopperMapMatching"
+                  active-text="GHMM"
+                  inactive-text="TransitRouter">
+              </el-switch>
+            </el-form-item>
+            <el-form-item label="Evaluate feed">
+              <el-switch v-model="formData.withEvaluation"></el-switch>
+            </el-form-item>
+          </div>
 
           <el-form-item>
             <el-button type="primary" @click="submit">Generate</el-button>
@@ -99,6 +115,7 @@ export default {
         beta: 2.0,
         candidateSearchRadius: 25.0,
         useGraphHopperMapMatching: false,
+        withEvaluation: true,
       },
     }
   },
@@ -116,14 +133,15 @@ export default {
       this.$refs['generate-feed-form'].resetFields();
     },
 
-    async submit() {
-      this.$refs['generate-feed-form'].validate()
-          .then(() => {
-            this.sendRequest();
-            this.close();
+    submit() {
+      this.$refs['generate-feed-form']
+          .validate((valid) => {
+            if (valid) {
+              this.sendRequest();
+              this.close();
+            }
+            return valid
           })
-          .finally(this.resetForm)
-
     },
 
     sendRequest() {
@@ -132,6 +150,7 @@ export default {
             this.$events.$emit('presets.generatedFeed', data);
             console.log(data);
           })
+          .finally(this.resetForm)
     }
   },
 }

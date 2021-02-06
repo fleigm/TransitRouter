@@ -12,7 +12,7 @@ const routes = [
     {
         path: '/',
         redirect: {
-            name: 'feeds.index'
+            name: 'presets.index'
         }
     }, {
         path: '/feeds',
@@ -27,15 +27,15 @@ const routes = [
             component: EvaluationView,
         }]
     }, {
-        path: '/feeds',
+        path: '/presets',
         component: FeedIndex,
         children: [{
             path: '',
-            name: 'feeds.index',
+            name: 'presets.index',
             component: FeedOverview,
         }, {
             path: ':id',
-            name: 'feeds.view',
+            name: 'presets.view',
             component: FeedView,
         }]
     }, {

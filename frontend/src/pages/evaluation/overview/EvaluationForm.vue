@@ -17,27 +17,44 @@
           <el-button size="small" type="">select file</el-button>
         </el-upload>
       </el-form-item>
-      <el-form-item label="profile" prop="profile">
-        <el-select v-model="formData.profile">
-          <el-option v-for="option in availableProfiles"
-                     :key="option.value"
-                     :label="option.label"
-                     :value="option.value">
-          </el-option>
-        </el-select>
-      </el-form-item>
-      <el-form-item label="sigma" prop="sigma">
-        <el-input-number v-model="formData.sigma" :precision="2"></el-input-number>
-      </el-form-item>
-      <el-form-item label="beta" prop="beta">
-        <el-input-number v-model="formData.beta" :precision="2"></el-input-number>
-      </el-form-item>
-      <el-form-item label="csr" prop="candidateSearchRadius">
-        <el-input-number v-model="formData.candidateSearchRadius" :precision="2"></el-input-number>
-      </el-form-item>
-      <el-form-item label="use GHMM">
-        <el-checkbox v-model="formData.useGraphHopperMapMatching"></el-checkbox>
-      </el-form-item>
+
+      <div class="my-12">
+        <el-divider content-position="left">Tuning parameters</el-divider>
+        <el-form-item label="profile" prop="profile">
+          <el-select v-model="formData.profile">
+            <el-option v-for="option in availableProfiles"
+                       :key="option.value"
+                       :label="option.label"
+                       :value="option.value">
+            </el-option>
+          </el-select>
+        </el-form-item>
+        <el-form-item label="sigma" prop="sigma">
+          <el-input-number v-model="formData.sigma" :precision="2"></el-input-number>
+        </el-form-item>
+        <el-form-item label="beta" prop="beta">
+          <el-input-number v-model="formData.beta" :precision="2"></el-input-number>
+        </el-form-item>
+        <el-form-item label="csr" prop="candidateSearchRadius">
+          <el-input-number v-model="formData.candidateSearchRadius" :precision="2"></el-input-number>
+        </el-form-item>
+      </div>
+
+
+      <div class="my-12">
+        <el-divider content-position="left">Options</el-divider>
+        <el-form-item label="Router">
+          <el-switch
+              v-model="formData.useGraphHopperMapMatching"
+              active-text="GHMM"
+              inactive-text="TransitRouter">
+          </el-switch>
+        </el-form-item>
+        <el-form-item label="Evaluate feed">
+          <el-switch v-model="formData.withEvaluation"></el-switch>
+        </el-form-item>
+      </div>
+
       <el-form-item>
         <el-button type="primary" @click="submit">Start evaluation</el-button>
         <el-button @click="resetForm">Reset</el-button>
@@ -101,6 +118,7 @@ export default {
         beta: 2.0,
         candidateSearchRadius: 25.0,
         useGraphHopperMapMatching: false,
+        withEvaluation: true,
         feed: null
       },
     }
@@ -119,9 +137,13 @@ export default {
     async submit() {
       this.$events.$once('evaluation:createdRequest', this.displayUploadNotification)
 
-      this.$refs['evaluation-upload-form'].validate()
-          .then(() => EvaluationService.createEvaluation(this.formData))
-          .finally(this.resetForm)
+      this.$refs['evaluation-upload-form']
+          .validate((valid) => {
+            if (valid) {
+              EvaluationService.createEvaluation(this.formData).finally(this.resetForm)
+            }
+            return valid;
+          });
 
     },
 

@@ -32,4 +32,6 @@ public class GenerateFeedRequest {
   private Double beta;
 
   private boolean useGraphHopperMapMatching;
+
+  private boolean withEvaluation;
 }

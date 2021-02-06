@@ -51,4 +51,7 @@ public class GenerateFeedRequest {
   @FormParam("useGraphHopperMapMatching")
   private boolean useGraphHopperMapMatching;
 
+  @FormParam("withEvaluation")
+  private boolean withEvaluation;
+
 }

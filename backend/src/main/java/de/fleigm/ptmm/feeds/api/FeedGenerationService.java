@@ -31,17 +31,6 @@ public class FeedGenerationService {
   TransitRouterFactory transitRouterFactory;
 
   public FeedGenerationResponse create(GenerateFeedRequest request) {
-    GeneratedFeed generatedFeed = createAndStoreGeneratedFeed(request);
-
-    Process process = new Process(generatedFeedRepository)
-        .addStep(new FeedGenerationStep(transitRouterFactory))
-        .addStep(new FeedEvaluationStep(evaluationTool))
-        .addStep(new QuickStatsGenerationStep());
-
-    return new FeedGenerationResponse(generatedFeed, process.runAsync(generatedFeed));
-  }
-
-  private GeneratedFeed createAndStoreGeneratedFeed(GenerateFeedRequest request) {
     GeneratedFeed generatedFeed = GeneratedFeed.builder()
         .name(request.getName())
         .parameters(Parameters.builder()
@@ -59,11 +48,14 @@ public class FeedGenerationService {
             generatedFeed.getFileStoragePath().resolve(GeneratedFeed.ORIGINAL_GTFS_FEED),
             request.getGtfsFeed()));
 
-    generatedFeedRepository.save(generatedFeed);
-    return generatedFeed;
+    return run(generatedFeed, request.isWithEvaluation());
   }
 
-  public FeedGenerationResponse createFromPreset(Preset preset, String name, Parameters parameters) {
+  public FeedGenerationResponse createFromPreset(Preset preset,
+                                                 String name,
+                                                 Parameters parameters,
+                                                 boolean withEvaluation) {
+
     GeneratedFeed generatedFeed = GeneratedFeed.builder()
         .name(name)
         .parameters(parameters)
@@ -74,10 +66,17 @@ public class FeedGenerationService {
 
     generatedFeedRepository.save(generatedFeed);
 
+    return run(generatedFeed, withEvaluation);
+  }
+
+  private FeedGenerationResponse run(GeneratedFeed generatedFeed, boolean withEvaluation) {
     Process process = new Process(generatedFeedRepository)
-        .addStep(new FeedGenerationStep(transitRouterFactory))
-        .addStep(new FeedEvaluationStep(evaluationTool))
-        .addStep(new QuickStatsGenerationStep());
+        .addStep(new FeedGenerationStep(transitRouterFactory));
+
+    if (withEvaluation) {
+      process.addStep(new FeedEvaluationStep(evaluationTool))
+          .addStep(new QuickStatsGenerationStep());
+    }
 
     return new FeedGenerationResponse(generatedFeed, process.runAsync(generatedFeed));
   }

@@ -19,7 +19,7 @@ export default {
   name: "Index",
 
   mounted() {
-    Breadcrumbs.set({name: 'Feeds', route: { name: 'feeds.index'}})
+    Breadcrumbs.set({name: 'Feeds', route: { name: 'presets.index'}})
   }
 }
 </script>

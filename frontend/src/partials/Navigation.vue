@@ -31,7 +31,7 @@ export default {
     return {
       navigation: [{
           name: 'feed presets',
-          page: 'feeds.index',
+          page: 'presets.index',
         }, {
           name: 'generated feeds',
           page: 'evaluation.index'

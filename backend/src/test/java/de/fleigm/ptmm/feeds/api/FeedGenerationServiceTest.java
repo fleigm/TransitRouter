@@ -110,7 +110,8 @@ public class FeedGenerationServiceTest {
     response.then().statusCode(201);
     Preset preset = response.as(Preset.class);
 
-    FeedGenerationResponse evaluation = feedGenerationService.createFromPreset(preset, "test name", Parameters.defaultParameters());
+    FeedGenerationResponse evaluation = feedGenerationService
+        .createFromPreset(preset, "test name", Parameters.defaultParameters(), true);
 
     evaluation.process().get();
 

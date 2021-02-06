@@ -3,7 +3,7 @@
     <template #header>
       <div class="flex justify-between items-center p-2">
         <div class="flex gap-4">
-          <router-link :to="{name: 'feeds.view', params: {id: preset.id}}">
+          <router-link :to="{name: 'presets.view', params: {id: preset.id}}">
             {{ preset.name }}
           </router-link>
         </div>
