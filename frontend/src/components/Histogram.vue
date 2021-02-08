@@ -10,6 +10,11 @@ const defaultOptions = {
       ticks: {
         autoSkip: true,
       }
+    }],
+    yAxes: [{
+      ticks: {
+        beginAtZero: true,
+      }
     }]
   }
 };
