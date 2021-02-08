@@ -3,10 +3,10 @@
     <div v-if="loading" v-loading="true" class="w-full h-128"></div>
     <div v-else>
 
-      <div class="my-8" v-show="pendingFeeds.length">
+      <div class="my-8" v-show="feeds.pending.length">
         <div class="text-secondary">Currently generating feeds...</div>
         <div class="flex gap-x-4">
-          <v-card v-for="feed in pendingFeeds" :key="feed.id"
+          <v-card v-for="feed in feeds.pending" :key="feed.id"
                   class="flex items-center gap-x-4 relative p-2 text-secondary">
             <div class="relative w-4">
               <v-spinner class="w-4 h-4"></v-spinner>
@@ -16,21 +16,21 @@
               <div>{{ feed.parameters.profile }}</div>
               <div>
                 {{ feed.parameters.sigma }} - {{ feed.parameters.beta }} -
-                <span>{{ feed.parameters.useGraphHopperMapMatching ? 'GHMM' : 'TR'}}</span>
+                <span>{{ feed.parameters.useGraphHopperMapMatching ? 'GHMM' : 'TR' }}</span>
               </div>
             </div>
           </v-card>
         </div>
       </div>
 
-      <v-reports :feeds="selectedFeeds">
+      <v-reports :feeds="feeds.selected">
         <template slot-scope="reports">
           <div class="my-8 ">
             <div class="text-secondary">Generated Feeds</div>
             <div class="grid grid-cols-3 gap-4">
               <v-card class="">
                 <el-table ref="finishedFeedsTable"
-                          :data="sortedFinishedFeeds"
+                          :data="feeds.evaluated"
                           size="mini"
                           height="440"
                           @selection-change="selectionChanged">
@@ -48,7 +48,7 @@
                         <div>{{ scope.row.parameters.profile }}</div>
                         <div>
                           {{ scope.row.parameters.sigma }} - {{ scope.row.parameters.beta }} -
-                          <span>{{ scope.row.parameters.useGraphHopperMapMatching ? 'GHMM' : 'TR'}}</span>
+                          <span>{{ scope.row.parameters.useGraphHopperMapMatching ? 'GHMM' : 'TR' }}</span>
                         </div>
                       </div>
                     </template>
@@ -86,10 +86,27 @@
                                :options="reports.chartOptions"></v-histogram>
                 </v-card>
               </template>
+              <template v-else>
+                <div class="text-xl font-thin text-secondary p-2">Select feeds to show evaluation results</div>
+              </template>
             </div>
           </div>
         </template>
       </v-reports>
+
+      <div class="flex">
+        <v-card v-for="feed in feeds.finished" :key="feed.id"
+                class="flex items-center gap-x-4 relative p-2 text-secondary">
+          <div>{{ feed.name }}</div>
+          <div class="">
+            <div>{{ feed.parameters.profile }}</div>
+            <div>
+              {{ feed.parameters.sigma }} - {{ feed.parameters.beta }} -
+              <span>{{ feed.parameters.useGraphHopperMapMatching ? 'GHMM' : 'TR' }}</span>
+            </div>
+          </div>
+        </v-card>
+      </div>
     </div>
   </div>
 </template>
@@ -105,6 +122,8 @@ const Filters = {
   hasEvaluation: (feed) => feed.extensions.hasOwnProperty('de.fleigm.ptmm.feeds.evaluation.Evaluation'),
 }
 
+const sortByDate = (a, b) => new Date(a.createdAt) - new Date(b.createdAt);
+
 const colors = ['#1E3A8A', '#3B82F6', '#D97706', '#F59E0B', '#991B1B', '#EF4444', '#064E3B', '#059669', '#4F46E5', '#7C3AED'];
 
 export default {
@@ -119,21 +138,20 @@ export default {
   data() {
     return {
       loading: false,
-      feeds: [],
+      feeds: {
+        finished: [],
+        evaluated: [],
+        pending: [],
+        failed: [],
+        selected: [],
+      },
       selectedFeeds: [],
-      finishedFeeds: [],
-      pendingFeeds: [],
 
       pollingPendingFeeds: null,
     }
   },
 
-  computed: {
-    sortedFinishedFeeds() {
-      return this.finishedFeeds.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
-    }
-  },
-
+  computed: {},
 
   methods: {
     fetchStreams() {
@@ -141,61 +159,78 @@ export default {
       this.$http.get(`presets/${this.presetId}/generated-feeds`)
           .then(({data}) => {
             data.filter(Filters.isFinished)
-                .forEach(this.addFinishedFeed);
+                .sort(sortByDate)
+                .forEach(this.addFinishedFeed)
 
-            data.filter(Filters.isPending)
-                .forEach(this.addPendingFeeds);
+            this.feeds.pending = data.filter(Filters.isPending).sort(sortByDate);
+            this.feeds.failed = data.filter(Filters.hasFailed).sort(sortByDate);
+
+            this.$nextTick(this.showReportForFirstFeeds);
           })
           .finally(() => {
             this.loading = false;
-            this.$nextTick(this.showReportForFirstFeeds);
           })
     },
 
     addFinishedFeed(feed) {
-      this.finishedFeeds.push({
-        ...feed,
-        _color: colors[this.finishedFeeds.length]
-      })
-    },
-
-    addPendingFeeds(feed) {
-      this.pendingFeeds.push(feed);
-    },
-
-    selectionChanged(selectedFeeds) {
-      this.selectedFeeds = selectedFeeds;
+      if (Filters.hasEvaluation(feed)) {
+        this.feeds.evaluated.push({
+          ...feed,
+          _color: colors[this.feeds.evaluated.length],
+        });
+      } else {
+        this.feeds.finished.push(feed);
+      }
     },
 
     showReportForFirstFeeds() {
-      this.finishedFeeds.slice(0, 3).forEach((feed) => this.$refs.finishedFeedsTable.toggleRowSelection(feed));
+      // hacky but otherwise $refs.finishedFeedsTable would be undefined
+      // even though it is called inside $nextTick
+      setTimeout(() => {
+        this.feeds.evaluated.slice(0, 3).forEach((feed) => this.$refs.finishedFeedsTable.toggleRowSelection(feed));
+      }, 100)
     },
 
-    selectColor(number) {
-      const hue = number * 137.508; // use golden angle approximation
-      return `hsl(${hue},50%,75%)`;
-    },
+    selectionChanged(selectedFeeds) {
+      this.feeds.selected = selectedFeeds;
+    }
+    ,
 
     onGeneratedFeed(feed) {
-      this.pendingFeeds.push(feed);
-    },
+      this.feeds.pending.push(feed);
+    }
+    ,
 
-    checkPendingFeeds() {
+    async checkPendingFeeds() {
+      if (this.feeds.pending.length === 0) {
+        return;
+      }
+
       const newlyFinished = [];
-      this.pendingFeeds.forEach(feed => {
-        this.$http.get(`feeds/${feed.id}`)
-            .then(({data}) => {
-              if (data.status === 'FINISHED') {
-                newlyFinished.push(feed.id);
-                this.addFinishedFeed(data);
-              }
-            })
-            .finally(() => {
-              // cannot remove feed with lodash because it is not reactive
-              this.pendingFeeds = this.pendingFeeds.filter(feed => !newlyFinished.includes(feed.id));
-            })
+      for (const feed of this.feeds.pending) {
+        const response = await this.$http.get(`feeds/${feed.id}`);
+        console.log("incomming");
+        if (response.data.status !== 'PENDING') {
+          newlyFinished.push(response.data);
+        }
+      }
+
+      if (newlyFinished.length === 0) {
+        console.log('no new finished');
+        return;
+      }
+      console.log("updated feeds");
+
+      this.feeds.pending = this.feeds.pending.filter(feed => newlyFinished.findIndex(newFeed => feed.id === newFeed.id) < 0);
+      newlyFinished.forEach(feed => {
+        if (feed.status === 'FINISHED') {
+          this.addFinishedFeed(feed);
+        } else {
+          this.feeds.failed.push(feed);
+        }
       })
-    },
+    }
+    ,
 
     deleteFeed(id) {
       this.$http.delete(`feeds/${id}`)
@@ -205,8 +240,8 @@ export default {
               message: 'Feed deleted.',
               duration: 5000,
             });
-            const index = this.finishedFeeds.findIndex(feed => feed.id === id);
-            this.finishedFeeds.splice(index, 1);
+            const index = this.feeds.finished.findIndex(feed => feed.id === id);
+            this.feeds.finished.splice(index, 1);
           })
           .catch((response) => {
             console.log(response);
@@ -217,15 +252,10 @@ export default {
             })
           })
     }
-
-
   },
 
   mounted() {
     this.fetchStreams();
-  },
-
-  created() {
     this.$events.$on('presets.generatedFeed', this.onGeneratedFeed);
     this.pollingPendingFeeds = setInterval(this.checkPendingFeeds, 10000);
   },
