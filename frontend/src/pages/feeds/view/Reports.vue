@@ -6,7 +6,7 @@ export default {
   name: "v-reports",
   components: {VAccuracyChart},
   props: {
-    feeds: {
+    evaluations: {
       type: Array,
       required: true,
     }
@@ -38,14 +38,16 @@ export default {
 
   computed: {
     reports() {
-      return this.cache.filter(item => this.feeds.find(feed => feed.id === item.id));
+      return this.cache.filter(item => this.evaluations.find(e => e.id === item.id));
     },
 
     accuracyDataSets() {
       return this.reports.map(report => {
         return {
           label: report.name,
-          data: this.feeds.find(feed => feed.id === report.id).extensions['de.fleigm.ptmm.feeds.evaluation.Evaluation'].quickStats.accuracy,
+          data: this.evaluations.find(e => e.id === report.id)
+              .feed
+              .extensions['de.fleigm.ptmm.feeds.evaluation.Evaluation'].quickStats.accuracy,
           backgroundColor: report.color,
         }
       })
@@ -89,31 +91,37 @@ export default {
   },
 
   methods: {
-    getFeeds() {
-      this.feeds.forEach(this.fetch)
+    getReports() {
+      this.evaluations.forEach(this.fetch)
     },
 
-    fetch(feed) {
-      const idFilter = item => item.id === feed.id
+    fetch(evaluation) {
+      const idFilter = item => item.id === evaluation.id
 
-      if (this.cache.find(idFilter) || this.loading.find(idFilter)) {
+      let cachedReport = this.cache.find(idFilter)
+      if (cachedReport) {
+        cachedReport.color = evaluation.color;
         return;
       }
 
-      this.loading.push({id: feed.id});
-      this.$http.get(`feeds/${feed.id}/report`)
+      if (this.loading.includes(evaluation.id)) {
+        return;
+      }
+
+      this.loading.push(evaluation.id);
+      this.$http.get(`feeds/${evaluation.id}/report`)
           .then(({data}) => {
-            this.cache.push({id: feed.id, name: feed.name, entries: data.entries, color: feed._color})
+            this.cache.push({id: evaluation.id, name: evaluation.feed.name, entries: data.entries, color: evaluation.color})
           })
           .finally(() => {
-            const index = this.loading.indexOf(x => x.id === feed.id);
+            const index = this.loading.indexOf(x => x.id === evaluation.id);
             this.loading.splice(index, 1);
           });
     },
   },
 
   watch: {
-    feeds: 'getFeeds'
+    evaluations: 'getReports'
   }
 }
 </script>

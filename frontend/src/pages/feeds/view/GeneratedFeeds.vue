@@ -2,111 +2,84 @@
   <div>
     <div v-if="loading" v-loading="true" class="w-full h-128"></div>
     <div v-else>
+      <div class="text-secondary">Generated Feeds</div>
+      <v-card class="">
+        <el-table ref="finishedFeedsTable"
+                  :data="feeds"
+                  size="mini"
+                  max-height="440"
+                  :default-sort="{prop: 'createdAt', order: 'descending'}"
+                  @selection-change="selectionChanged">
+          <el-table-column type="selection" width="55"></el-table-column>
+          <el-table-column prop="name" label="Name" sortable width="200"></el-table-column>
 
-      <div class="my-8" v-show="feeds.pending.length">
-        <div class="text-secondary">Currently generating feeds...</div>
-        <div class="flex gap-x-4">
-          <v-card v-for="feed in feeds.pending" :key="feed.id"
-                  class="flex items-center gap-x-4 relative p-2 text-secondary">
-            <div class="relative w-4">
-              <v-spinner class="w-4 h-4"></v-spinner>
-            </div>
-            <div>{{ feed.name }}</div>
-            <div class="">
-              <div>{{ feed.parameters.profile }}</div>
-              <div>
-                {{ feed.parameters.sigma }} - {{ feed.parameters.beta }} -
-                <span>{{ feed.parameters.useGraphHopperMapMatching ? 'GHMM' : 'TR' }}</span>
+          <el-table-column label="parameters" width="200">
+            <template slot-scope="scope">
+              <div class="">
+                <div>{{ scope.row.parameters.profile }}</div>
+                <div>
+                  {{ scope.row.parameters.sigma }} - {{ scope.row.parameters.beta }} -
+                  <span>{{ scope.row.parameters.useGraphHopperMapMatching ? 'GHMM' : 'TR' }}</span>
+                </div>
               </div>
-            </div>
-          </v-card>
-        </div>
-      </div>
+            </template>
+          </el-table-column>
 
-      <v-reports :feeds="feeds.selected">
-        <template slot-scope="reports">
-          <div class="my-8 ">
-            <div class="text-secondary">Generated Feeds</div>
-            <div class="grid grid-cols-3 gap-4">
-              <v-card class="">
-                <el-table ref="finishedFeedsTable"
-                          :data="feeds.evaluated"
-                          size="mini"
-                          height="440"
-                          @selection-change="selectionChanged">
-                  <el-table-column type="selection" width="30"></el-table-column>
-                  <el-table-column prop="name" label="Name">
-                    <template slot-scope="scope">
-                      <span :style="{background: scope.row._color}"
-                            class="px-2 rounded-full text-white inline-block"
-                      >{{ scope.row.name }}</span>
-                    </template>
-                  </el-table-column>
-                  <el-table-column label="parameters">
-                    <template slot-scope="scope">
-                      <div class="">
-                        <div>{{ scope.row.parameters.profile }}</div>
-                        <div>
-                          {{ scope.row.parameters.sigma }} - {{ scope.row.parameters.beta }} -
-                          <span>{{ scope.row.parameters.useGraphHopperMapMatching ? 'GHMM' : 'TR' }}</span>
-                        </div>
-                      </div>
-                    </template>
-                  </el-table-column>
-                  <el-table-column width="40">
-                    <template slot-scope="scope">
-                      <el-popconfirm
-                          cancel-button-text='No, Thanks'
-                          confirm-button-text='Yes'
-                          title="Are you sure to delete this feed?"
-                          @confirm="deleteFeed(scope.row.id)">
-                        <el-button slot="reference" icon="el-icon-delete" circle size="mini"></el-button>
-                      </el-popconfirm>
-                    </template>
-                  </el-table-column>
-                </el-table>
-              </v-card>
+          <el-table-column label="Status" prop="status" sortable width="100"
+                           :filters="statusFilter"
+                           :filter-method="filterByStatus">
+            <template slot-scope="scope">
+              <v-feed-status-tag :feed="scope.row"></v-feed-status-tag>
+            </template>
+          </el-table-column>
 
+          <el-table-column label="Extensions">
+            <template slot-scope="scope">
+              <div>
+                <v-feed-extension-tag v-for="(ext, name) in scope.row.extensions" :key="`${scope.row.id}:${name}`"
+                                      :extension="name"></v-feed-extension-tag>
+              </div>
+            </template>
+          </el-table-column>
 
-              <template v-if="reports.reports.length">
-                <v-card class="col-span-2" header="Average Frechet Distance">
-                  <v-histogram class="relative m-2 h-128" :data-sets="reports.avgFrechetDistanceDataSets"
-                               :options="reports.chartOptions"></v-histogram>
-                </v-card>
-                <v-card header="Accuracy">
-                  <v-accuracy-chart class="relative m-2 h-128" :data-sets="reports.accuracyDataSets"
-                                    :options="reports.chartOptions"></v-accuracy-chart>
-                </v-card>
-                <v-card header="percentage mismatched hop segments">
-                  <v-histogram class="relative m-2 h-128" :data-sets="reports.anDataSets"
-                               :options="reports.chartOptions"></v-histogram>
-                </v-card>
-                <v-card header="percentage length mismatched hop segments">
-                  <v-histogram class="relative m-2 h-128" :data-sets="reports.alDataSets"
-                               :options="reports.chartOptions"></v-histogram>
-                </v-card>
-              </template>
-              <template v-else>
-                <div class="text-xl font-thin text-secondary p-2">Select feeds to show evaluation results</div>
-              </template>
-            </div>
-          </div>
-        </template>
-      </v-reports>
+          <el-table-column label="Created" width="150" prop="createdAt" sortable>
+            <template slot-scope="scope">
+              <i class="el-icon-time"></i>
+              <span style="margin-left: 10px">{{ scope.row.createdAt | fromNow }}</span>
+            </template>
+          </el-table-column>
 
-      <div class="flex">
-        <v-card v-for="feed in feeds.finished" :key="feed.id"
-                class="flex items-center gap-x-4 relative p-2 text-secondary">
-          <div>{{ feed.name }}</div>
-          <div class="">
-            <div>{{ feed.parameters.profile }}</div>
-            <div>
-              {{ feed.parameters.sigma }} - {{ feed.parameters.beta }} -
-              <span>{{ feed.parameters.useGraphHopperMapMatching ? 'GHMM' : 'TR' }}</span>
-            </div>
-          </div>
-        </v-card>
-      </div>
+          <el-table-column width="" align="right">
+            <template slot="header" slot-scope="scope">
+              <el-button @click="showEvaluationOfSelectedFeeds" icon="el-icon-s-data" circle size="mini"></el-button>
+              <el-popconfirm cancel-button-text='No, Thanks'
+                             confirm-button-text='Yes'
+                             title="Are you sure to delete all selected feeds?"
+                             @confirm="deleteSelectedFeeds">
+                <el-button slot="reference" icon="el-icon-delete" circle size="mini"></el-button>
+              </el-popconfirm>
+            </template>
+            <template slot-scope="scope">
+              <el-button @click="showEvaluation(scope.row)"
+                         :disabled="!scope.row.extensions['de.fleigm.ptmm.feeds.evaluation.Evaluation']"
+                         icon="el-icon-s-data" circle size="mini" title="show evaluation"></el-button>
+              <router-link :to="{name: 'evaluation.view', params: {name: scope.row.id}}">
+                <el-button icon="el-icon-right" circle size="mini" title="go to feed"></el-button>
+              </router-link>
+              <el-popconfirm cancel-button-text='No, Thanks'
+                             confirm-button-text='Yes'
+                             title="Are you sure to delete this feed?"
+                             @confirm="deleteFeed(scope.row.id)">
+                <el-button slot="reference" icon="el-icon-delete" circle size="mini"></el-button>
+              </el-popconfirm>
+            </template>
+          </el-table-column>
+
+        </el-table>
+      </v-card>
+
+      <v-feed-evaluations></v-feed-evaluations>
+
     </div>
   </div>
 </template>
@@ -114,6 +87,9 @@
 <script>
 import VReports from "./Reports";
 import VAccuracyChart from "./AccuracyChart";
+import VFeedStatusTag from "./FeedStatusTag";
+import VFeedExtensionTag from "./FeedExtensionTag";
+import VFeedEvaluations from "./FeedEvaluations";
 
 const Filters = {
   isFinished: (feed) => feed.status === 'FINISHED',
@@ -124,11 +100,10 @@ const Filters = {
 
 const sortByDate = (a, b) => new Date(a.createdAt) - new Date(b.createdAt);
 
-const colors = ['#1E3A8A', '#3B82F6', '#D97706', '#F59E0B', '#991B1B', '#EF4444', '#064E3B', '#059669', '#4F46E5', '#7C3AED'];
 
 export default {
   name: "GeneratedFeeds",
-  components: {VAccuracyChart, VReports},
+  components: {VFeedEvaluations, VFeedExtensionTag, VFeedStatusTag, VAccuracyChart, VReports},
   props: {
     presetId: {
       required: true,
@@ -138,14 +113,14 @@ export default {
   data() {
     return {
       loading: false,
-      feeds: {
-        finished: [],
-        evaluated: [],
-        pending: [],
-        failed: [],
-        selected: [],
-      },
+      feeds: [],
       selectedFeeds: [],
+
+      statusFilter: [
+        {text: 'finished', value: 'FINISHED'},
+        {text: 'failed', value: 'FAILED'},
+        {text: 'pending', value: 'PENDING'},
+      ],
 
       pollingPendingFeeds: null,
     }
@@ -158,79 +133,66 @@ export default {
       this.loading = true;
       this.$http.get(`presets/${this.presetId}/generated-feeds`)
           .then(({data}) => {
-            data.filter(Filters.isFinished)
-                .sort(sortByDate)
-                .forEach(this.addFinishedFeed)
-
-            this.feeds.pending = data.filter(Filters.isPending).sort(sortByDate);
-            this.feeds.failed = data.filter(Filters.hasFailed).sort(sortByDate);
-
-            this.$nextTick(this.showReportForFirstFeeds);
+            this.feeds = data;
+            setTimeout(this.showEvaluationOfFirstFeeds, 100);
           })
           .finally(() => {
             this.loading = false;
           })
     },
 
-    addFinishedFeed(feed) {
-      if (Filters.hasEvaluation(feed)) {
-        this.feeds.evaluated.push({
-          ...feed,
-          _color: colors[this.feeds.evaluated.length],
-        });
-      } else {
-        this.feeds.finished.push(feed);
-      }
+    onGeneratedFeed(feed) {
+      this.feeds.push(feed);
     },
 
-    showReportForFirstFeeds() {
-      // hacky but otherwise $refs.finishedFeedsTable would be undefined
-      // even though it is called inside $nextTick
-      setTimeout(() => {
-        this.feeds.evaluated.slice(0, 3).forEach((feed) => this.$refs.finishedFeedsTable.toggleRowSelection(feed));
-      }, 100)
+    filterByStatus(value, row) {
+      return row.status === value;
     },
 
     selectionChanged(selectedFeeds) {
-      this.feeds.selected = selectedFeeds;
-    }
-    ,
+      this.selectedFeeds = selectedFeeds;
+    },
 
-    onGeneratedFeed(feed) {
-      this.feeds.pending.push(feed);
-    }
-    ,
+    deleteSelectedFeeds() {
+      this.selectedFeeds
+          .filter(feed => feed.status !== 'PENDING')
+          .forEach(feed => this.deleteFeed(feed.id))
+    },
 
-    async checkPendingFeeds() {
-      if (this.feeds.pending.length === 0) {
-        return;
-      }
+    showEvaluationOfSelectedFeeds() {
+      this.selectedFeeds
+          .filter(Filters.hasEvaluation)
+          .forEach(this.showEvaluation);
+    },
 
-      const newlyFinished = [];
-      for (const feed of this.feeds.pending) {
-        const response = await this.$http.get(`feeds/${feed.id}`);
-        console.log("incomming");
-        if (response.data.status !== 'PENDING') {
-          newlyFinished.push(response.data);
+    showEvaluationOfFirstFeeds() {
+      this.feeds
+          .filter(Filters.isFinished)
+          .filter(Filters.hasEvaluation)
+          .sort(sortByDate)
+          .slice(0, 3)
+          .forEach(this.showEvaluation)
+    },
+
+    showEvaluation(feed) {
+      this.$events.$emit('FeedEvaluations:show', feed);
+    },
+
+    checkPendingFeeds() {
+      this.feeds.filter(Filters.isPending).forEach(this.updateFeed);
+    },
+
+    updateFeed(feed) {
+      this.$http.get(`feeds/${feed.id}`).then(({data}) => {
+        if (data.status !== 'PENDING') {
+          let index = this.feeds.findIndex(f => f.id === feed.id);
+          if (index >= 0) {
+            this.feeds.splice(index, 1, data);
+          }
         }
-      }
+      });
 
-      if (newlyFinished.length === 0) {
-        console.log('no new finished');
-        return;
-      }
-      console.log("updated feeds");
-
-      this.feeds.pending = this.feeds.pending.filter(feed => newlyFinished.findIndex(newFeed => feed.id === newFeed.id) < 0);
-      newlyFinished.forEach(feed => {
-        if (feed.status === 'FINISHED') {
-          this.addFinishedFeed(feed);
-        } else {
-          this.feeds.failed.push(feed);
-        }
-      })
-    }
-    ,
+    },
 
     deleteFeed(id) {
       this.$http.delete(`feeds/${id}`)
@@ -240,8 +202,9 @@ export default {
               message: 'Feed deleted.',
               duration: 5000,
             });
-            const index = this.feeds.finished.findIndex(feed => feed.id === id);
-            this.feeds.finished.splice(index, 1);
+            const index = this.feeds.findIndex(feed => feed.id === id);
+            this.feeds.splice(index, 1);
+            this.$events.$emit('FeedEvaluations:hide', {id});
           })
           .catch((response) => {
             console.log(response);
