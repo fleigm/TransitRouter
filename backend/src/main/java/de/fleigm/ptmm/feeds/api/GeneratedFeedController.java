@@ -2,6 +2,8 @@ package de.fleigm.ptmm.feeds.api;
 
 import de.fleigm.ptmm.feeds.GeneratedFeed;
 import de.fleigm.ptmm.feeds.GeneratedFeedRepository;
+import de.fleigm.ptmm.presets.FeedDetails;
+import de.fleigm.ptmm.presets.PresetRepository;
 import org.jboss.resteasy.annotations.providers.multipart.MultipartForm;
 
 import javax.inject.Inject;
@@ -30,6 +32,9 @@ public class GeneratedFeedController {
   @Inject
   GeneratedFeedRepository generatedFeedRepository;
 
+  @Inject
+  PresetRepository presetRepository;
+
   @POST
   @Consumes(MediaType.MULTIPART_FORM_DATA)
   @Produces(MediaType.APPLICATION_JSON)
@@ -56,10 +61,15 @@ public class GeneratedFeedController {
   @Path("{id}")
   @Produces(MediaType.APPLICATION_JSON)
   public Response show(@PathParam("id") UUID id) {
-    return generatedFeedRepository.find(id)
-        .map(Response::ok)
-        .orElse(Response.status(Response.Status.NOT_FOUND))
-        .build();
+    GeneratedFeed feed = generatedFeedRepository.findOrFail(id);
+
+    if (feed.getPreset() != null && !feed.hasExtension(FeedDetails.class)) {
+      presetRepository.findOrFail(feed.getPreset())
+          .getExtension(FeedDetails.class)
+          .ifPresent(feed::addExtension);
+    }
+
+    return Response.ok(feed).build();
   }
 
   @DELETE
