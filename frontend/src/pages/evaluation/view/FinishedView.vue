@@ -1,139 +1,59 @@
 <template>
-  <div class="pb-8">
-    <div class="grid grid-cols-3 gap-4 px-4">
-      <EvaluationCard header="accuracy">
-        <v-accuracy-chart :accuracies="evaluation.quickStats.accuracy" class="h-48"></v-accuracy-chart>
-      </EvaluationCard>
+  <div class="">
+    <div class="grid grid-cols-3 gap-4">
+      <evaluation-card header="feed info">
+        <div class="max-h-64 overflow-y-scroll" v-if="hasFeedDetails">
+            <v-metric title="Agency" :value="feedDetails.agencies[0].agency_name" size="mini"></v-metric>
+            <el-table :data="routesAndTripsPerType" size="mini" class="p-2">
+              <el-table-column prop="type" label="Type" width=""></el-table-column>
+              <el-table-column prop="routes" label="Routes" width="80"></el-table-column>
+              <el-table-column prop="trips" label="Trips" width="80"></el-table-column>
+            </el-table>
+        </div>
+        <div v-else>
+          <div class="w-full text-xl text-secondary font-thin my-8 text-center">Generating feed info...</div>
+        </div>
+      </evaluation-card>
 
-      <EvaluationCard header="configuration">
-        <div class="flex flex-col justify-between gap-4">
-          <div class="flex justify-between gap-4">
-            <v-metric :value="info.parameters.profile" size="mini" title="Profile"></v-metric>
-            <v-metric :value="info.parameters.sigma" size="small" title="sigma"></v-metric>
-            <v-metric :value="info.parameters.beta" size="small" title="beta"></v-metric>
-            <v-metric :value="info.parameters.candidateSearchRadius" size="small" title="csr"></v-metric>
-          </div>
-          <div class="flex justify-center gap-4">
-            <v-metric :value="info.statistics.trips" size="small" title="Trips"></v-metric>
-            <v-metric :value="info.statistics.generatedShapes" size="small" title="Shapes"></v-metric>
-          </div>
+
+      <EvaluationCard header="Parameters" class="">
+        <div class="flex justify-between gap-4 mb-4">
+          <v-metric :value="feed.parameters.profile"
+                    class=""
+                    size="small"
+                    title="Profile"
+          ></v-metric>
+          <v-metric :value="feed.parameters.useGraphHopperMapMatching ? 'GHMM' : 'TransitRouter'"
+                    class=""
+                    size="small"
+                    title="Router"
+          ></v-metric>
+        </div>
+        <div class="flex justify-between gap-4">
+          <v-metric :value="feed.parameters.beta | number('0.00')"
+                    class=""
+                    title="beta"
+          ></v-metric>
+          <v-metric :value="feed.parameters.sigma | number('0')"
+                    class=""
+                    title="sigma"
+          ></v-metric>
+          <v-metric :value="feed.parameters.candidateSearchRadius | number('0')"
+                    class=""
+                    title="CSR"
+          ></v-metric>
         </div>
       </EvaluationCard>
 
       <EvaluationCard header="execution times">
-        <ExecutionTimeChart v-if="info" :info="info"></ExecutionTimeChart>
+        <ExecutionTimeChart v-if="feed" :info="feed"></ExecutionTimeChart>
       </EvaluationCard>
-
-      <EvaluationCard>
-        <template #header>
-          averaged avg Frechet Distance <span class="italic">&delta;<sub>aF</sub></span>
-        </template>
-        <div v-loading="!report.length" class="min-h-128">
-          <HistogramAverageFrechetDistance v-if="report.length"
-                                           :report="report"
-                                           class="relative h-128"
-          ></HistogramAverageFrechetDistance>
-        </div>
-        <div slot="footer" class="flex w-full justify-between">
-          <v-metric :value="evaluation.quickStats.fd.max | number('0.0')"
-                    class="text-red-400"
-                    title="max"
-                    unit="m"
-          ></v-metric>
-          <v-metric :value="evaluation.quickStats.fd.min | number('0.0')"
-                    class="text-green-400"
-                    title="min"
-                    unit="m"
-          ></v-metric>
-          <v-metric :value="evaluation.quickStats.fd.average | number('0.0')"
-                    class=""
-                    title="avg"
-                    unit="m"
-          ></v-metric>
-        </div>
-      </EvaluationCard>
-
-      <EvaluationCard>
-        <div slot="header">
-          percentage mismatched hop segments <span class="italic">A<sub>N</sub></span>
-        </div>
-        <div v-loading="!report.length" class="min-h-128">
-          <HistogramMismatchedHopSegments v-if="report.length"
-                                          :report="report"
-                                          class="relative h-128">
-          </HistogramMismatchedHopSegments>
-        </div>
-        <div slot="footer" class="flex w-full justify-between">
-          <v-metric :value="evaluation.quickStats.an.max | number('0.000')"
-                    class="text-red-400"
-                    title="max"
-                    unit=""
-          ></v-metric>
-          <v-metric :value="evaluation.quickStats.an.min | number('0.000')"
-                    class="text-green-400"
-                    title="min"
-                    unit=""
-          ></v-metric>
-          <v-metric :value="evaluation.quickStats.an.average | number('0.000')"
-                    class=""
-                    title="avg"
-                    unit=""
-          ></v-metric>
-        </div>
-
-      </EvaluationCard>
-
-      <EvaluationCard>
-        <div slot="header">
-          percentage length mismatched hop segments <span class="italic">A<sub>L</sub></span>
-        </div>
-        <div v-loading="!report.length" class="min-h-128">
-          <HistogramLengthMismatchedHopSegments v-if="report.length"
-                                                :report="report"
-                                                class="relative h-128">
-          </HistogramLengthMismatchedHopSegments>
-        </div>
-        <div slot="footer" class="flex w-full justify-between">
-          <v-metric :value="evaluation.quickStats.al.max | number('0.000')"
-                    class="text-red-400"
-                    title="max"
-                    unit=""
-          ></v-metric>
-          <v-metric :value="evaluation.quickStats.al.min | number('0.000')"
-                    class="text-green-400"
-                    title="min"
-                    unit=""
-          ></v-metric>
-          <v-metric :value="evaluation.quickStats.al.average | number('0.000')"
-                    class=""
-                    title="avg"
-                    unit=""
-          ></v-metric>
-        </div>
-      </EvaluationCard>
-
-
-      <div class="grid auto-rows-min gap-4">
-        <EvaluationCard header="shape generation errors">
-          <div class="flex justify-between w-full">
-            <v-metric :value="shapeGenerationErrors.length"
-                      class=""
-                      title="shape generation errors"
-                      unit=""
-            ></v-metric>
-            <v-metric :value="affectedTripCount"
-                      class=""
-                      title="affected trips"
-                      unit=""
-            ></v-metric>
-          </div>
-        </EvaluationCard>
-      </div>
-
-      <v-card class="col-span-2">
+      <v-card class="col-span-3">
         <v-report-list :name="$route.params.name"></v-report-list>
       </v-card>
     </div>
+
+    <v-feed-evaluation :feed="feed" v-if="evaluation" class="my-4"></v-feed-evaluation>
 
   </div>
 </template>
@@ -147,11 +67,14 @@ import ExecutionTimeChart from "./ExecutionTimeChart";
 import EvaluationCard from "./EvaluationCard";
 import VAccuracyChart from "../AccuracyChart";
 import ErrorCard from "./ErrorCard";
+import VFeedEvaluation from "./evaluation/FeedEvaluation";
+import {routeTypeToString} from "../../../filters/Filters";
 
 export default {
   name: "v-finished-view",
 
   components: {
+    VFeedEvaluation,
     ErrorCard,
     VAccuracyChart,
     EvaluationCard,
@@ -161,7 +84,7 @@ export default {
   },
 
   props: {
-    info: {
+    feed: {
       type: Object,
       required: true,
     }
@@ -175,11 +98,37 @@ export default {
 
   computed: {
     evaluation() {
-      return this.info.extensions['de.fleigm.ptmm.feeds.evaluation.Evaluation'];
+      return this.feed.extensions['de.fleigm.ptmm.feeds.evaluation.Evaluation'];
+    },
+
+    hasFeedDetails() {
+      return this.feed.extensions.hasOwnProperty('de.fleigm.ptmm.presets.FeedDetails');
+    },
+
+    feedDetails() {
+      return this.feed.extensions['de.fleigm.ptmm.presets.FeedDetails'];
+    },
+
+    routesAndTripsPerType() {
+      if (!this.hasFeedDetails) {
+        return null;
+      }
+
+      var map = [];
+      map.push({type: 'Total', routes: this.feedDetails.routes, trips: this.feedDetails.trips})
+
+      for (const [key, value] of Object.entries(this.feedDetails.routesPerType)) {
+        map.push({
+          type: routeTypeToString(key),
+          routes: value,
+          trips: this.feedDetails.tripsPerType[key]
+        });
+      }
+      return map;
     },
 
     shapeGenerationErrors() {
-      return this.info.errors.filter(error => error.code === 'shape_generation_failed') ?? [];
+      return this.feed.errors.filter(error => error.code === 'shape_generation_failed') ?? [];
     },
     affectedTripCount() {
       return this.shapeGenerationErrors

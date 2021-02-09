@@ -27,19 +27,28 @@
 
         <div class="grid grid-cols-2 gap-4">
           <template v-if="scope.reports.length">
-            <v-card header="Accuracy">
+            <v-card header="accuracy">
               <v-accuracy-chart class="relative m-2 h-128" :data-sets="scope.accuracyDataSets"
                                 :options="scope.chartOptions"></v-accuracy-chart>
             </v-card>
-            <v-card class="" header="Average Frechet Distance">
+            <v-card class="">
+              <div slot="header" class="p-2 border-b">
+                <h2>average Frechet Distance <span class="italic">&delta;<sub>aF</sub></span></h2>
+              </div>
               <v-histogram class="relative m-2 h-128" :data-sets="scope.avgFrechetDistanceDataSets"
                            :options="scope.chartOptions"></v-histogram>
             </v-card>
-            <v-card header="percentage mismatched hop segments">
+            <v-card>
+              <div slot="header" class="p-2 border-b">
+                <h2>percentage mismatched hop segments <span class="italic">A<sub>N</sub></span></h2>
+              </div>
               <v-histogram class="relative m-2 h-128" :data-sets="scope.anDataSets"
                            :options="scope.chartOptions"></v-histogram>
             </v-card>
             <v-card header="percentage length mismatched hop segments">
+              <div slot="header" class="p-2 border-b">
+                <h2>percentage length mismatched hop segments <span class="italic">A<sub>L</sub></span></h2>
+              </div>
               <v-histogram class="relative m-2 h-128" :data-sets="scope.alDataSets"
                            :options="scope.chartOptions"></v-histogram>
             </v-card>

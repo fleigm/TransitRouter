@@ -4,7 +4,7 @@
         slot-scope="{page, searchQuery, loading, getPage, search, sortBy}">
       <el-table v-loading="loading"
                 :data="page.data"
-                size="small"
+                size="mini"
                 stripe
                 :fit="true"
                 @sort-change="({prop, order}) => sortBy(prop, order)">
@@ -14,20 +14,22 @@
         <el-table-column prop="route"
                          label="Route"
         ></el-table-column>
-        <el-table-column prop="an"
-                         label="A_n"
-                         sortable="custom"
-        ></el-table-column>
-        <el-table-column prop="al"
-                         label="A_l"
-                         sortable="custom"
-        ></el-table-column>
-        <el-table-column prop="avgFd"
-                         label="avg FD"
-                         sortable="custom"
-        ></el-table-column>
-        <el-table-column
-            align="right">
+        <el-table-column prop="an" label="A_n" sortable="custom" width="90">
+          <template slot-scope="scope">
+            {{ scope.row.an | number('0.00') }}
+          </template>
+        </el-table-column>
+        <el-table-column prop="al" label="A_l" sortable="custom" width="90">
+          <template slot-scope="scope">
+            {{ scope.row.al | number('0.00') }}
+          </template>
+        </el-table-column>
+        <el-table-column prop="avgFd" label="avg FD" sortable="custom" width="90">
+          <template slot-scope="scope">
+            {{ scope.row.avgFd | number('0.0') }}
+          </template>
+        </el-table-column>
+        <el-table-column align="right" width="">
           <template slot="header" slot-scope="scope">
             <div class="el-input el-input--mini">
               <input type="text"

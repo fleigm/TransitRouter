@@ -6,12 +6,20 @@ import {objectToFormData} from '../../Helper';
 
 const state = reactive({
     evaluations: [],
+    loading: false,
 });
 
 async function fetchEvaluations() {
-    const response = await http.get('feeds');
-    state.evaluations = response.data;
-    return response;
+    state.loading = true;
+    return http.get('feeds')
+        .then((response) => {
+            state.evaluations = response.data;
+            return response;
+        })
+        .finally(() => {
+            state.loading = false;
+        });
+
 }
 
 async function clearCache() {

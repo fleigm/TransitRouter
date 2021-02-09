@@ -1,6 +1,6 @@
 <template>
-  <div class="w-full">
-    <div class="container flex justify-between items-center">
+  <div class="container">
+    <div class="flex justify-between items-center">
       <el-breadcrumb separator-class="el-icon-arrow-right" class="my-8">
         <el-breadcrumb-item :to="{ name: 'evaluation.index' }">Evaluations</el-breadcrumb-item>
         <el-breadcrumb-item>{{ info.name }}</el-breadcrumb-item>
@@ -34,7 +34,7 @@
 
     <div v-if="loading" v-loading="true" class="w-full h-128"></div>
 
-    <v-finished-view v-if="finished" :info="info"></v-finished-view>
+    <v-finished-view v-if="finished" :feed="info"></v-finished-view>
     <v-failed-view v-else-if="failed" :info="info"></v-failed-view>
 
     <div v-if="notFound">

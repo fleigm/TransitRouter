@@ -6,6 +6,7 @@
       <v-card class="">
         <el-table ref="finishedFeedsTable"
                   :data="feeds"
+                  empty-text="No generated feeds from this preset yet"
                   size="mini"
                   max-height="440"
                   :default-sort="{prop: 'createdAt', order: 'descending'}"
@@ -13,7 +14,7 @@
           <el-table-column type="selection" width="55"></el-table-column>
           <el-table-column prop="name" label="Name" sortable width="200"></el-table-column>
 
-          <el-table-column label="parameters" width="200">
+          <el-table-column label="Parameters" width="200">
             <template slot-scope="scope">
               <div class="">
                 <div>{{ scope.row.parameters.profile }}</div>
@@ -51,12 +52,12 @@
 
           <el-table-column width="" align="right">
             <template slot="header" slot-scope="scope">
-              <el-button @click="showEvaluationOfSelectedFeeds" icon="el-icon-s-data" circle size="mini"></el-button>
+              <el-button @click="showEvaluationOfSelectedFeeds" :disabled="!selectedFeeds.length" icon="el-icon-s-data" circle size="mini"></el-button>
               <el-popconfirm cancel-button-text='No, Thanks'
                              confirm-button-text='Yes'
                              title="Are you sure to delete all selected feeds?"
                              @confirm="deleteSelectedFeeds">
-                <el-button slot="reference" icon="el-icon-delete" circle size="mini"></el-button>
+                <el-button slot="reference" :disabled="!selectedFeeds.length" icon="el-icon-delete" circle size="mini"></el-button>
               </el-popconfirm>
             </template>
             <template slot-scope="scope">

@@ -6,6 +6,9 @@
 const extensions = {
   'de.fleigm.ptmm.feeds.evaluation.Evaluation': {
     text: 'eval',
+  },
+  'de.fleigm.ptmm.presets.FeedDetails': {
+    text: 'info',
   }
 };
 export default {
