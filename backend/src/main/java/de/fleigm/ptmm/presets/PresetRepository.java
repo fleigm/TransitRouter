@@ -48,6 +48,7 @@ public class PresetRepository extends Repository<Preset> {
   public List<GeneratedFeed> generatedFeedsFromPreset(UUID id) {
     return generatedFeeds.all()
         .stream()
+        .filter(GeneratedFeed::hasPreset)
         .filter(info -> info.getPreset().equals(id))
         .collect(Collectors.toList());
   }

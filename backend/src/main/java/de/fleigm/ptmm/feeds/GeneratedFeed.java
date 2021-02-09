@@ -70,6 +70,10 @@ public class GeneratedFeed extends Entity implements HasExtensions {
     return this;
   }
 
+  public boolean hasPreset() {
+    return preset != null;
+  }
+
   public boolean hasFinished() {
     return status == Status.FINISHED;
   }
