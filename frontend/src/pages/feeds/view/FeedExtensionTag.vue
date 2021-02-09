@@ -7,7 +7,7 @@ const extensions = {
   'de.fleigm.ptmm.feeds.evaluation.Evaluation': {
     text: 'eval',
   },
-  'de.fleigm.ptmm.presets.FeedDetails': {
+  'de.fleigm.ptmm.gtfs.FeedDetails': {
     text: 'info',
   }
 };

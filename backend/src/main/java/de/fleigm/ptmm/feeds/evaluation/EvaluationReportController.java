@@ -32,14 +32,11 @@ public class EvaluationReportController {
     }
 
     return info.flatMap(i -> i.getExtension(Evaluation.class))
-        .map(evaluation -> reportService.get(evaluation.getReport()))
+        .map(Evaluation::getReport)
+        .map(reportService::get)
         .map(Response::ok)
         .orElse(Response.status(Response.Status.NOT_FOUND))
         .build();
-
-    /*return generatedFeedRepository.findEvaluationResult(id)
-        .map(evaluationResult -> getPagedReport(evaluationResult, uriInfo, paged, search, sort))
-        .orElse(Response.status(Response.Status.NOT_FOUND).build());*/
   }
 
 }

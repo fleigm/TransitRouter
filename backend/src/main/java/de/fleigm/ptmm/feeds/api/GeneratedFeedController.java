@@ -2,7 +2,7 @@ package de.fleigm.ptmm.feeds.api;
 
 import de.fleigm.ptmm.feeds.GeneratedFeed;
 import de.fleigm.ptmm.feeds.GeneratedFeedRepository;
-import de.fleigm.ptmm.presets.FeedDetails;
+import de.fleigm.ptmm.gtfs.FeedDetails;
 import de.fleigm.ptmm.presets.PresetRepository;
 import org.jboss.resteasy.annotations.providers.multipart.MultipartForm;
 

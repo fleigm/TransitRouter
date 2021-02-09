@@ -31,11 +31,11 @@ export default {
 
   computed: {
     hasFeedDetails() {
-      return this.preset.extensions.hasOwnProperty('de.fleigm.ptmm.presets.FeedDetails');
+      return this.preset.extensions.hasOwnProperty('de.fleigm.ptmm.gtfs.FeedDetails');
     },
 
     feedDetails() {
-      return this.preset.extensions['de.fleigm.ptmm.presets.FeedDetails'];
+      return this.preset.extensions['de.fleigm.ptmm.gtfs.FeedDetails'];
     },
 
     routesAndTripsPerType() {

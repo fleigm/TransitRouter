@@ -102,11 +102,11 @@ export default {
     },
 
     hasFeedDetails() {
-      return this.feed.extensions.hasOwnProperty('de.fleigm.ptmm.presets.FeedDetails');
+      return this.feed.extensions.hasOwnProperty('de.fleigm.ptmm.gtfs.FeedDetails');
     },
 
     feedDetails() {
-      return this.feed.extensions['de.fleigm.ptmm.presets.FeedDetails'];
+      return this.feed.extensions['de.fleigm.ptmm.gtfs.FeedDetails'];
     },
 
     routesAndTripsPerType() {

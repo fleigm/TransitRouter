@@ -6,9 +6,11 @@ import de.fleigm.ptmm.feeds.Parameters;
 import de.fleigm.ptmm.feeds.Status;
 import de.fleigm.ptmm.feeds.evaluation.FeedEvaluationStep;
 import de.fleigm.ptmm.feeds.evaluation.QuickStatsGenerationStep;
+import de.fleigm.ptmm.feeds.process.FeedDetailsGenerationStep;
 import de.fleigm.ptmm.feeds.process.FeedGenerationStep;
 import de.fleigm.ptmm.feeds.process.Process;
 import de.fleigm.ptmm.gtfs.Feed;
+import de.fleigm.ptmm.gtfs.TransitFeedService;
 import de.fleigm.ptmm.presets.Preset;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.slf4j.Logger;
@@ -30,6 +32,9 @@ public class FeedGenerationService {
   @Inject
   TransitRouterFactory transitRouterFactory;
 
+  @Inject
+  TransitFeedService transitFeedService;
+
   public FeedGenerationResponse create(GenerateFeedRequest request) {
     GeneratedFeed generatedFeed = GeneratedFeed.builder()
         .name(request.getName())
@@ -48,7 +53,16 @@ public class FeedGenerationService {
             generatedFeed.getFileStoragePath().resolve(GeneratedFeed.ORIGINAL_GTFS_FEED),
             request.getGtfsFeed()));
 
-    return run(generatedFeed, request.isWithEvaluation());
+    Process process = new Process(generatedFeedRepository)
+        .addStep(new FeedGenerationStep(transitRouterFactory))
+        .addStep(new FeedDetailsGenerationStep(transitFeedService));
+
+    if (request.isWithEvaluation()) {
+      process.addStep(new FeedEvaluationStep(evaluationTool))
+          .addStep(new QuickStatsGenerationStep());
+    }
+
+    return new FeedGenerationResponse(generatedFeed, process.runAsync(generatedFeed));
   }
 
   public FeedGenerationResponse createFromPreset(Preset preset,
