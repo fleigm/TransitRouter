@@ -8,6 +8,8 @@ import de.fleigm.ptmm.util.StopWatch;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;
 
+import java.time.Duration;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -44,10 +46,15 @@ public class Process {
       generatedFeed.setStatus(Status.FAILED);
       generatedFeed.addError(Error.of("process.failed", "Evaluation process failed.", error));
     } finally {
-      MDC.clear();
       stopWatch.stop();
-      generatedFeed.addStatistic("executionTime.total", stopWatch.getMillis());
+      MDC.clear();
+
+      generatedFeed
+          .getOrCreateExtension(ExecutionTime.class, ExecutionTime::new)
+          .add("total", Duration.of(stopWatch.getNanos(), ChronoUnit.NANOS));
+
       generatedFeedRepository.save(generatedFeed);
+
       log.info("Finished evaluation process. Took {}s", stopWatch.getSeconds());
     }
   }

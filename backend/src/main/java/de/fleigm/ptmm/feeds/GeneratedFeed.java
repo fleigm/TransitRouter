@@ -12,9 +12,7 @@ import lombok.NoArgsConstructor;
 
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 /**
@@ -41,9 +39,6 @@ public class GeneratedFeed extends Entity implements HasExtensions {
   private UUID preset;
 
   @Builder.Default
-  private Map<String, Object> statistics = new HashMap<>();
-
-  @Builder.Default
   private Extensions extensions = new Extensions();
 
   @Builder.Default
@@ -57,12 +52,6 @@ public class GeneratedFeed extends Entity implements HasExtensions {
   @Override
   protected Path entityStorageRoot() {
     return storageRoot().resolve("generated");
-  }
-
-  public GeneratedFeed addStatistic(String key, Object value) {
-    statistics.put(key, value);
-
-    return this;
   }
 
   public GeneratedFeed addError(Error error) {

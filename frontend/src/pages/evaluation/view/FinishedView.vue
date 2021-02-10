@@ -46,7 +46,7 @@
       </EvaluationCard>
 
       <EvaluationCard header="execution times">
-        <ExecutionTimeChart v-if="feed" :info="feed"></ExecutionTimeChart>
+        <ExecutionTimeChart v-if="feed" :feed="feed"></ExecutionTimeChart>
       </EvaluationCard>
       <v-card class="col-span-3">
         <v-report-list :name="$route.params.name"></v-report-list>

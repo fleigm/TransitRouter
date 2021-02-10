@@ -1,13 +1,18 @@
 <template>
-  <div class="relative">
-    <v-doughnut-chart :data="data" :options="options" class="relative h-48"></v-doughnut-chart>
+  <div class="relative" v-if="extension">
+    <v-doughnut-chart :data="dataSet" :options="options" class="relative h-48"></v-doughnut-chart>
     <div class="absolute w-full bottom-1/4 text-center text-xl text-secondary">
-      total: {{ timeTotal }}s
+      total: {{ total | number('0.0') }}s
     </div>
+  </div>
+  <div v-else class="text-secondary p-2">
+    Missing execution time data...
   </div>
 </template>
 
 <script>
+
+import moment from "moment";
 
 const defaultOptions = {
   rotation: Math.PI,
@@ -32,7 +37,7 @@ export default {
   name: "ExecutionTimeChart",
 
   props: {
-    info: {
+    feed: {
       type: Object,
       required: true,
     },
@@ -43,32 +48,49 @@ export default {
       return defaultOptions;
     },
 
-    data() {
+    dataSet() {
+      let labels = [];
+      let data = [];
+
+      this.times.forEach(([key, duration]) => {
+        labels.push(key);
+        data.push(duration);
+      });
+
+      labels.push('rest');
+      data.push(this.rest);
+
       return {
-        labels: ['shape generation', 'evaluation', 'rest'],
+        labels,
         datasets: [{
-          data: [
-            this.timeShapeGeneration,
-            this.timeEvaluation,
-            this.timeRest,
-          ],
-          backgroundColor: ['#075985', '#0369A1', '#0284C7']
+          data,
+          backgroundColor: ['#1e3a8a', '#1e40af', '#1d4ed8', '#2563eb', '#3b82f6', '#60a5fa',]
         }]
       }
     },
 
-    timeShapeGeneration() {
-      return Math.round(this.info.statistics['executionTime.shapeGeneration'] / 1000);
+    extension() {
+      return this.feed.extensions['de.fleigm.ptmm.feeds.process.ExecutionTime'];
     },
-    timeEvaluation() {
-      return Math.round(this.info.statistics['executionTime.evaluation'] / 1000);
-    },
-    timeTotal() {
-      return Math.round(this.info.statistics['executionTime.total'] / 1000);
-    },
-    timeRest() {
-      return this.timeTotal - this.timeShapeGeneration - this.timeEvaluation;
+
+    times() {
+      let durations = this.extension.durations;
+
+      return Object.entries(durations)
+          .filter(([key]) => key !== 'total')
+          .map(([key, duration]) => [key, moment.duration(duration).asSeconds()])
     }
+    ,
+
+    total() {
+      return moment.duration(this.extension.durations.total).asSeconds();
+    },
+
+    rest() {
+      let rest = this.total;
+      this.times.forEach(([key, duration]) => rest - duration);
+      return rest;
+    },
   },
 
   methods: {},

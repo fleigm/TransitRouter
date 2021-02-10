@@ -2,6 +2,7 @@ package de.fleigm.ptmm.feeds.evaluation;
 
 import de.fleigm.ptmm.feeds.GeneratedFeed;
 import de.fleigm.ptmm.feeds.Status;
+import de.fleigm.ptmm.feeds.process.ExecutionTime;
 import de.fleigm.ptmm.feeds.process.Step;
 import de.fleigm.ptmm.util.StopWatch;
 import org.slf4j.Logger;
@@ -46,6 +47,9 @@ public class FeedEvaluationStep implements Step {
     evaluation.setShapevlOutput(shapevlResult.getMessage());
     evaluation.setReport(info.getFileStoragePath().resolve(Evaluation.SHAPEVL_REPORT));
     evaluation.setExecutionTime(Duration.of(stopWatch.getMillis(), ChronoUnit.MILLIS));
+
+    info.getOrCreateExtension(ExecutionTime.class, ExecutionTime::new)
+        .add("feed_evaluation", Duration.of(stopWatch.getNanos(), ChronoUnit.NANOS));
 
     logger.info("Finished feed evaluation step. Took {}s", stopWatch.getSeconds());
   }

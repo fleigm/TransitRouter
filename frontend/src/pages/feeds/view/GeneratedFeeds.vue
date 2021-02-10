@@ -62,7 +62,7 @@
             </template>
             <template slot-scope="scope">
               <el-button @click="showEvaluation(scope.row)"
-                         :disabled="!scope.row.extensions['de.fleigm.ptmm.feeds.evaluation.Evaluation']"
+                         :disabled="!scope.row.extensions['de.fleigm.ptmm.feeds.evaluation.Evaluation'] || scope.row.status === 'PENDING'"
                          icon="el-icon-s-data" circle size="mini" title="show evaluation"></el-button>
               <router-link :to="{name: 'evaluation.view', params: {name: scope.row.id}}">
                 <el-button icon="el-icon-right" circle size="mini" title="go to feed"></el-button>
@@ -71,7 +71,7 @@
                              confirm-button-text='Yes'
                              title="Are you sure to delete this feed?"
                              @confirm="deleteFeed(scope.row.id)">
-                <el-button slot="reference" icon="el-icon-delete" circle size="mini"></el-button>
+                <el-button slot="reference" icon="el-icon-delete" circle size="mini" :disabled="scope.row.status === 'PENDING'"></el-button>
               </el-popconfirm>
             </template>
           </el-table-column>

@@ -22,12 +22,12 @@ export default {
   },
 
   computed: {
-    type() {
-      return extensions[this.extension].tag;
+    extensions() {
+      return extensions[this.extension] || {text: ''}
     },
 
     text() {
-      return extensions[this.extension].text
+      return this.extensions.text
     }
 
 

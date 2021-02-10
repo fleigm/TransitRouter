@@ -7,7 +7,7 @@
       </el-breadcrumb>
       <div v-if="!notFound && !loading">
         <el-dropdown>
-          <el-button size="mini">
+          <el-button size="mini" :disabled="pending">
             Download<i class="el-icon-arrow-down el-icon--right"></i>
           </el-button>
           <el-dropdown-menu slot="dropdown">
@@ -26,7 +26,7 @@
             title="Are you sure to delete this evaluation?"
             @confirm="deleteEvaluation()"
         >
-          <el-button slot="reference" plain size="mini" type="danger">Delete</el-button>
+          <el-button slot="reference" plain size="mini" type="danger" :disabled="pending">Delete</el-button>
         </el-popconfirm>
 
       </div>
@@ -36,6 +36,9 @@
 
     <v-finished-view v-if="finished" :feed="info"></v-finished-view>
     <v-failed-view v-else-if="failed" :info="info"></v-failed-view>
+    <div v-else class="text-secondary font-light text-2xl">
+      Running generation process. This might take a while...
+    </div>
 
     <div v-if="notFound">
       <div class="text-secondary text-2xl font-thin text-center py-8">Could not find evaluation with id {{ id }}</div>
@@ -77,6 +80,10 @@ export default {
 
     failed() {
       return this.info && this.info.status === 'FAILED';
+    },
+
+    pending() {
+      return this.info && this.info.status === 'PENDING';
     },
 
     downloadLinkFull() {

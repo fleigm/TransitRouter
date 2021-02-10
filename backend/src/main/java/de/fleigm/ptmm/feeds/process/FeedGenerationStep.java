@@ -19,6 +19,8 @@ import lombok.Value;
 import lombok.extern.slf4j.Slf4j;
 import org.mapdb.Fun;
 
+import java.time.Duration;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
@@ -83,9 +85,8 @@ public class FeedGenerationStep implements Step {
 
       stopWatch.stop();
 
-      info.addStatistic("trips", trips.intValue())
-          .addStatistic("generatedShapes", generatedShapes.intValue())
-          .addStatistic("executionTime.shapeGeneration", stopWatch.getMillis());
+      info.getOrCreateExtension(ExecutionTime.class, ExecutionTime::new)
+          .add("feed_generation", Duration.of(stopWatch.getNanos(), ChronoUnit.NANOS));
 
       log.info("Finished feed generation step. Took {}s", stopWatch.getSeconds());
     }
