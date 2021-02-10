@@ -65,13 +65,13 @@
 </template>
 
 <script>
-import EvaluationService from "../EvaluationService";
+import GeneratedFeedService from "../GeneratedFeedService";
 import {Notification} from "element-ui";
 import {watch} from '@vue/composition-api';
 import UploadProgressNotification from "./UploadProgressNotification";
 
 export default {
-  name: "v-evaluation-form",
+  name: "v-generate-feed-form",
 
   data() {
     return {
@@ -140,7 +140,7 @@ export default {
       this.$refs['evaluation-upload-form']
           .validate((valid) => {
             if (valid) {
-              EvaluationService.createEvaluation(this.formData).finally(this.resetForm)
+              GeneratedFeedService.createEvaluation(this.formData).finally(this.resetForm)
             }
             return valid;
           });

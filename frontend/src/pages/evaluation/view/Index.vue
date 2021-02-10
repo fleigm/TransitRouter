@@ -1,5 +1,5 @@
 <template>
-  <div class="container">
+  <div class="container pb-8">
     <div class="flex justify-between items-center">
       <el-breadcrumb separator-class="el-icon-arrow-right" class="my-8">
         <el-breadcrumb-item :to="{ name: 'evaluation.index' }">Evaluations</el-breadcrumb-item>
@@ -52,7 +52,7 @@ import Config from '../../../config';
 import VReportList from "./ReportList";
 import VFinishedView from "./FinishedView";
 import VFailedView from "./FailedView";
-import EvaluationService from "../EvaluationService";
+import GeneratedFeedService from "../GeneratedFeedService";
 
 export default {
   name: "Index",
@@ -114,7 +114,7 @@ export default {
     },
 
     deleteEvaluation() {
-      EvaluationService.deleteEvaluation(this.id)
+      GeneratedFeedService.deleteEvaluation(this.id)
           .then(() => this.$router.push({name: 'evaluation.index'}))
     },
 

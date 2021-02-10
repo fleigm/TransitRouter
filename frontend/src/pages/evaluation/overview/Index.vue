@@ -4,14 +4,9 @@
       <div></div>
       <div class="">
         <el-button size="mini" @click="clearCache">Clear Cache</el-button>
-        <v-evaluation-form-dialog></v-evaluation-form-dialog>
+        <v-generate-feed-dialog></v-generate-feed-dialog>
       </div>
     </div>
-
-<!--    <v-evaluation-info-card v-for="evaluation in feeds"
-                            :key="evaluation.id"
-                            :evaluation="evaluation"
-    ></v-evaluation-info-card>-->
 
     <v-card>
       <el-table ref="feedsTable" :data="feeds" size="mini" :default-expand-all="false" v-loading="loadingFeeds" stripe>
@@ -51,12 +46,6 @@
           </template>
         </el-table-column>
 
-<!--        <el-table-column label="Evaluation">
-          <template slot-scope="scope">
-            <v-feed-evaluation-info :feed="scope.row"></v-feed-evaluation-info>
-          </template>
-        </el-table-column>-->
-
         <el-table-column label="Created" width="150" prop="createdAt" sortable>
           <template slot-scope="scope">
             <i class="el-icon-time"></i>
@@ -88,11 +77,9 @@
 </template>
 
 <script>
-import VAccuracyChart from "../AccuracyChart";
-import VEvaluationForm from "./EvaluationForm";
-import VEvaluationFormDialog from "./EvaluationFormDialog";
-import VEvaluationInfoCard from "./EvaluationInfoCard";
-import EvaluationService from "../EvaluationService";
+import VGenerateFeedForm from "./GenerateFeedForm";
+import VGenerateFeedDialog from "./GenerateFeedDialog";
+import GeneratedFeedService from "../GeneratedFeedService";
 import VFeedStatusTag from "../../feeds/view/FeedStatusTag";
 import VFeedExtensionTag from "../../feeds/view/FeedExtensionTag";
 import VFeedTableExpand from "./FeedTableExpand";
@@ -105,29 +92,32 @@ export default {
     VFeedEvaluationInfo,
     VFeedTableExpand,
     VFeedExtensionTag,
-    VFeedStatusTag, VEvaluationInfoCard, VEvaluationFormDialog, VEvaluationForm, VAccuracyChart},
+    VFeedStatusTag,
+    VGenerateFeedDialog,
+    VGenerateFeedForm
+  },
 
   computed: {
     feeds() {
-      return EvaluationService.state.evaluations;
+      return GeneratedFeedService.state.evaluations;
     },
     loadingFeeds() {
-      return EvaluationService.state.loading;
+      return GeneratedFeedService.state.loading;
     }
   },
 
   methods: {
     clearCache() {
-      EvaluationService.clearCache()
+      GeneratedFeedService.clearCache()
     },
 
     deleteFeed(id) {
-      EvaluationService.deleteEvaluation(id);
+      GeneratedFeedService.deleteEvaluation(id);
     }
   },
 
   mounted() {
-    EvaluationService.fetchEvaluations();
+    GeneratedFeedService.fetchEvaluations();
   }
 }
 </script>

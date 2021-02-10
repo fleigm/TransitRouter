@@ -1,6 +1,6 @@
 <template>
   <div class="container">
-    <ErrorCard v-for="(error, i) in info.errors" :key="i" :error="error"></ErrorCard>
+    <ErrorCard v-for="(error, i) in errors" :key="i" :error="error" class="my-4"></ErrorCard>
   </div>
 </template>
 
@@ -17,6 +17,12 @@ export default {
       required: true,
     }
   },
+
+  computed: {
+    errors() {
+      return this.info.errors.reverse();
+    }
+  }
 }
 </script>
 

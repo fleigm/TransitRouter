@@ -10,19 +10,19 @@
           :visible.sync="showDialog"
           title="Upload GTFS feed for evaluation">
 
-        <v-evaluation-form></v-evaluation-form>
+        <v-generate-feed-form></v-generate-feed-form>
       </el-dialog>
     </portal>
   </el-button>
 </template>
 
 <script>
-import VEvaluationForm from "./EvaluationForm";
+import VGenerateFeedForm from "./GenerateFeedForm";
 
 export default {
-  name: "v-evaluation-form-dialog",
+  name: "v-generate-feed-dialog",
 
-  components: {VEvaluationForm},
+  components: {VGenerateFeedForm},
 
   data() {
     return {
