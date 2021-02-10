@@ -27,11 +27,15 @@ public class DownloadController {
   @Path("generated")
   @Produces(MediaType.APPLICATION_OCTET_STREAM)
   public Response downloadGeneratedFeed(@PathParam("id") UUID id) {
-    GeneratedFeed info = generatedFeedRepository.findOrFail(id);
+    GeneratedFeed generatedFeed = generatedFeedRepository.findOrFail(id);
+
+    if (!generatedFeed.hasFinished()) {
+      return Response.status(Response.Status.NOT_FOUND).build();
+    }
 
     return Response
-            .ok(info.getFileStoragePath().resolve(GeneratedFeed.GENERATED_GTFS_FEED).toFile())
-            .header("Content-Disposition", "attachment;filename=" + info.getName() + "." + GeneratedFeed.GENERATED_GTFS_FEED)
+            .ok(generatedFeed.getFileStoragePath().resolve(GeneratedFeed.GENERATED_GTFS_FEED).toFile())
+            .header("Content-Disposition", "attachment;filename=" + generatedFeed.getName() + "." + GeneratedFeed.GENERATED_GTFS_FEED)
             .build();
   }
 

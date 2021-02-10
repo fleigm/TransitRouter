@@ -1,6 +1,8 @@
 package de.fleigm.ptmm.feeds.api;
 
 import de.fleigm.ptmm.feeds.GeneratedFeed;
+import de.fleigm.ptmm.feeds.GeneratedFeedRepository;
+import de.fleigm.ptmm.feeds.Status;
 import de.fleigm.ptmm.feeds.evaluation.Evaluation;
 import io.quarkus.test.junit.QuarkusTest;
 import io.restassured.http.ContentType;
@@ -28,6 +30,9 @@ public class DownloadControllerTest {
 
   @Inject
   FeedGenerationService feedGenerationService;
+
+  @Inject
+  GeneratedFeedRepository generatedFeedRepository;
 
 
   private GeneratedFeed info;
@@ -65,6 +70,32 @@ public class DownloadControllerTest {
         .then()
         .statusCode(200)
         .contentType(ContentType.BINARY);
+  }
+
+  @Test
+  void cannot_download_generated_feed_if_not_finished() {
+    GeneratedFeed pending = GeneratedFeed.builder()
+        .name("cannot_download_generated_feed_if_not_finished")
+        .status(Status.PENDING)
+        .build();
+
+    GeneratedFeed failed = GeneratedFeed.builder()
+        .name("cannot_download_generated_feed_if_not_finished")
+        .status(Status.FAILED)
+        .build();
+
+    generatedFeedRepository.save(pending);
+    generatedFeedRepository.save(failed);
+
+    given().when()
+        .get("feeds/" + pending.getId() + "/download/generated")
+        .then()
+        .statusCode(404);
+
+    given().when()
+        .get("feeds/" + failed.getId() + "/download/generated")
+        .then()
+        .statusCode(404);
   }
 
   @Test
