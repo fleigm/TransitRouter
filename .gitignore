@@ -39,3 +39,4 @@ node_modules/
 mix-manifest.json
 /backend/storage/
 /storage/
+/backend/storage_test/
