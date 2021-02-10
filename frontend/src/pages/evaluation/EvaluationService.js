@@ -36,6 +36,10 @@ async function clearCache() {
 async function deleteEvaluation(id) {
     try {
         const response = await http.delete(`feeds/${id}`);
+        let index = state.evaluations.findIndex(feed => feed.id === id);
+        if (index >= 0) {
+            state.evaluations.splice(index, 1);
+        }
         Notification.success(`Deleted evaluation.`);
         return response;
     } catch (error) {
