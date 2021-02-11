@@ -47,7 +47,7 @@ export default {
           label: report.name,
           data: this.evaluations.find(e => e.id === report.id)
               .feed
-              .extensions['de.fleigm.ptmm.feeds.evaluation.Evaluation'].quickStats.accuracy,
+              .extensions['de.fleigm.transitrouter.feeds.evaluation.Evaluation'].quickStats.accuracy,
           backgroundColor: report.color,
         }
       })

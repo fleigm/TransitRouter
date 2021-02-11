@@ -62,7 +62,7 @@
             </template>
             <template slot-scope="scope">
               <el-button @click="showEvaluation(scope.row)"
-                         :disabled="!scope.row.extensions['de.fleigm.ptmm.feeds.evaluation.Evaluation'] || scope.row.status === 'PENDING'"
+                         :disabled="!scope.row.extensions['de.fleigm.transitrouter.feeds.evaluation.Evaluation'] || scope.row.status === 'PENDING'"
                          icon="el-icon-s-data" circle size="mini" title="show evaluation"></el-button>
               <router-link :to="{name: 'evaluation.view', params: {name: scope.row.id}}">
                 <el-button icon="el-icon-right" circle size="mini" title="go to feed"></el-button>
@@ -96,7 +96,7 @@ const Filters = {
   isFinished: (feed) => feed.status === 'FINISHED',
   isPending: (feed) => feed.status === 'PENDING',
   hasFailed: (feed) => feed.status === 'FAILED',
-  hasEvaluation: (feed) => feed.extensions.hasOwnProperty('de.fleigm.ptmm.feeds.evaluation.Evaluation'),
+  hasEvaluation: (feed) => feed.extensions.hasOwnProperty('de.fleigm.transitrouter.feeds.evaluation.Evaluation'),
 }
 
 const sortByDate = (a, b) => new Date(a.createdAt) - new Date(b.createdAt);

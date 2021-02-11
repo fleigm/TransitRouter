@@ -70,7 +70,7 @@ export default {
     },
 
     extension() {
-      return this.feed.extensions['de.fleigm.ptmm.feeds.process.ExecutionTime'];
+      return this.feed.extensions['de.fleigm.transitrouter.feeds.process.ExecutionTime'];
     },
 
     times() {

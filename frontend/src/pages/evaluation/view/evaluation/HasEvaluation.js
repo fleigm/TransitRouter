@@ -8,7 +8,7 @@ export default {
 
     computed: {
         evaluation() {
-            return this.feed.extensions['de.fleigm.ptmm.feeds.evaluation.Evaluation'];
+            return this.feed.extensions['de.fleigm.transitrouter.feeds.evaluation.Evaluation'];
         }
     }
 }

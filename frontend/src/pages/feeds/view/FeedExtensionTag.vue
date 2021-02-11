@@ -4,10 +4,10 @@
 
 <script>
 const extensions = {
-  'de.fleigm.ptmm.feeds.evaluation.Evaluation': {
+  'de.fleigm.transitrouter.feeds.evaluation.Evaluation': {
     text: 'eval',
   },
-  'de.fleigm.ptmm.gtfs.FeedDetails': {
+  'de.fleigm.transitrouter.gtfs.FeedDetails': {
     text: 'info',
   }
 };

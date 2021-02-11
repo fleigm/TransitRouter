@@ -4,8 +4,8 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <artifactId>ptmm-parent</artifactId>
-        <groupId>de.fleigm.ptmm</groupId>
+        <artifactId>transitrouter-parent</artifactId>
+        <groupId>de.fleigm.transitrouter</groupId>
         <version>1.0-SNAPSHOT</version>
     </parent>
     <artifactId>backend</artifactId>

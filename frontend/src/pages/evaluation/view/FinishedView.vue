@@ -98,15 +98,15 @@ export default {
 
   computed: {
     evaluation() {
-      return this.feed.extensions['de.fleigm.ptmm.feeds.evaluation.Evaluation'];
+      return this.feed.extensions['de.fleigm.transitrouter.feeds.evaluation.Evaluation'];
     },
 
     hasFeedDetails() {
-      return this.feed.extensions.hasOwnProperty('de.fleigm.ptmm.gtfs.FeedDetails');
+      return this.feed.extensions.hasOwnProperty('de.fleigm.transitrouter.gtfs.FeedDetails');
     },
 
     feedDetails() {
-      return this.feed.extensions['de.fleigm.ptmm.gtfs.FeedDetails'];
+      return this.feed.extensions['de.fleigm.transitrouter.gtfs.FeedDetails'];
     },
 
     routesAndTripsPerType() {
