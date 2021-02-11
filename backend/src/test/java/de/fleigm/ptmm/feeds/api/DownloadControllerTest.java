@@ -52,6 +52,7 @@ public class DownloadControllerTest {
         .candidateSearchRadius(25.0)
         .beta(2.0)
         .profile("bus_shortest")
+        .withEvaluation(true)
         .build();
 
     FeedGenerationResponse evaluation = feedGenerationService.create(request);

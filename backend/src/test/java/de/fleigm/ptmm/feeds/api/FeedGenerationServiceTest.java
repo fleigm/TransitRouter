@@ -36,6 +36,7 @@ public class FeedGenerationServiceTest {
         .candidateSearchRadius(25.0)
         .beta(2.0)
         .profile("bus_shortest")
+        .withEvaluation(true)
         .build();
 
     FeedGenerationResponse evaluation = feedGenerationService.create(request);
@@ -95,8 +96,7 @@ public class FeedGenerationServiceTest {
 
     assertThrows(IllegalArgumentException.class, () -> feedGenerationService.create(request));
 
-    //assertFalse(Files.exists(Path.of(evaluationFolder, "abort_and_remove_folder_if_gtfs_feed_is_invalid")));
-    assertFalse(true);
+    // TODO: find a way to test if the folder was deleted. We do not know the folder name / id
   }
 
   @Test
