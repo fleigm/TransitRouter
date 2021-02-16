@@ -38,8 +38,11 @@ public class GraphHopperFactory {
         .putObject(Parameters.Routing.TURN_COSTS, true)
         .putObject("block_barriers", false));
 
+    RailFlagEncoder railFlagEncoder = new RailFlagEncoder(new PMap());
+
     EncodingManager encodingManager = EncodingManager.start()
         .add(busFlagEncoder)
+        .add(railFlagEncoder)
         .addRelationTagParser(new BusNetworkRelationTagParser())
         .build();
 
@@ -51,7 +54,8 @@ public class GraphHopperFactory {
             new Profile("bus_fastest").setVehicle("bus").setWeighting("fastest").setTurnCosts(false),
             new Profile("bus_fastest_turn").setVehicle("bus").setWeighting("fastest").setTurnCosts(true),
             new Profile("bus_shortest_turn").setVehicle("bus").setWeighting("shortest").setTurnCosts(true),
-            new Profile("bus_shortest").setVehicle("bus").setWeighting("shortest").setTurnCosts(false)
+            new Profile("bus_shortest").setVehicle("bus").setWeighting("shortest").setTurnCosts(false),
+            new Profile("rail").setVehicle("rail").setWeighting("shortest").setTurnCosts(false)
         );
 
     graphHopper.setDataReaderFile(osmFile.toString());
