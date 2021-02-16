@@ -22,4 +22,12 @@ public class SearchCriteria {
   public String value() {
     return value;
   }
+
+  public int intValue() {
+    return Integer.parseInt(value);
+  }
+
+  public boolean booleanValue() {
+    return Boolean.parseBoolean(value);
+  }
 }
