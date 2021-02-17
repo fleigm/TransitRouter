@@ -56,5 +56,6 @@ public class Report {
     public final double an;
     public final double al;
     public final double avgFd;
+    public int type;
   }
 }

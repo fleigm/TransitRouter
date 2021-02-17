@@ -13,6 +13,7 @@
 <script>
 
 import moment from "moment";
+import number from "../../../filters/NumberFilter";
 
 const defaultOptions = {
   rotation: Math.PI,
@@ -26,8 +27,9 @@ const defaultOptions = {
 
   plugins: {
     labels: {
-      render: (args) => args.value + 's',
-      fontColor: '#fff'
+      render: (args) => number(args.value, '0.00') + 'min',
+      fontColor: '#fff',
+      precision: 0,
     }
   }
 };
@@ -78,17 +80,19 @@ export default {
 
       return Object.entries(durations)
           .filter(([key]) => key !== 'total')
-          .map(([key, duration]) => [key, moment.duration(duration).asSeconds()])
+          .map(([key, duration]) => [key, moment.duration(duration).asMinutes()])
     }
     ,
 
     total() {
-      return moment.duration(this.extension.durations.total).asSeconds();
+      return moment.duration(this.extension.durations.total).asMinutes();
     },
 
     rest() {
       let rest = this.total;
-      this.times.forEach(([key, duration]) => rest - duration);
+      this.times.forEach(([key, duration]) => {
+        rest = rest - duration
+      });
       return rest;
     },
   },

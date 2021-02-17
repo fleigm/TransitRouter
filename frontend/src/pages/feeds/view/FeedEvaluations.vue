@@ -16,7 +16,15 @@
       </div>
     </div>
 
-    <v-reports :evaluations="evaluations">
+    <div class="my-4">
+      <el-checkbox v-model="types.tram">Tram</el-checkbox>
+      <el-checkbox v-model="types.subway">Subway</el-checkbox>
+      <el-checkbox v-model="types.rail">Rail</el-checkbox>
+      <el-checkbox v-model="types.bus">Bus</el-checkbox>
+      <el-button size="mini" type=""  @click="updateTypeFilter" class="ml-4">apply</el-button>
+    </div>
+
+    <v-reports :evaluations="evaluations" :types="typeFilter">
       <template slot-scope="scope">
 
         <div class="grid grid-cols-2 gap-4">
@@ -72,6 +80,13 @@ export default {
     return {
       evaluations: [],
       availableColors: [...colors.reverse()],
+      typeFilter: [0, 1, 2, 3],
+      types: {
+        tram: true,
+        subway: true,
+        rail: true,
+        bus: true,
+      }
     }
   },
 
@@ -99,6 +114,23 @@ export default {
         this.evaluations.splice(index, 1);
       }
     },
+
+    updateTypeFilter() {
+      const filter = [];
+      if (this.types.tram) {
+        filter.push(0);
+      }
+      if (this.types.subway) {
+        filter.push(1);
+      }
+      if (this.types.rail) {
+        filter.push(2);
+      }
+      if (this.types.bus) {
+        filter.push(3);
+      }
+      this.typeFilter = filter;
+    }
   },
 
   created() {

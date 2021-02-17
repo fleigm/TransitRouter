@@ -3,6 +3,9 @@ package de.fleigm.transitrouter.feeds.evaluation;
 import de.fleigm.transitrouter.feeds.GeneratedFeed;
 import de.fleigm.transitrouter.feeds.GeneratedFeedRepository;
 import de.fleigm.transitrouter.feeds.Status;
+import de.fleigm.transitrouter.gtfs.TransitFeed;
+import de.fleigm.transitrouter.gtfs.TransitFeedService;
+import de.fleigm.transitrouter.gtfs.Type;
 
 import javax.inject.Inject;
 import javax.ws.rs.GET;
@@ -22,6 +25,9 @@ public class EvaluationReportController {
   @Inject
   ReportService reportService;
 
+  @Inject
+  TransitFeedService transitFeedService;
+
   @GET
   @Produces(MediaType.APPLICATION_JSON)
   public Response index(@PathParam("id") UUID id) {
@@ -31,9 +37,15 @@ public class EvaluationReportController {
       return Response.status(Response.Status.NOT_FOUND).build();
     }
 
+    TransitFeed transitFeed = transitFeedService.get(info.get().getFeed().getPath());
+
     return info.flatMap(i -> i.getExtension(Evaluation.class))
         .map(Evaluation::getReport)
         .map(reportService::get)
+        .map(report -> {
+          report.entries().forEach(entry -> entry.type = Type.create(transitFeed.getRouteForTrip(entry.tripId).route_type).value());
+          return report;
+        })
         .map(Response::ok)
         .orElse(Response.status(Response.Status.NOT_FOUND))
         .build();

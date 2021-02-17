@@ -9,6 +9,10 @@ export default {
     evaluations: {
       type: Array,
       required: true,
+    },
+    types: {
+      type: Array,
+      default: () => [0, 1, 2, 3],
     }
   },
 
@@ -45,9 +49,7 @@ export default {
       return this.reports.map(report => {
         return {
           label: report.name,
-          data: this.evaluations.find(e => e.id === report.id)
-              .feed
-              .extensions['de.fleigm.transitrouter.feeds.evaluation.Evaluation'].quickStats.accuracy,
+          data: this.computeAccuracy(report),
           backgroundColor: report.color,
         }
       })
@@ -59,7 +61,7 @@ export default {
       return this.reports.map(report => {
         return {
           label: report.name,
-          data: histogram(report.entries.map(e => e.avgFd)),
+          data: histogram(report.entries.filter(this.typeFilter).map(e => e.avgFd)),
           backgroundColor: report.color,
         };
       });
@@ -71,7 +73,7 @@ export default {
       return this.reports.map(report => {
         return {
           label: report.name,
-          data: histogram(report.entries.map(e => e.an)),
+          data: histogram(report.entries.filter(this.typeFilter).map(e => e.an)),
           backgroundColor: report.color,
         };
       });
@@ -83,7 +85,7 @@ export default {
       return this.reports.map(report => {
         return {
           label: report.name,
-          data: histogram(report.entries.map(e => e.al)),
+          data: histogram(report.entries.filter(this.typeFilter).map(e => e.al)),
           backgroundColor: report.color,
         };
       });
@@ -111,13 +113,42 @@ export default {
       this.loading.push(evaluation.id);
       this.$http.get(`feeds/${evaluation.id}/report`)
           .then(({data}) => {
-            this.cache.push({id: evaluation.id, name: evaluation.feed.name, entries: data.entries, color: evaluation.color})
+            this.cache.push({
+              id: evaluation.id,
+              name: evaluation.feed.name,
+              entries: data.entries,
+              color: evaluation.color
+            })
           })
           .finally(() => {
             const index = this.loading.indexOf(x => x.id === evaluation.id);
             this.loading.splice(index, 1);
           });
     },
+
+    typeFilter(entry) {
+      return this.types.includes(entry.type);
+    },
+
+    computeAccuracy(report) {
+      const accuracy = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+
+      const entries = report.entries.filter(this.typeFilter);
+
+      for (let entry of entries) {
+        for (let i = 0; i < 10; i++) {
+          if (entry.an <= i * 0.1) {
+            accuracy[i]++
+          }
+        }
+      }
+
+      for (let i = 0; i < 10; i++) {
+        accuracy[i] /= entries.length;
+      }
+
+      return accuracy;
+    }
   },
 
   watch: {
