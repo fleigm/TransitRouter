@@ -11,6 +11,7 @@ import de.fleigm.transitrouter.feeds.process.FeedGenerationStep;
 import de.fleigm.transitrouter.feeds.process.Process;
 import de.fleigm.transitrouter.gtfs.Feed;
 import de.fleigm.transitrouter.gtfs.TransitFeedService;
+import de.fleigm.transitrouter.gtfs.Type;
 import de.fleigm.transitrouter.presets.Preset;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.slf4j.Logger;
@@ -18,6 +19,7 @@ import org.slf4j.Logger;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import java.nio.file.Path;
+import java.util.Map;
 
 @ApplicationScoped
 public class FeedGenerationService {
@@ -38,13 +40,13 @@ public class FeedGenerationService {
   public FeedGenerationResponse create(GenerateFeedRequest request) {
     GeneratedFeed generatedFeed = GeneratedFeed.builder()
         .name(request.getName())
-        .parameters(Parameters.builder()
+        .parameters(Map.of(Type.BUS, Parameters.builder()
             .sigma(request.getSigma())
             .candidateSearchRadius(request.getCandidateSearchRadius())
             .beta(request.getBeta())
             .profile(request.getProfile())
             .useGraphHopperMapMatching(request.isUseGraphHopperMapMatching())
-            .build())
+            .build()))
         .status(Status.PENDING)
         .build();
 
@@ -67,7 +69,7 @@ public class FeedGenerationService {
 
   public FeedGenerationResponse createFromPreset(Preset preset,
                                                  String name,
-                                                 Parameters parameters,
+                                                 Map<Type, Parameters> parameters,
                                                  boolean withEvaluation) {
 
     GeneratedFeed generatedFeed = GeneratedFeed.builder()

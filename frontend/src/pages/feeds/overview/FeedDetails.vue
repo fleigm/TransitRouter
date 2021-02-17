@@ -48,7 +48,7 @@ export default {
 
       for (const [key, value] of Object.entries(this.feedDetails.routesPerType)) {
         map.push({
-          type: routeTypeToString(key),
+          type: routeTypeToString(key) + ' (' + key + ')',
           routes: value,
           trips: this.feedDetails.tripsPerType[key]
         });

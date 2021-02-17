@@ -4,6 +4,7 @@ import de.fleigm.transitrouter.feeds.GeneratedFeed;
 import de.fleigm.transitrouter.feeds.Parameters;
 import de.fleigm.transitrouter.feeds.Status;
 import de.fleigm.transitrouter.feeds.evaluation.Evaluation;
+import de.fleigm.transitrouter.gtfs.Type;
 import de.fleigm.transitrouter.presets.Preset;
 import io.quarkus.test.junit.QuarkusTest;
 import io.restassured.response.Response;
@@ -14,6 +15,7 @@ import javax.inject.Inject;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
 import static io.restassured.RestAssured.given;
@@ -111,7 +113,7 @@ public class FeedGenerationServiceTest {
     Preset preset = response.as(Preset.class);
 
     FeedGenerationResponse evaluation = feedGenerationService
-        .createFromPreset(preset, "test name", Parameters.defaultParameters(), true);
+        .createFromPreset(preset, "test name", Map.of(Type.BUS, Parameters.defaultParameters()), true);
 
     evaluation.process().get();
 

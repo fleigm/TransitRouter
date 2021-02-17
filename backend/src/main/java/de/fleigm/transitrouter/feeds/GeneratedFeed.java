@@ -4,6 +4,7 @@ import de.fleigm.transitrouter.data.Entity;
 import de.fleigm.transitrouter.data.Extensions;
 import de.fleigm.transitrouter.data.HasExtensions;
 import de.fleigm.transitrouter.gtfs.Feed;
+import de.fleigm.transitrouter.gtfs.Type;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -13,6 +14,7 @@ import lombok.NoArgsConstructor;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 /**
@@ -31,7 +33,8 @@ public class GeneratedFeed extends Entity implements HasExtensions {
   public static final String ORIGINAL_GTFS_FOLDER = "gtfs.original";
 
   private String name;
-  private Parameters parameters;
+  //private Parameters parameters;
+  private Map<Type, Parameters> parameters;
   private Status status;
 
   private Feed feed;

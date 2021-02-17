@@ -1,5 +1,6 @@
 package de.fleigm.transitrouter.feeds.evaluation;
 
+import de.fleigm.transitrouter.gtfs.Type;
 import de.fleigm.transitrouter.util.Unzip;
 import io.quarkus.test.junit.QuarkusTest;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
@@ -10,8 +11,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 @QuarkusTest
 class ShapevlTest {
@@ -42,6 +42,19 @@ class ShapevlTest {
     assertFalse(result.hasFailed());
     assertFalse(result.getMessage().isBlank());
     assertTrue(Files.exists(feedPath.resolve("run.fullreport.tsv")));
+  }
+
+  @Test
+  void command_builder() {
+    Shapevl shapevl = new Shapevl(Path.of("shapevl"));
+
+    Path feed = Path.of("feed");
+    Path groundTruth = Path.of("groundTruth");
+    Path folder = Path.of("folder");
+
+    assertArrayEquals(
+        new String[]{"shapevl", "-m", "0,1,2,3", "-f", "folder", "-g", "groundTruth", "feed"},
+        shapevl.buildCommand(feed, groundTruth, folder, Type.TRAM, Type.SUBWAY, Type.RAIL, Type.BUS));
   }
 
   @Test

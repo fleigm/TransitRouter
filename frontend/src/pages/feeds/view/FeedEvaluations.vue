@@ -3,23 +3,17 @@
     <div class="text-secondary">Evaluation results</div>
 
     <div class="flex gap-4 my-4">
-      <v-card v-for="evaluation in evaluations" :key="evaluation.id"
-              class="flex items-center gap-x-4 relative p-2 text-secondary">
-        <div :style="{background: evaluation.color}"
+      <div v-for="evaluation in evaluations" :key="evaluation.id"
+              :style="{background: evaluation.color}"
+              class="flex items-center gap-x-4 relative p-2 text-secondary rounded-full">
+        <div
              class="px-2 rounded-full text-white inline-block">
           {{ evaluation.feed.name }}
-        </div>
-        <div class="">
-          <div>{{ evaluation.feed.parameters.profile }}</div>
-          <div>
-            {{ evaluation.feed.parameters.sigma }} - {{ evaluation.feed.parameters.beta }} -
-            <span>{{ evaluation.feed.parameters.useGraphHopperMapMatching ? 'GHMM' : 'TR' }}</span>
-          </div>
         </div>
         <div>
           <el-button @click="remove(evaluation)" size="mini" circle icon="el-icon-close"></el-button>
         </div>
-      </v-card>
+      </div>
     </div>
 
     <v-reports :evaluations="evaluations">

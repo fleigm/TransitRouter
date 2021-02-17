@@ -19,12 +19,18 @@
         <el-table-column label="Name" prop="name" width="200"></el-table-column>
         <el-table-column label="Parameters" props="parameters">
           <template slot-scope="scope">
-            <div class="">
-              <div>{{ scope.row.parameters.profile }}</div>
-              <div>
-                {{ scope.row.parameters.sigma }} - {{ scope.row.parameters.beta }} -
-                <span>{{ scope.row.parameters.useGraphHopperMapMatching ? 'GHMM' : 'TR' }}</span>
-              </div>
+            <div class="flex gap-2">
+              <el-popover v-for="(params, type) in scope.row.parameters" :key="type" trigger="hover" placement="top">
+                <h3>{{ type }}</h3>
+                <p>Profile: {{ params.profile }}</p>
+                <p>Sigma: {{ params.sigma }}</p>
+                <p>Beta: {{ params.beta }}</p>
+                <p>CSR: {{ params.candidateSearchRadius }}</p>
+                <p>Router: {{ params.useGraphHopperMapMatching ? 'GHMM' : 'TR'}}</p>
+                <div slot="reference" class="name-wrapper">
+                  <el-tag  size="mini">{{ type | lowercase }}</el-tag>
+                </div>
+              </el-popover>
             </div>
           </template>
         </el-table-column>

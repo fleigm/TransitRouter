@@ -38,6 +38,10 @@
       </div>
     </v-promise>
 
+    <div class="my-8">
+      <v-preset-routing-index></v-preset-routing-index>
+    </div>
+
 
     <div class="my-8">
       <GeneratedFeeds :preset-id="id"></GeneratedFeeds>
@@ -52,10 +56,11 @@ import PresetService from "../PresetService";
 import FeedDetails from "../overview/FeedDetails";
 import VGenerateFeedDialog from "./GenerateFeedDialog";
 import GeneratedFeeds from "./GeneratedFeeds";
+import VPresetRoutingIndex from "./routing/Index";
 
 export default {
   name: "Index",
-  components: {GeneratedFeeds, VGenerateFeedDialog, FeedDetails},
+  components: {VPresetRoutingIndex, GeneratedFeeds, VGenerateFeedDialog, FeedDetails},
   data() {
     return {
       loading: false,

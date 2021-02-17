@@ -4,6 +4,7 @@ import de.fleigm.transitrouter.feeds.GeneratedFeed;
 import de.fleigm.transitrouter.feeds.Status;
 import de.fleigm.transitrouter.feeds.process.ExecutionTime;
 import de.fleigm.transitrouter.feeds.process.Step;
+import de.fleigm.transitrouter.gtfs.Type;
 import de.fleigm.transitrouter.util.StopWatch;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,11 +40,13 @@ public class FeedEvaluationStep implements Step {
     Shapevl.Result shapevlResult = shapevl.run(
         info.getFeed().getFolder(),
         info.getOriginalFeed().getFolder(),
-        info.getFileStoragePath());
+        info.getFileStoragePath(),
+        info.getParameters().keySet().toArray(new Type[0]));
 
     stopWatch.stop();
 
     evaluation.setStatus(shapevlResult.hasFailed() ? Status.FAILED : Status.FINISHED);
+    evaluation.setShapevlCommand(shapevlResult.getCommand());
     evaluation.setShapevlOutput(shapevlResult.getMessage());
     evaluation.setReport(info.getFileStoragePath().resolve(Evaluation.SHAPEVL_REPORT));
     evaluation.setExecutionTime(Duration.of(stopWatch.getMillis(), ChronoUnit.MILLIS));

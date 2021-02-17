@@ -1,30 +1,34 @@
 <template>
-  <div class="grid grid-cols-3">
-    <div>
-      <div>
+  <div class="flex justify-between">
+    <div class="grid grid-cols-2 gap-4">
+      <div v-for="(params, type) in feed.parameters" :key="type">
+        <p>{{ type | capitalize }}</p>
         <div class="flex">
-          <v-metric :value="feed.parameters.profile"
+          <v-metric :value="params.profile"
                     class=""
-                    size="small"
+                    size="mini"
                     title="Profile"
           ></v-metric>
-          <v-metric :value="feed.parameters.useGraphHopperMapMatching ? 'GHMM' : 'TransitRouter'"
+          <v-metric :value="params.useGraphHopperMapMatching ? 'GHMM' : 'TransitRouter'"
                     class=""
-                    size="small"
+                    size="mini"
                     title="Router"
           ></v-metric>
         </div>
         <div class="flex gap-4">
-          <v-metric :value="feed.parameters.beta | number('0.00')"
+          <v-metric :value="params.beta | number('0.00')"
                     class=""
+                    size="mini"
                     title="beta"
           ></v-metric>
-          <v-metric :value="feed.parameters.sigma | number('0')"
+          <v-metric :value="params.sigma | number('0')"
                     class=""
+                    size="mini"
                     title="sigma"
           ></v-metric>
-          <v-metric :value="feed.parameters.candidateSearchRadius | number('0')"
+          <v-metric :value="params.candidateSearchRadius | number('0')"
                     class=""
+                    size="mini"
                     title="CSR"
           ></v-metric>
         </div>

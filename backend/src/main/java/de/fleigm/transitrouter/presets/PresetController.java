@@ -2,7 +2,6 @@ package de.fleigm.transitrouter.presets;
 
 import de.fleigm.transitrouter.events.CreatedQualifier;
 import de.fleigm.transitrouter.events.Events;
-import de.fleigm.transitrouter.feeds.Parameters;
 import de.fleigm.transitrouter.feeds.api.FeedGenerationResponse;
 import de.fleigm.transitrouter.feeds.api.FeedGenerationService;
 import de.fleigm.transitrouter.gtfs.Feed;
@@ -101,13 +100,7 @@ public class PresetController {
     FeedGenerationResponse feedGenerationResponse = feedGenerationService.createFromPreset(
         preset,
         generateFeedRequest.getName(),
-        Parameters.builder()
-            .sigma(generateFeedRequest.getSigma())
-            .candidateSearchRadius(generateFeedRequest.getCandidateSearchRadius())
-            .beta(generateFeedRequest.getBeta())
-            .profile(generateFeedRequest.getProfile())
-            .useGraphHopperMapMatching(generateFeedRequest.isUseGraphHopperMapMatching())
-            .build(),
+        generateFeedRequest.getParameters(),
         generateFeedRequest.isWithEvaluation());
 
     return Response.ok(feedGenerationResponse.generatedFeed()).build();

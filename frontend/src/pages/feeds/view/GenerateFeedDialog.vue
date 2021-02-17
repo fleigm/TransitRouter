@@ -15,36 +15,52 @@
 
           <div class="my-12">
             <el-divider content-position="left">Tuning parameters</el-divider>
-            <el-form-item label="profile" prop="profile">
-              <el-select v-model="formData.profile">
-                <el-option v-for="option in availableProfiles"
-                           :key="option.value"
-                           :label="option.label"
-                           :value="option.value">
-                </el-option>
-              </el-select>
-            </el-form-item>
-            <el-form-item label="sigma" prop="sigma">
-              <el-input-number v-model="formData.sigma" :precision="2"></el-input-number>
-            </el-form-item>
-            <el-form-item label="beta" prop="beta">
-              <el-input-number v-model="formData.beta" :precision="2"></el-input-number>
-            </el-form-item>
-            <el-form-item label="csr" prop="candidateSearchRadius">
-              <el-input-number v-model="formData.candidateSearchRadius" :precision="2"></el-input-number>
-            </el-form-item>
+
+            <el-tabs tab-position="left" active-name="TRAM" class="mt-4">
+              <el-tab-pane v-for="(parameters, type) in formData.parameters"
+                           :key="type"
+                           :label="type"
+                           :name="type">
+                <span slot="label">{{ type }}</span>
+                <el-form-item label="enabled" prop="enabled">
+                  <el-switch v-model="parameters._enabled"></el-switch>
+                </el-form-item>
+                <el-form-item label="profile" prop="profile">
+                  <el-select v-model="parameters.profile" :disabled="!parameters._enabled">
+                    <el-option v-for="option in availableProfiles"
+                               :key="option.value"
+                               :label="option.label"
+                               :value="option.value">
+                    </el-option>
+                  </el-select>
+                </el-form-item>
+                <el-form-item label="sigma" prop="sigma">
+                  <el-input-number v-model="parameters.sigma" :precision="2"
+                                   :disabled="!parameters._enabled"></el-input-number>
+                </el-form-item>
+                <el-form-item label="beta" prop="beta">
+                  <el-input-number v-model="parameters.beta" :precision="2"
+                                   :disabled="!parameters._enabled"></el-input-number>
+                </el-form-item>
+                <el-form-item label="csr" prop="candidateSearchRadius">
+                  <el-input-number v-model="parameters.candidateSearchRadius" :precision="2"
+                                   :disabled="!parameters._enabled"></el-input-number>
+                </el-form-item>
+                <el-form-item label="Router">
+                  <el-switch
+                      v-model="parameters.useGraphHopperMapMatching"
+                      active-text="GHMM"
+                      inactive-text="TransitRouter"
+                      :disabled="!parameters._enabled">
+                  </el-switch>
+                </el-form-item>
+              </el-tab-pane>
+            </el-tabs>
           </div>
 
 
           <div class="my-12">
             <el-divider content-position="left">Options</el-divider>
-            <el-form-item label="Router">
-              <el-switch
-                  v-model="formData.useGraphHopperMapMatching"
-                  active-text="GHMM"
-                  inactive-text="TransitRouter">
-              </el-switch>
-            </el-form-item>
             <el-form-item label="Evaluate feed">
               <el-switch v-model="formData.withEvaluation"></el-switch>
             </el-form-item>
@@ -78,43 +94,74 @@ export default {
       showDialog: false,
       availableProfiles: [
         {
-          value: 'bus_shortest',
-          label: 'shortest path',
-        }, {
           value: 'bus_shortest_turn',
-          label: 'shortest path with turn restrictions'
-        }, {
-          value: 'bus_fastest',
-          label: 'fastest path',
+          label: 'bus - shortest path'
         }, {
           value: 'bus_fastest_turn',
-          label: 'fastest path with turn restrictions',
+          label: 'bus - fastest path',
+        }, {
+          value: 'rail',
+          label: 'rail - shortest path',
         }
       ],
       rules: {
         name: [
           {required: true, message: 'Please enter a name', trigger: 'blur'}
         ],
-        profile: [
-          {required: true, message: 'Please enter a profile', trigger: 'blur'}
-        ],
-        sigma: [
-          {type: 'number', required: true, min: 0, message: 'sigma value must be positive', trigger: 'blur'}
-        ],
-        beta: [
-          {type: 'number', required: true, min: 0, message: 'Beta value must be positive', trigger: 'blur'}
-        ],
-        candidateSearchRadius: [
-          {type: 'number', required: true, min: 0, message: 'Csr value must be positive', trigger: 'blur'}
-        ],
+        parameters: {
+          '*': {
+            profile: [
+              {required: true, message: 'Please enter a profile', trigger: 'blur'}
+            ],
+            sigma: [
+              {type: 'number', required: true, min: 0, message: 'sigma value must be positive', trigger: 'blur'}
+            ],
+            beta: [
+              {type: 'number', required: true, min: 0, message: 'Beta value must be positive', trigger: 'blur'}
+            ],
+            candidateSearchRadius: [
+              {type: 'number', required: true, min: 0, message: 'Csr value must be positive', trigger: 'blur'}
+            ],
+          },
+        }
+
       },
       formData: {
         name: '',
-        profile: 'bus_fastest_turn',
-        sigma: 25.0,
-        beta: 2.0,
-        candidateSearchRadius: 25.0,
-        useGraphHopperMapMatching: false,
+        parameters: {
+          TRAM: {
+            profile: 'rail',
+            sigma: 25.0,
+            beta: 2.0,
+            candidateSearchRadius: 25.0,
+            useGraphHopperMapMatching: false,
+            _enabled: true,
+          },
+          SUBWAY: {
+            profile: 'rail',
+            sigma: 25.0,
+            beta: 2.0,
+            candidateSearchRadius: 25.0,
+            useGraphHopperMapMatching: false,
+            _enabled: true,
+          },
+          RAIL: {
+            profile: 'rail',
+            sigma: 25.0,
+            beta: 2.0,
+            candidateSearchRadius: 25.0,
+            useGraphHopperMapMatching: false,
+            _enabled: true,
+          },
+          BUS: {
+            profile: 'bus_fastest_turn',
+            sigma: 25.0,
+            beta: 2.0,
+            candidateSearchRadius: 25.0,
+            useGraphHopperMapMatching: false,
+            _enabled: true,
+          },
+        },
         withEvaluation: true,
       },
     }

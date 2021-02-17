@@ -116,10 +116,13 @@ public class TransitFeed {
         .collect(Collectors.toList());
 
     return trips.stream()
-        .collect(Collectors.groupingBy(this::getOrderedStopsForTrip))
+        .collect(Collectors.groupingBy(trip -> feed.getOrderedStopListForTrip(trip.trip_id)))
         .entrySet()
         .stream()
-        .map(pattern -> new Pattern(route, pattern.getKey(), pattern.getValue()))
+        .map(pattern -> new Pattern(
+            route,
+            pattern.getKey().stream().map(feed.stops::get).collect(Collectors.toList()),
+            pattern.getValue()))
         .collect(Collectors.toList());
   }
 }

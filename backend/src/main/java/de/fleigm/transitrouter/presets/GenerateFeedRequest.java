@@ -1,12 +1,15 @@
 package de.fleigm.transitrouter.presets;
 
+import de.fleigm.transitrouter.feeds.Parameters;
+import de.fleigm.transitrouter.gtfs.Type;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Positive;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Data
 @AllArgsConstructor
@@ -16,22 +19,17 @@ public class GenerateFeedRequest {
   @NotBlank
   private String name;
 
-  @NotBlank
-  private String profile;
 
+  // Do not use Map<Type, Parameters>, JSONB / Yasson is not able to deserialize enums as keys.
+  // results in string representation at runtime.
+  // See https://github.com/eclipse-ee4j/yasson/issues/283
   @NotNull
-  @Positive
-  private Double sigma;
-
-  @NotNull
-  @Positive
-  private Double candidateSearchRadius;
-
-  @NotNull
-  @Positive
-  private Double beta;
-
-  private boolean useGraphHopperMapMatching;
+  private Map<String, Parameters> parameters;
 
   private boolean withEvaluation;
+
+  public Map<Type, Parameters> getParameters() {
+    return parameters.entrySet().stream()
+        .collect(Collectors.toMap(entry -> Type.valueOf(entry.getKey()), Map.Entry::getValue));
+  }
 }

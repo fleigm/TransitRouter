@@ -4,6 +4,7 @@ import de.fleigm.transitrouter.feeds.GeneratedFeed;
 import de.fleigm.transitrouter.feeds.GeneratedFeedRepository;
 import de.fleigm.transitrouter.feeds.Parameters;
 import de.fleigm.transitrouter.feeds.Status;
+import de.fleigm.transitrouter.gtfs.Type;
 import io.quarkus.test.junit.QuarkusTest;
 import io.restassured.response.Response;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
@@ -16,6 +17,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Map;
 
 import static io.restassured.RestAssured.given;
 import static org.junit.jupiter.api.Assertions.*;
@@ -58,7 +60,7 @@ public class EvaluationEndpointTest {
 
     GeneratedFeed info = GeneratedFeed.builder()
         .name(evaluationName)
-        .parameters(Parameters.defaultParameters())
+        .parameters(Map.of(Type.BUS, Parameters.defaultParameters()))
         .status(status)
         .build();
 
@@ -79,7 +81,7 @@ public class EvaluationEndpointTest {
 
     GeneratedFeed info = GeneratedFeed.builder()
         .name(evaluationName)
-        .parameters(Parameters.defaultParameters())
+        .parameters(Map.of(Type.BUS, Parameters.defaultParameters()))
         .status(Status.PENDING)
         .build();
 

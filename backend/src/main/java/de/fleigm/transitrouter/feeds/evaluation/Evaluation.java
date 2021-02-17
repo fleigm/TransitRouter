@@ -19,6 +19,7 @@ public class Evaluation implements Extension {
 
   private Status status;
   private Path report;
+  private String shapevlCommand;
   private String shapevlOutput;
   private Map<String, Object> quickStats;
   private Duration executionTime;

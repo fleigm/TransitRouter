@@ -4,6 +4,7 @@ import com.conveyal.gtfs.model.Route;
 import com.conveyal.gtfs.model.Stop;
 import com.conveyal.gtfs.model.Trip;
 import com.graphhopper.util.shapes.GHPoint;
+import de.fleigm.transitrouter.gtfs.Type;
 import de.fleigm.transitrouter.routing.Observation;
 import lombok.Data;
 import lombok.experimental.Accessors;
@@ -19,8 +20,16 @@ import java.util.stream.Collectors;
 @Accessors(fluent = true)
 public class Pattern {
   private final Route route;
+  private final Type type;
   private final List<Stop> stops;
   private final List<Trip> trips;
+
+  public Pattern(Route route, List<Stop> stops, List<Trip> trips) {
+    this.route = route;
+    this.stops = stops;
+    this.trips = trips;
+    this.type = Type.create(route.route_type);
+  }
 
   /**
    * @return ordered stops of this pattern as observations

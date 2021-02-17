@@ -2,9 +2,8 @@ package de.fleigm.transitrouter.feeds.api;
 
 import com.graphhopper.GraphHopper;
 import com.graphhopper.util.PMap;
-import de.fleigm.transitrouter.feeds.GeneratedFeed;
 import de.fleigm.transitrouter.feeds.Parameters;
-import de.fleigm.transitrouter.routing.DefaultTransitRouter;
+import de.fleigm.transitrouter.routing.FallbackTransitRouter;
 import de.fleigm.transitrouter.routing.GraphHopperTransitRouter;
 import de.fleigm.transitrouter.routing.TransitRouter;
 
@@ -19,14 +18,6 @@ public interface TransitRouterFactory {
     return create(parameters.toPropertyMap());
   }
 
-  default TransitRouter create(GeneratedFeed info, PMap parameters) {
-    return create(info.getParameters().toPropertyMap().putAll(parameters));
-  }
-
-  default TransitRouter create(GeneratedFeed info) {
-    return create(info, new PMap());
-  }
-
   @ApplicationScoped
   class Default implements TransitRouterFactory {
 
@@ -38,7 +29,7 @@ public interface TransitRouterFactory {
       if (parameters.getBool("use_graph_hopper_map_matching", false)) {
         return new GraphHopperTransitRouter(graphHopper, parameters);
       }
-      return new DefaultTransitRouter(graphHopper, parameters);
+      return new FallbackTransitRouter(graphHopper, parameters);
     }
   }
 }
