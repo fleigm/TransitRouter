@@ -4,7 +4,8 @@ public enum Operation {
   EQUALITY,
   GREATER_THAN,
   LESS_THAN,
-  LIKE;
+  LIKE,
+  NONE;
 
   public static Operation get(char value) {
     switch (value) {
@@ -17,7 +18,7 @@ public enum Operation {
       case '~':
         return LIKE;
       default:
-        return null;
+        return NONE;
     }
   }
 }

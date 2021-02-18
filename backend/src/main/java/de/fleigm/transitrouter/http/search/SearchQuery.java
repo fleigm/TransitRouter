@@ -7,7 +7,13 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class SearchQuery {
+  public static final Pattern SEARCH_CRITERIA_PATTERN = Pattern.compile("(\\w+|\\w+\\.\\w+|\\w+\\.\\w+\\.\\w+)([:~<>])(.+)");
+
   private Map<String, SearchCriteria> criteria;
+
+  private SearchQuery() {
+    this(new HashMap<>());
+  }
 
   public SearchQuery(Map<String, SearchCriteria> criteria) {
     this.criteria = criteria;
@@ -15,6 +21,10 @@ public class SearchQuery {
 
   public boolean has(String key) {
     return criteria.containsKey(key);
+  }
+
+  public boolean has(SearchCriteria searchCriteria) {
+    return criteria.containsValue(searchCriteria);
   }
 
   public SearchCriteria get(String key) {
@@ -57,21 +67,38 @@ public class SearchQuery {
     return this;
   }
 
+  public boolean isEmpty() {
+    return this.criteria.isEmpty();
+  }
+
+  public int size() {
+    return this.criteria.size();
+  }
+
   public static SearchQuery parse(String search) {
-    Map<String, SearchCriteria> criteria = new HashMap<>();
+    SearchQuery searchQuery = new SearchQuery();
 
-    Pattern pattern = Pattern.compile("(\\w+|\\w+\\.\\w+|\\w+\\.\\w+\\.\\w+)(:|~|<|>)(.+?);");
-    Matcher matcher = pattern.matcher(search + ";");
+    for (String searchEntry : search.split(";")) {
+      searchEntry = searchEntry.trim();
+      if (!searchEntry.isBlank()) {
+        searchQuery.add(parseSearchCriteria(searchEntry));
+      }
+    }
 
-    while (matcher.find()) {
+    return searchQuery;
+  }
+
+  private static SearchCriteria parseSearchCriteria(String search) {
+    Matcher matcher = SEARCH_CRITERIA_PATTERN.matcher(search);
+
+    if (matcher.find()) {
       String key = matcher.group(1).trim();
       Operation operation = Operation.get(matcher.group(2).charAt(0));
       String value = matcher.group(3).trim();
 
-      criteria.put(key, new SearchCriteria(key, operation, value));
+      return new SearchCriteria(key, operation, value);
     }
 
-    return new SearchQuery(criteria);
-
+    return SearchCriteria.create(SearchCriteria.WILDCARD_KEY, Operation.NONE, search);
   }
 }
