@@ -48,8 +48,6 @@ export default {
 
   methods: {
     fetch(page = 1) {
-      if (page <= 0 || page > this.page.lastPage) return;
-
       this.loading = true;
 
       return this.$http
