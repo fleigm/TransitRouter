@@ -177,7 +177,7 @@ export default {
           .filter(Filters.isFinished)
           .filter(Filters.hasEvaluation)
           .sort(sortByDate)
-          .slice(0, 3)
+          .slice(0, 1)
           .forEach(this.showEvaluation)
     },
 

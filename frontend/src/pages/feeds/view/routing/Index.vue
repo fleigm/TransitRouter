@@ -16,14 +16,14 @@
                   <div>{{ scope.row.route.route_short_name }}</div>
                 </template>
               </el-table-column>
-              <el-table-column label="name" >
+              <el-table-column label="name">
                 <template slot-scope="scope">
                   <div>{{ scope.row.route.route_long_name }}</div>
                 </template>
               </el-table-column>
               <el-table-column label="type" width="150">
                 <template slot-scope="scope">
-                  <div>{{ scope.row.route.route_type | routeTypeToString}}</div>
+                  <div>{{ scope.row.route.route_type | routeTypeToString }}</div>
                 </template>
               </el-table-column>
               <el-table-column label="trips" width="80">
@@ -48,7 +48,8 @@
                   </div>
                 </template>
                 <template slot-scope="scope">
-                  <el-button size="mini" @click="showDetails(scope.row)" type="text" circle icon="el-icon-map-location"></el-button>
+                  <el-button size="mini" @click="showDetails(scope.row)" type="text" circle
+                             icon="el-icon-map-location"></el-button>
                 </template>
               </el-table-column>
             </el-table>
@@ -112,7 +113,7 @@ export default {
             this.loadingDetails = false;
             this.details = data;
           })
-    }
+    },
   },
 
   mounted() {

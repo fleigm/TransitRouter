@@ -8,6 +8,7 @@ import de.fleigm.transitrouter.feeds.Parameters;
 import de.fleigm.transitrouter.feeds.api.TransitRouterFactory;
 import de.fleigm.transitrouter.gtfs.TransitFeed;
 import de.fleigm.transitrouter.gtfs.TransitFeedService;
+import de.fleigm.transitrouter.gtfs.Type;
 import de.fleigm.transitrouter.http.ResourcePageBuilder;
 import de.fleigm.transitrouter.http.pagination.Page;
 import de.fleigm.transitrouter.http.pagination.Paged;
@@ -66,6 +67,7 @@ public class PresetFeedController {
         uriInfo
     )
         .add("type", this::typeFilter)
+        .add(SearchCriteria.WILDCARD_KEY, this::nameFilter)
         .add("name", this::nameFilter);
 
     Page<Pattern> page = resultBuilder.build(patterns);
@@ -74,7 +76,7 @@ public class PresetFeedController {
   }
 
   private boolean typeFilter(SearchCriteria searchCriteria, Pattern pattern) {
-    return pattern.route().route_type == searchCriteria.intValue();
+    return Type.create(searchCriteria.intValue()).contains(pattern.route().route_type);
   }
 
   private boolean nameFilter(SearchCriteria searchCriteria, Pattern pattern) {
