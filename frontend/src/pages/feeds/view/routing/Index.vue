@@ -38,13 +38,19 @@
               </el-table-column>
               <el-table-column align="right" width="">
                 <template slot="header" slot-scope="scope">
-                  <div class="el-input el-input--mini">
+                  <div class="el-input el-input--mini flex gap-2 items-center">
                     <input type="text"
                            autocomplete="off"
                            placeholder="Type to search"
                            class="el-input__inner"
                            v-model="searchQuery"
                            @change="search(searchQuery)">
+                    <HelperTooltip content="Test Content" title="Search helper" class="text-lg">
+                      <p>free text - search for name</p>
+                      <p>name:&ltNAME&gt - search for name</p>
+                      <p>type:&lt1-4&gt - search for type</p>
+                      <p>search query delimiter - ;</p>
+                    </HelperTooltip>
                   </div>
                 </template>
                 <template slot-scope="scope">

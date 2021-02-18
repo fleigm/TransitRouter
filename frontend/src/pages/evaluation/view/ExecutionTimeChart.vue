@@ -2,7 +2,7 @@
   <div class="relative" v-if="extension">
     <v-doughnut-chart :data="dataSet" :options="options" class="relative h-48"></v-doughnut-chart>
     <div class="absolute w-full bottom-1/4 text-center text-xl text-secondary">
-      total: {{ total | number('0.0') }}s
+      total: {{ total | number('0.0') }}m
     </div>
   </div>
   <div v-else class="text-secondary p-2">
@@ -27,7 +27,7 @@ const defaultOptions = {
 
   plugins: {
     labels: {
-      render: (args) => number(args.value, '0.00') + 'min',
+      render: (args) => number(args.value, '0.0') + 'm',
       fontColor: '#fff',
       precision: 0,
     }

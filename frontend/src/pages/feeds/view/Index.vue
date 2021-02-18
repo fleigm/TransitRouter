@@ -34,7 +34,9 @@
           </div>
         </div>
 
-        <FeedDetails :preset="preset"></FeedDetails>
+        <v-card>
+          <FeedDetails :preset="preset"></FeedDetails>
+        </v-card>
       </div>
     </v-promise>
 
