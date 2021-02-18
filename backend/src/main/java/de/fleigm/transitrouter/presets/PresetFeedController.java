@@ -60,15 +60,14 @@ public class PresetFeedController {
 
     List<Pattern> patterns = cachedPatternService.getPatternsForFeed(preset.getFeed());
 
-    ResourcePageBuilder<Pattern> resultBuilder = new ResourcePageBuilder<Pattern>(
-        paged,
-        SearchQuery.parse(search),
-        SortQuery.parse(sort.isBlank() ? "_none_:asc" : sort),
-        uriInfo
-    )
-        .add("type", this::typeFilter)
-        .add(SearchCriteria.WILDCARD_KEY, this::nameFilter)
-        .add("name", this::nameFilter);
+    ResourcePageBuilder<Pattern> resultBuilder = new ResourcePageBuilder<Pattern>()
+        .pagination(paged)
+        .uriInfo(uriInfo)
+        .searchQuery(SearchQuery.parse(search))
+        .sortQuery(SortQuery.parse(sort.isBlank() ? "_none_:asc" : sort))
+        .addSearch("type", this::typeFilter)
+        .addSearch("name", this::nameFilter)
+        .addSearch(SearchCriteria.WILDCARD_KEY, this::nameFilter);
 
     Page<Pattern> page = resultBuilder.build(patterns);
 

@@ -9,10 +9,18 @@ import de.fleigm.transitrouter.feeds.GeneratedFeedRepository;
 import de.fleigm.transitrouter.feeds.Status;
 import de.fleigm.transitrouter.gtfs.TransitFeed;
 import de.fleigm.transitrouter.gtfs.TransitFeedService;
+import de.fleigm.transitrouter.gtfs.Type;
+import de.fleigm.transitrouter.http.ResourcePageBuilder;
 import de.fleigm.transitrouter.http.pagination.Page;
 import de.fleigm.transitrouter.http.pagination.Paged;
+import de.fleigm.transitrouter.http.search.SearchCriteria;
+import de.fleigm.transitrouter.http.search.SearchQuery;
 import de.fleigm.transitrouter.http.sort.SortQuery;
 import de.fleigm.transitrouter.http.views.View;
+import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.ToString;
 
 import javax.inject.Inject;
 import javax.ws.rs.BeanParam;
@@ -28,9 +36,9 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Path("feeds/{id}/trips")
 public class EvaluationTripController {
@@ -72,8 +80,6 @@ public class EvaluationTripController {
         })
         .orElse(Response.status(Response.Status.NOT_FOUND))
         .build();
-
-
   }
 
   @GET
@@ -90,65 +96,100 @@ public class EvaluationTripController {
       return Response.status(Response.Status.NOT_FOUND).build();
     }
 
-    Evaluation evaluation = info.getExtension(Evaluation.class).get();
-    Report report = reportService.get(evaluation.getReport());
-    Stream<Report.Entry> entryQueryStream = report.entries().stream();
-
-    if (!search.isBlank()) {
-      entryQueryStream = entryQueryStream.filter(entry -> entry.tripId.contains(search));
-    }
-
-    if (!sort.isBlank()) {
-      Comparator<Report.Entry> comparator = createComparator(SortQuery.parse(sort));
-      if (comparator != null) {
-        if (SortQuery.parse(sort).order() == SortQuery.SortOrder.DESC) {
-          comparator = comparator.reversed();
-        }
-        entryQueryStream = entryQueryStream.sorted(comparator);
-      }
-    }
-
     TransitFeed transitFeed = transitFeedService.get(info.getFeed().getPath());
+    List<Entry> entries;
 
-    List<Report.Entry> entries = entryQueryStream.collect(Collectors.toList());
+    ResourcePageBuilder<Entry> resultBuilder = new ResourcePageBuilder<Entry>()
+        .uriInfo(uriInfo)
+        .pagination(paged)
+        .searchQuery(SearchQuery.parse(search))
+        .sortQuery(SortQuery.parse(sort.isBlank() ? "_none_:asc" : sort))
+        .addSearch("type", this::typeFilter)
+        .addSearch("name", this::nameFilter)
+        .addSearch(SearchCriteria.WILDCARD_KEY, this::wildCardFilter);
 
-    List<View> views = entries.stream()
-        .skip(paged.getOffset())
-        .limit(paged.getLimit())
-        .map(entry -> new View()
-            .add("tripId", entry.tripId())
-            .add("an", entry.an())
-            .add("al", entry.al())
-            .add("avgFd", entry.avgFd())
-            .add("route", transitFeed.getRouteForTrip(entry.tripId()).route_short_name))
-        .collect(Collectors.toList());
+    Optional<Evaluation> evaluation = info.getExtension(Evaluation.class);
+    if (evaluation.isPresent()) {
+      Report report = reportService.get(evaluation.get().getReport());
+      entries = report.entries()
+          .stream()
+          .map(entry -> Entry.create(entry, transitFeed))
+          .collect(Collectors.toList());
 
-    var page = Page.<View>builder()
-        .data(views)
-        .currentPage(paged.getPage())
-        .perPage(paged.getLimit())
-        .total(entries.size())
-        .uri(uriInfo.getAbsolutePath())
-        .build();
+      resultBuilder
+          .addSort("an", Comparator.comparingDouble(Entry::getAn))
+          .addSort("al", Comparator.comparingDouble(Entry::getAl))
+          .addSort("avgFd", Comparator.comparingDouble(Entry::getAvgFd));
+    } else {
+      entries = transitFeed.trips()
+          .keySet()
+          .stream()
+          .map(tripId -> Entry.create(tripId, transitFeed))
+          .collect(Collectors.toList());
+    }
+
+
+    Page<Entry> page = resultBuilder.build(entries);
 
     return Response.ok(page).build();
+  }
 
+  private boolean typeFilter(SearchCriteria searchCriteria, Entry entry) {
+    return entry.type.contains(searchCriteria.intValue());
+  }
+
+  private boolean nameFilter(SearchCriteria searchCriteria, Entry entry) {
+    return entry.routeShortName.contains(searchCriteria.value())
+           || entry.routeLongName.contains(searchCriteria.value());
+  }
+
+  private boolean wildCardFilter(SearchCriteria searchCriteria, Entry entry) {
+    return entry.tripId.contains(searchCriteria.value())
+           || entry.routeId.contains(searchCriteria.value())
+           || entry.routeShortName.contains(searchCriteria.value())
+           || entry.routeLongName.contains(searchCriteria.value());
   }
 
 
-  private Comparator<Report.Entry> createComparator(SortQuery sortQuery) {
-    Comparator<Report.Entry> comparator = null;
-    switch (sortQuery.attribute()) {
-      case "an":
-        comparator = Comparator.comparingDouble(Report.Entry::an);
-        break;
-      case "al":
-        comparator = Comparator.comparingDouble(Report.Entry::al);
-        break;
-      case "avgFd":
-        comparator = Comparator.comparingDouble(Report.Entry::avgFd);
-        break;
+  @Getter
+  @AllArgsConstructor
+  @EqualsAndHashCode
+  @ToString
+  public static class Entry {
+    public final String tripId;
+    public final double an;
+    public final double al;
+    public final double avgFd;
+    public final Type type;
+    public final String routeId;
+    public final String routeShortName;
+    public final String routeLongName;
+
+    public static Entry create(String tripId, TransitFeed transitFeed) {
+      Route route = transitFeed.getRouteForTrip(tripId);
+      return new Entry(
+          tripId,
+          0, 0, 0,
+          Type.create(route.route_type),
+          route.route_id,
+          route.route_short_name,
+          route.route_long_name
+      );
     }
-    return comparator;
+
+    public static Entry create(Report.Entry entry, TransitFeed transitFeed) {
+      Route route = transitFeed.getRouteForTrip(entry.tripId);
+      return new Entry(
+          entry.tripId,
+          entry.an,
+          entry.al,
+          entry.avgFd,
+          Type.create(route.route_type),
+          route.route_id,
+          route.route_short_name,
+          route.route_long_name
+
+      );
+    }
   }
 }

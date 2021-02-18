@@ -8,18 +8,19 @@
                 stripe
                 :fit="true"
                 @sort-change="({prop, order}) => sortBy(prop, order)">
-        <el-table-column prop="tripId"
-                         label="Trip"
-        ></el-table-column>
-        <el-table-column prop="route"
-                         label="Route"
-        ></el-table-column>
-        <el-table-column prop="an" label="A_n" sortable="custom" width="90">
+        <el-table-column prop="tripId" label="Trip" width="180"></el-table-column>
+        <el-table-column prop="routeShortName" label="Route" width="400">
+          <template slot-scope="scope">
+            {{ scope.row.routeShortName }} | {{ scope.row.routeLongName }}
+          </template>
+        </el-table-column>
+        <el-table-column prop="type" label="Type" width="100"></el-table-column>
+        <el-table-column prop="an" label="A_n" sortable="custom" width="70">
           <template slot-scope="scope">
             {{ scope.row.an | number('0.00') }}
           </template>
         </el-table-column>
-        <el-table-column prop="al" label="A_l" sortable="custom" width="90">
+        <el-table-column prop="al" label="A_l" sortable="custom" width="70">
           <template slot-scope="scope">
             {{ scope.row.al | number('0.00') }}
           </template>

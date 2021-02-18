@@ -92,7 +92,6 @@ export default {
 
   data() {
     return {
-      report: [],
     }
   },
 
@@ -138,17 +137,9 @@ export default {
   },
 
   methods: {
-    fetchReport() {
-      const name = this.$route.params.name;
-      this.$http.get(`feeds/${name}/report`)
-          .then(({data}) => {
-            this.report = data.entries;
-          })
-    }
   },
 
   mounted() {
-    this.fetchReport();
   }
 }
 </script>

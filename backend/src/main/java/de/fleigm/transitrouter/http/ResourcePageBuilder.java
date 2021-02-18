@@ -19,27 +19,37 @@ public class ResourcePageBuilder<T> {
   private final StreamSearchHelper<T> searchHelper = new StreamSearchHelper<>();
   private final StreamSortHelper<T> sortHelper = new StreamSortHelper<>();
 
-  private final Paged pagination;
-  private final SearchQuery searchQuery;
-  private final SortQuery sortQuery;
-  private final UriInfo uriInfo;
+  private Paged pagination;
+  private SearchQuery searchQuery;
+  private SortQuery sortQuery;
+  private UriInfo uriInfo;
 
-  public ResourcePageBuilder(Paged pagination,
-                             SearchQuery searchQuery,
-                             SortQuery sortQuery,
-                             UriInfo uriInfo) {
+  public ResourcePageBuilder<T> pagination(Paged pagination) {
     this.pagination = pagination;
-    this.searchQuery = searchQuery;
-    this.sortQuery = sortQuery;
-    this.uriInfo = uriInfo;
+    return this;
   }
 
-  public ResourcePageBuilder<T> add(String key, SearchFilter<T> searchFilter) {
+  public ResourcePageBuilder<T> searchQuery(SearchQuery searchQuery) {
+    this.searchQuery = searchQuery;
+    return this;
+  }
+
+  public ResourcePageBuilder<T> sortQuery(SortQuery sortQuery) {
+    this.sortQuery = sortQuery;
+    return this;
+  }
+
+  public ResourcePageBuilder<T> uriInfo(UriInfo uriInfo) {
+    this.uriInfo = uriInfo;
+    return this;
+  }
+
+  public ResourcePageBuilder<T> addSearch(String key, SearchFilter<T> searchFilter) {
     searchHelper.add(key, searchFilter);
     return this;
   }
 
-  public ResourcePageBuilder<T> add(String key, Comparator<T> comparator) {
+  public ResourcePageBuilder<T> addSort(String key, Comparator<T> comparator) {
     sortHelper.add(key, comparator);
     return this;
   }
