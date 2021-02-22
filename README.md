@@ -24,7 +24,9 @@ Set the *app.evaluation-tool* property to *shapevl* located in your project root
 - osm file for Baden-Württemberg: [download](http://download.geofabrik.de/europe/germany/baden-wuerttemberg-latest.osm.pbf)
 - GTFS Feed Stuttgart: [download](https://www.openvvs.de/dataset/e66f03e4-79f2-41d0-90f1-166ca609e491/resource/bfbb59c7-767c-4bca-bbb2-d8d32a3e0378/download/vvs_gtfs.zip)
 
- 
+The test currently require the osm file of Baden-Württemberg. This will be (hopefully) changed in the future. 
+
+
 ## Development
 run `.\mvnw clean quarkus:dev` to start the quarkus backend. The API is available via localhost:8080
 
