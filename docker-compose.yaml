@@ -8,7 +8,7 @@ services:
     environment:
       APP_GH_OSM: '/app/resources/bw.osm.pbf'
       APP_STORAGE: '/app/storage'
-      EVALUATION_TOOL: '/app/shapevl'
+      APP_EVALUATION_TOOL: '/app/shapevl'
     volumes:
       #- /home/michi-pc/uni/bachelor/project/dr:/app/storage
       - /home/michi-pc/uni/bachelor/project/resources:/app/resources

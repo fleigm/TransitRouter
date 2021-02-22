@@ -21,6 +21,7 @@ ENV JAVA_OPTIONS="-Dquarkus.http.host=0.0.0.0 -Djava.util.logging.manager=org.jb
 COPY backend/target/lib/* ./lib/
 COPY backend/target/*-runner.jar ./app.jar
 COPY shapevl ./
+RUN chmod 777 ./shapevl
 
 EXPOSE 8080
 
