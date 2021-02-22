@@ -53,7 +53,7 @@ class ShapevlTest {
     Path folder = Path.of("folder");
 
     assertArrayEquals(
-        new String[]{"shapevl", "-m", "0,1,2,3", "-f", "folder", "-g", "groundTruth", "feed"},
+        new String[]{"shapevl", "-f", "folder", "-g", "groundTruth", "feed"},
         shapevl.buildCommand(feed, groundTruth, folder, Type.TRAM, Type.SUBWAY, Type.RAIL, Type.BUS));
   }
 

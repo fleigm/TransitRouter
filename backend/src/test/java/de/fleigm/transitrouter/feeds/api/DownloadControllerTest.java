@@ -2,8 +2,10 @@ package de.fleigm.transitrouter.feeds.api;
 
 import de.fleigm.transitrouter.feeds.GeneratedFeed;
 import de.fleigm.transitrouter.feeds.GeneratedFeedRepository;
+import de.fleigm.transitrouter.feeds.Parameters;
 import de.fleigm.transitrouter.feeds.Status;
 import de.fleigm.transitrouter.feeds.evaluation.Evaluation;
+import de.fleigm.transitrouter.gtfs.Type;
 import io.quarkus.test.junit.QuarkusTest;
 import io.restassured.http.ContentType;
 import io.restassured.response.Response;
@@ -48,10 +50,7 @@ public class DownloadControllerTest {
     GenerateFeedRequest request = GenerateFeedRequest.builder()
         .name("download_test")
         .gtfsFeed(FileUtils.openInputStream(testFeed))
-        .sigma(25.0)
-        .candidateSearchRadius(25.0)
-        .beta(2.0)
-        .profile("bus_shortest")
+        .parameters(Type.BUS, Parameters.defaultParameters())
         .withEvaluation(true)
         .build();
 

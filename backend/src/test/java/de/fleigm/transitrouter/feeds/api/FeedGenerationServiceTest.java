@@ -34,12 +34,11 @@ public class FeedGenerationServiceTest {
     GenerateFeedRequest request = GenerateFeedRequest.builder()
         .name("happy_path")
         .gtfsFeed(FileUtils.openInputStream(testFeed))
-        .sigma(25.0)
-        .candidateSearchRadius(25.0)
-        .beta(2.0)
-        .profile("bus_shortest")
+        .parameters(Type.BUS, Parameters.defaultParameters())
         .withEvaluation(true)
         .build();
+
+    Map<Type, Parameters> parameters = request.getParameters();
 
     FeedGenerationResponse evaluation = feedGenerationService.create(request);
 
@@ -67,10 +66,12 @@ public class FeedGenerationServiceTest {
     GenerateFeedRequest request = GenerateFeedRequest.builder()
         .name("test_handle_failure")
         .gtfsFeed(FileUtils.openInputStream(testFeed))
-        .sigma(25.0)
-        .candidateSearchRadius(25.0)
-        .beta(2.0)
-        .profile("invalid_profile")
+        .parameters(Type.BUS, Parameters.builder()
+            .sigma(25.0)
+            .candidateSearchRadius(25.0)
+            .beta(2.0)
+            .profile("invalid_profile")
+            .build())
         .build();
 
     FeedGenerationResponse evaluation = feedGenerationService.create(request);
@@ -90,10 +91,12 @@ public class FeedGenerationServiceTest {
     GenerateFeedRequest request = GenerateFeedRequest.builder()
         .name("abort_and_remove_folder_if_gtfs_feed_is_invalid")
         .gtfsFeed(FileUtils.openInputStream(invalidFeed))
-        .sigma(25.0)
-        .candidateSearchRadius(25.0)
-        .beta(2.0)
-        .profile("invalid_profile")
+        .parameters(Type.BUS, Parameters.builder()
+            .sigma(25.0)
+            .candidateSearchRadius(25.0)
+            .beta(2.0)
+            .profile("invalid_profile")
+            .build())
         .build();
 
     assertThrows(IllegalArgumentException.class, () -> feedGenerationService.create(request));

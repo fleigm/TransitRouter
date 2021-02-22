@@ -40,13 +40,7 @@ public class FeedGenerationService {
   public FeedGenerationResponse create(GenerateFeedRequest request) {
     GeneratedFeed generatedFeed = GeneratedFeed.builder()
         .name(request.getName())
-        .parameters(Map.of(Type.BUS, Parameters.builder()
-            .sigma(request.getSigma())
-            .candidateSearchRadius(request.getCandidateSearchRadius())
-            .beta(request.getBeta())
-            .profile(request.getProfile())
-            .useGraphHopperMapMatching(request.isUseGraphHopperMapMatching())
-            .build()))
+        .parameters(request.getParameters())
         .status(Status.PENDING)
         .build();
 

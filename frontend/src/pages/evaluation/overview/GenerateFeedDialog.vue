@@ -8,7 +8,8 @@
     <portal>
       <el-dialog
           :visible.sync="showDialog"
-          title="Upload GTFS feed for evaluation">
+          title="Upload GTFS feed for evaluation"
+          width="800px">
 
         <v-generate-feed-form></v-generate-feed-form>
       </el-dialog>
@@ -26,7 +27,7 @@ export default {
 
   data() {
     return {
-      showDialog: false,
+      showDialog: true,
     }
   },
 

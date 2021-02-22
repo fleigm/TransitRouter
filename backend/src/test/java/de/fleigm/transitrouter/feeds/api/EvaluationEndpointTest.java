@@ -13,6 +13,8 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
 import javax.inject.Inject;
+import javax.json.bind.Jsonb;
+import javax.json.bind.JsonbBuilder;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -31,16 +33,18 @@ public class EvaluationEndpointTest {
   @Inject
   GeneratedFeedRepository generatedFeedRepository;
 
+  private Jsonb jsonb = JsonbBuilder.create();
+
   @Test
   void send_evaluation_request() throws IOException {
     String resourceAsStream = getClass().getClassLoader().getResource("test_feed.zip").getFile();
+
+    String params = jsonb.toJson(Map.of("BUS", Parameters.defaultParameters()));
+
     Response response = given()
         .multiPart("feed", new File(resourceAsStream))
         .multiPart("name", "endpoint_happy_path")
-        .multiPart("profile", "bus_shortest")
-        .multiPart("sigma", 25)
-        .multiPart("candidateSearchRadius", 25)
-        .multiPart("beta", 2.0)
+        .multiPart("parameters", params)
         .when()
         .post("feeds");
 

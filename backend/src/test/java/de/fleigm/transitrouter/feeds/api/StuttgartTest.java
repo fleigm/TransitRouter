@@ -2,6 +2,8 @@ package de.fleigm.transitrouter.feeds.api;
 
 import com.graphhopper.GraphHopper;
 import de.fleigm.transitrouter.feeds.GeneratedFeedRepository;
+import de.fleigm.transitrouter.feeds.Parameters;
+import de.fleigm.transitrouter.gtfs.Type;
 import de.fleigm.transitrouter.routing.GraphHopperTransitRouter;
 import io.quarkus.test.junit.QuarkusTest;
 import org.apache.commons.io.FileUtils;
@@ -48,10 +50,12 @@ public class StuttgartTest {
     GenerateFeedRequest request = GenerateFeedRequest.builder()
         .name("st_complete")
         .gtfsFeed(FileUtils.openInputStream(testFeed))
-        .sigma(10.0)
-        .candidateSearchRadius(10.0)
-        .beta(1.0)
-        .profile("bus_fastest_turn")
+        .parameters(Type.BUS, Parameters.builder()
+            .sigma(25.0)
+            .candidateSearchRadius(25.0)
+            .beta(2.0)
+            .profile("invalid_profile")
+            .build())
         .build();
 
     FeedGenerationService feedGenerationService = new FeedGenerationService();
@@ -74,10 +78,12 @@ public class StuttgartTest {
     GenerateFeedRequest request = GenerateFeedRequest.builder()
         .name(profile)
         .gtfsFeed(FileUtils.openInputStream(testFeed))
-        .sigma(25.0)
-        .candidateSearchRadius(25.0)
-        .beta(2.0)
-        .profile(profile)
+        .parameters(Type.BUS, Parameters.builder()
+            .sigma(25.0)
+            .candidateSearchRadius(25.0)
+            .beta(2.0)
+            .profile("invalid_profile")
+            .build())
         .build();
 
     FeedGenerationResponse result = feedGenerationService.create(request);
@@ -99,10 +105,12 @@ public class StuttgartTest {
     GenerateFeedRequest request = GenerateFeedRequest.builder()
         .name(String.format("vg_converted_%.0f_%.1f", sigma, beta))
         .gtfsFeed(FileUtils.openInputStream(feed))
-        .sigma(sigma)
-        .candidateSearchRadius(sigma)
-        .beta(beta)
-        .profile("bus_fastest_turn")
+        .parameters(Type.BUS, Parameters.builder()
+            .sigma(25.0)
+            .candidateSearchRadius(25.0)
+            .beta(2.0)
+            .profile("invalid_profile")
+            .build())
         .build();
 
     FeedGenerationResponse result = feedGenerationService.create(request);
@@ -121,20 +129,24 @@ public class StuttgartTest {
     GenerateFeedRequest ptmmRequest = GenerateFeedRequest.builder()
         .name(String.format("ptmm_paris_10_1_%s", profile))
         .gtfsFeed(FileUtils.openInputStream(feed))
-        .sigma(10.0)
-        .candidateSearchRadius(10.0)
-        .beta(1.0)
-        .profile(profile)
+        .parameters(Type.BUS, Parameters.builder()
+            .sigma(25.0)
+            .candidateSearchRadius(25.0)
+            .beta(2.0)
+            .profile("invalid_profile")
+            .build())
         .build();
 
     GenerateFeedRequest ghRequest = GenerateFeedRequest.builder()
         .name(String.format("graphHopper_paris_10_1_%s", profile))
         .gtfsFeed(FileUtils.openInputStream(feed))
-        .sigma(10.0)
-        .candidateSearchRadius(10.0)
-        .beta(1.0)
-        .profile(profile)
-        .useGraphHopperMapMatching(true)
+        .parameters(Type.BUS, Parameters.builder()
+            .sigma(25.0)
+            .candidateSearchRadius(25.0)
+            .beta(2.0)
+            .profile("invalid_profile")
+            .useGraphHopperMapMatching(true)
+            .build())
         .build();
 
     FeedGenerationResponse ptmmResult = feedGenerationService.create(ptmmRequest);
@@ -157,10 +169,12 @@ public class StuttgartTest {
     GenerateFeedRequest request = GenerateFeedRequest.builder()
         .name("st_gh_complete")
         .gtfsFeed(FileUtils.openInputStream(testFeed))
-        .sigma(25.0)
-        .candidateSearchRadius(25.0)
-        .beta(2.0)
-        .profile("bus_fastest")
+        .parameters(Type.BUS, Parameters.builder()
+            .sigma(25.0)
+            .candidateSearchRadius(25.0)
+            .beta(2.0)
+            .profile("invalid_profile")
+            .build())
         .build();
 
     FeedGenerationService service = new FeedGenerationService();

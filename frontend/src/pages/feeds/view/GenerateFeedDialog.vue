@@ -4,28 +4,20 @@
     <span>Generate Feed</span>
 
     <portal>
-      <el-dialog
-          :visible.sync="showDialog"
-          title="Generate new feed">
-
-        <el-form ref="generate-feed-form" :model="formData" :rules="rules" label-width="150px" size="mini">
+      <el-dialog :visible.sync="showDialog" title="Generate new feed" width="800px">
+        <el-form ref="generate-feed-form" :model="formData" :rules="rules" label-width="120px" size="mini">
           <el-form-item label="name" prop="name">
             <el-input v-model="formData.name"></el-input>
           </el-form-item>
 
           <div class="my-12">
-            <el-divider content-position="left">Tuning parameters</el-divider>
-
-            <el-tabs tab-position="left" active-name="TRAM" class="mt-4">
-              <el-tab-pane v-for="(parameters, type) in formData.parameters"
-                           :key="type"
-                           :label="type"
-                           :name="type">
-                <span slot="label">{{ type }}</span>
-                <el-form-item label="enabled" prop="enabled">
+            <div class="grid grid-cols-2 gap-8">
+              <div v-for="(parameters, type) in formData.parameters" :key="type">
+                <el-divider content-position="left" slot="label">{{ type }}</el-divider>
+                <el-form-item label="enabled" :prop="'parameters.' + type + '.enabled'">
                   <el-switch v-model="parameters._enabled"></el-switch>
                 </el-form-item>
-                <el-form-item label="profile" prop="profile">
+                <el-form-item label="profile" :prop="'parameters.' + type + '.profile'">
                   <el-select v-model="parameters.profile" :disabled="!parameters._enabled">
                     <el-option v-for="option in availableProfiles"
                                :key="option.value"
@@ -34,16 +26,12 @@
                     </el-option>
                   </el-select>
                 </el-form-item>
-                <el-form-item label="sigma" prop="sigma">
-                  <el-input-number v-model="parameters.sigma" :precision="2"
+                <el-form-item label="sigma" :prop="'parameters.' + type + '.sigma'">
+                  <el-input-number v-model="parameters.sigma" :precision="2" controls-position="right"
                                    :disabled="!parameters._enabled"></el-input-number>
                 </el-form-item>
-                <el-form-item label="beta" prop="beta">
-                  <el-input-number v-model="parameters.beta" :precision="2"
-                                   :disabled="!parameters._enabled"></el-input-number>
-                </el-form-item>
-                <el-form-item label="csr" prop="candidateSearchRadius">
-                  <el-input-number v-model="parameters.candidateSearchRadius" :precision="2"
+                <el-form-item label="beta" :prop="'parameters.' + type + '.beta'">
+                  <el-input-number v-model="parameters.beta" :precision="2" controls-position="right"
                                    :disabled="!parameters._enabled"></el-input-number>
                 </el-form-item>
                 <el-form-item label="Router">
@@ -54,8 +42,8 @@
                       :disabled="!parameters._enabled">
                   </el-switch>
                 </el-form-item>
-              </el-tab-pane>
-            </el-tabs>
+              </div>
+            </div>
           </div>
 
 
@@ -78,6 +66,23 @@
 </template>
 
 <script>
+import {copyObject} from "../../../Helper";
+
+const parameterRules = {
+  profile: [
+    {required: true, message: 'Please enter a profile', trigger: 'blur'}
+  ],
+  sigma: [
+    {type: 'number', required: true, min: 0, message: 'sigma value must be positive', trigger: 'blur'}
+  ],
+  beta: [
+    {type: 'number', required: true, min: 0, message: 'Beta value must be positive', trigger: 'blur'}
+  ],
+  candidateSearchRadius: [
+    {type: 'number', required: true, min: 0, message: 'Csr value must be positive', trigger: 'blur'}
+  ],
+}
+
 
 export default {
   name: "v-generate-feed-dialog",
@@ -108,23 +113,21 @@ export default {
         name: [
           {required: true, message: 'Please enter a name', trigger: 'blur'}
         ],
-        parameters: {
-          '*': {
-            profile: [
-              {required: true, message: 'Please enter a profile', trigger: 'blur'}
-            ],
-            sigma: [
-              {type: 'number', required: true, min: 0, message: 'sigma value must be positive', trigger: 'blur'}
-            ],
-            beta: [
-              {type: 'number', required: true, min: 0, message: 'Beta value must be positive', trigger: 'blur'}
-            ],
-            candidateSearchRadius: [
-              {type: 'number', required: true, min: 0, message: 'Csr value must be positive', trigger: 'blur'}
-            ],
-          },
-        }
-
+        feed: [
+          {required: true, message: 'Please add a gtfs feed', trigger: 'change'}
+        ],
+        'parameters.TRAM.profile': parameterRules.profile,
+        'parameters.TRAM.sigma': parameterRules.sigma,
+        'parameters.TRAM.beta': parameterRules.beta,
+        'parameters.SUBWAY.profile': parameterRules.profile,
+        'parameters.SUBWAY.sigma': parameterRules.sigma,
+        'parameters.SUBWAY.beta': parameterRules.beta,
+        'parameters.RAIL.profile':parameterRules.profile,
+        'parameters.RAIL.sigma':parameterRules.sigma,
+        'parameters.RAIL.beta':parameterRules.beta,
+        'parameters.BUS.profile': parameterRules.profile,
+        'parameters.BUS.sigma': parameterRules.sigma,
+        'parameters.BUS.beta': parameterRules.beta,
       },
       formData: {
         name: '',
@@ -192,7 +195,21 @@ export default {
     },
 
     sendRequest() {
-      this.$http.post(`presets/${this.preset.id}/generated-feeds`, this.formData)
+      const payload = {
+        name: this.formData.name,
+        feed: this.formData.feed,
+        withEvaluation: this.formData.withEvaluation,
+        parameters: {},
+      };
+
+      for (const [type, params] of Object.entries(this.formData.parameters)) {
+        if (params._enabled) {
+          payload.parameters[type] = copyObject(params);
+          payload.parameters[type].candidateSearchRadius = payload.parameters[type].sigma;
+        }
+      }
+
+      this.$http.post(`presets/${this.preset.id}/generated-feeds`, payload)
           .then(({data}) => {
             this.$events.$emit('presets.generatedFeed', data);
             console.log(data);

@@ -41,9 +41,9 @@
           </template>
         </el-table-column>
 
-        <el-table-column label="Extensions" width="100">
+        <el-table-column label="Extensions" width="">
           <template slot-scope="scope">
-            <div>
+            <div class="flex gap-1">
               <v-feed-extension-tag v-for="(ext, name) in scope.row.extensions"
                                     :key="`${scope.row.id}:${name}`"
                                     :extension="name">
