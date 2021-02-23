@@ -197,7 +197,7 @@ public class BusFlagEncoder extends AbstractFlagEncoder {
 
     // multiple restrictions needs special handling compared to foot and bike, see also motorcycle
     if (!firstValue.isEmpty()) {
-      if (restrictedValues.contains(firstValue) && !getConditionalTagInspector().isRestrictedWayConditionallyPermitted(way))
+      if (restrictedValues.contains(firstValue))
         return EncodingManager.Access.CAN_SKIP;
       if (intendedValues.contains(firstValue))
         return EncodingManager.Access.WAY;
@@ -208,11 +208,7 @@ public class BusFlagEncoder extends AbstractFlagEncoder {
       return EncodingManager.Access.CAN_SKIP;
     }
 
-    if (getConditionalTagInspector().isPermittedWayConditionallyRestricted(way)) {
-      return EncodingManager.Access.CAN_SKIP;
-    } else {
-      return EncodingManager.Access.WAY;
-    }
+    return EncodingManager.Access.WAY;
   }
 
   @Override
