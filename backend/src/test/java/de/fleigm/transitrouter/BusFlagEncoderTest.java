@@ -73,4 +73,28 @@ public class BusFlagEncoderTest {
     assertTrue(accessEnc.getBool(false, edgeFlags));
     assertTrue(accessEnc.getBool(true, edgeFlags));
   }
+
+  @Test
+  void strange_one_way() {
+    // https://www.openstreetmap.org/way/9725471
+
+    ReaderWay way = new ReaderWay(1);
+
+    way.setTag("access:lanes:backward", "no|yes");
+    way.setTag("bus:forward", "designated");
+    way.setTag("highway", "residential");
+    way.setTag("lanes", "3");
+    way.setTag("lanes:backward", "2");
+    way.setTag("maxspeed", "30");
+    way.setTag("motor_vehicle:forward", "no");
+
+    EncodingManager.AcceptWay allowed = new EncodingManager.AcceptWay();
+    for (FlagEncoder encoder : em.fetchEdgeEncoders())
+      allowed.put(encoder.toString(), EncodingManager.Access.WAY);
+    IntsRef relFlags = em.createRelationFlags();
+    IntsRef edgeFlags = em.handleWayTags(way, allowed, relFlags);
+
+    assertTrue(accessEnc.getBool(false, edgeFlags));
+    assertTrue(accessEnc.getBool(true, edgeFlags));
+  }
 }

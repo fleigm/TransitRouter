@@ -183,28 +183,11 @@ public class BusFlagEncoder extends AbstractFlagEncoder {
     String highwayValue = way.getTag("highway");
     String firstValue = way.getFirstPriorityTag(restrictions);
 
-    if (highwayValue == null) {
+    if (highwayValue == null || !defaultSpeedMap.containsKey(highwayValue)) {
       return EncodingManager.Access.CAN_SKIP;
     }
 
-    if (!defaultSpeedMap.containsKey(highwayValue)) {
-      return EncodingManager.Access.CAN_SKIP;
-    }
-
-    if (way.hasTag("impassable", "yes") || way.hasTag("status", "impassable")) {
-      return EncodingManager.Access.CAN_SKIP;
-    }
-
-    // multiple restrictions needs special handling compared to foot and bike, see also motorcycle
-    if (!firstValue.isEmpty()) {
-      if (restrictedValues.contains(firstValue))
-        return EncodingManager.Access.CAN_SKIP;
-      if (intendedValues.contains(firstValue))
-        return EncodingManager.Access.WAY;
-    }
-
-    // do not drive street cars into fords
-    if (isBlockFords() && ("ford".equals(highwayValue) || way.hasTag("ford"))) {
+    if (!firstValue.isEmpty() && restrictedValues.contains(firstValue)) {
       return EncodingManager.Access.CAN_SKIP;
     }
 
@@ -265,7 +248,9 @@ public class BusFlagEncoder extends AbstractFlagEncoder {
   protected boolean isForwardOneway(ReaderWay way) {
     return !way.hasTag("oneway", "-1")
            && !way.hasTag("vehicle:forward", "no")
-           && !way.hasTag("motor_vehicle:forward", "no");
+           && !way.hasTag("motor_vehicle:forward", "no")
+           || way.hasTag("busway")
+           || way.hasTag("bus:forward", "yes", "designated");
   }
 
   protected boolean isOneway(ReaderWay way) {
