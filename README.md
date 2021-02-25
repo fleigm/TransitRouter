@@ -24,11 +24,12 @@ Set the *app.evaluation-tool* property to *shapevl* located in your project root
 - osm file for Baden-Württemberg: [download](http://download.geofabrik.de/europe/germany/baden-wuerttemberg-latest.osm.pbf)
 - GTFS Feed Stuttgart: [download](https://www.openvvs.de/dataset/e66f03e4-79f2-41d0-90f1-166ca609e491/resource/bfbb59c7-767c-4bca-bbb2-d8d32a3e0378/download/vvs_gtfs.zip)
 
-The test currently require the osm file of Baden-Württemberg. This will be (hopefully) changed in the future. 
+The tests currently require the osm file of Baden-Württemberg. This will (hopefully) change in the near future.
+At the moment the app is not very well tested (shame on me)
 
 
 ## Development
-run `.\mvnw clean quarkus:dev` to start the quarkus backend. The API is available via localhost:8080
+run `./mvnw clean quarkus:dev` to start the quarkus backend. The API is available via localhost:8080
 
 run `npm run hot` inside the frontend module to. You can visit the site via localhost:9000
 Inside *frontend/src/Config.js* set *apiEndpoint* to http://localhost:8080
@@ -39,7 +40,7 @@ The frontend will be served by the quarkus backend.
 
 Inside *frontend/src/Config.js* set *apiEndpoint* to an empty string and run `npm run prod` inside the frontend module. This compiles and copies all files inside the backend resource folder.
 
-run `\.mvnw clean package` to compile the project
+run `./mvnw clean package` to compile the project
 
 
 ## Docker
