@@ -23,15 +23,15 @@ public class RailFlagEncoder extends AbstractFlagEncoder {
         properties.getBool("turn_costs", false) ? 1 : 0);
 
     this.maxPossibleSpeed = 40;
+
+    blockPrivate(properties.getBool("block_private", true));
+    blockFords(properties.getBool("block_fords", false));
+    blockBarriersByDefault(properties.getBool("block_barriers", true));
   }
 
   @Override
   public Access getAccess(ReaderWay way) {
-    if (!way.hasTag("railway", allowedWays)) {
-      return Access.CAN_SKIP;
-    }
-
-    return Access.WAY;
+    return way.hasTag("railway", allowedWays) ? Access.WAY : Access.CAN_SKIP;
   }
 
   @Override
@@ -53,25 +53,18 @@ public class RailFlagEncoder extends AbstractFlagEncoder {
     return 40;
   }
 
-  /**
-   * @param way   needed to retrieve tags
-   * @param speed speed guessed e.g. from the road type or other tags
-   * @return The assumed speed.
-   */
-  protected double applyMaxSpeed(ReaderWay way, double speed) {
-    double maxSpeed = getMaxSpeed(way);
-    if (isValidSpeed(maxSpeed)) {
-      // We assume that the average speed is 90% of the allowed maximum
-      return maxSpeed * 0.9;
-    }
-    return speed;
-  }
-
   @Override
   public void createEncodedValues(List<EncodedValue> registerNewEncodedValue, String prefix, int index) {
     // first two bits are reserved for route handling in superclass
     super.createEncodedValues(registerNewEncodedValue, prefix, index);
-    registerNewEncodedValue.add(avgSpeedEnc = new UnsignedDecimalEncodedValue(EncodingManager.getKey(prefix, "average_speed"), speedBits, speedFactor, false));
+
+    avgSpeedEnc = new UnsignedDecimalEncodedValue(
+        EncodingManager.getKey(prefix, "average_speed"),
+        speedBits,
+        speedFactor,
+        false);
+
+    registerNewEncodedValue.add(avgSpeedEnc);
   }
 
   @Override

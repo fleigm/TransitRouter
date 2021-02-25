@@ -12,21 +12,15 @@ import com.graphhopper.util.PMap;
 
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * Vehicle profile optimized for public transport via bus.
  * This is based on the {@link com.graphhopper.routing.util.CarFlagEncoder} from GraphHopper.
  */
 public class BusFlagEncoder extends AbstractFlagEncoder {
-  protected final Map<String, Integer> trackTypeSpeedMap = new HashMap<>();
-  protected final Set<String> badSurfaceSpeedMap = new HashSet<>();
   private boolean speedTwoDirections;
-  // This value determines the maximal possible on roads with bad surfaces
-  protected int badSurfaceSpeed;
 
   /**
    * A map which associates string to speed. Get some impression:
@@ -49,6 +43,7 @@ public class BusFlagEncoder extends AbstractFlagEncoder {
   public BusFlagEncoder(int speedBits, double speedFactor, int maxTurnCosts) {
     super(speedBits, speedFactor, maxTurnCosts);
     restrictions.addAll(Arrays.asList("bus", "psv", "motorcar", "motor_vehicle", "vehicle", "access"));
+
     restrictedValues.add("agricultural");
     restrictedValues.add("forestry");
     restrictedValues.add("no");
@@ -58,7 +53,6 @@ public class BusFlagEncoder extends AbstractFlagEncoder {
     restrictedValues.add("emergency");
     restrictedValues.add("private");
     restrictedValues.add("customers");
-    //restrictedValues.add("destination");
 
     intendedValues.add("yes");
     intendedValues.add("permissive");
@@ -78,17 +72,6 @@ public class BusFlagEncoder extends AbstractFlagEncoder {
     absoluteBarriers.add("motorcycle_barrier");
     absoluteBarriers.add("block");
     absoluteBarriers.add("sump_buster");
-
-    badSurfaceSpeedMap.add("cobblestone");
-    badSurfaceSpeedMap.add("grass_paver");
-    badSurfaceSpeedMap.add("gravel");
-    badSurfaceSpeedMap.add("sand");
-    badSurfaceSpeedMap.add("paving_stones");
-    badSurfaceSpeedMap.add("dirt");
-    badSurfaceSpeedMap.add("ground");
-    badSurfaceSpeedMap.add("grass");
-    badSurfaceSpeedMap.add("unpaved");
-    badSurfaceSpeedMap.add("compacted");
 
     // bus lanes
     defaultSpeedMap.put("platform", 50);
@@ -118,16 +101,6 @@ public class BusFlagEncoder extends AbstractFlagEncoder {
     // unknown road
     defaultSpeedMap.put("road", 20);
 
-    // disable tracks!
-    //defaultSpeedMap.put("track", 15);
-
-    trackTypeSpeedMap.put("grade1", 20); // paved
-    trackTypeSpeedMap.put("grade2", 15); // now unpaved - gravel mixed with ...
-    trackTypeSpeedMap.put("grade3", 10); // ... hard and soft materials
-    trackTypeSpeedMap.put(null, 15);
-
-    // limit speed on bad surfaces to 30 km/h
-    badSurfaceSpeed = 30;
     maxPossibleSpeed = 100;
     speedDefault = defaultSpeedMap.get("secondary");
   }
@@ -153,7 +126,14 @@ public class BusFlagEncoder extends AbstractFlagEncoder {
   public void createEncodedValues(List<EncodedValue> registerNewEncodedValue, String prefix, int index) {
     // first two bits are reserved for route handling in superclass
     super.createEncodedValues(registerNewEncodedValue, prefix, index);
-    registerNewEncodedValue.add(avgSpeedEnc = new UnsignedDecimalEncodedValue(EncodingManager.getKey(prefix, "average_speed"), speedBits, speedFactor, speedTwoDirections));
+
+    avgSpeedEnc = new UnsignedDecimalEncodedValue(
+        EncodingManager.getKey(prefix, "average_speed"),
+        speedBits,
+        speedFactor,
+        speedTwoDirections);
+
+    registerNewEncodedValue.add(avgSpeedEnc);
   }
 
   protected double getSpeed(ReaderWay way) {
@@ -162,17 +142,10 @@ public class BusFlagEncoder extends AbstractFlagEncoder {
         && !"motorway".equals(highwayValue) && !"motorway_link".equals(highwayValue)) {
       highwayValue = "motorroad";
     }
-    Integer speed = defaultSpeedMap.get(highwayValue);
-    if (speed == null)
-      throw new IllegalStateException(toString() + ", no speed found for: " + highwayValue + ", tags: " + way);
 
-    if (highwayValue.equals("track")) {
-      String tt = way.getTag("tracktype");
-      if (!Helper.isEmpty(tt)) {
-        Integer tInt = trackTypeSpeedMap.get(tt);
-        if (tInt != null)
-          speed = tInt;
-      }
+    Integer speed = defaultSpeedMap.get(highwayValue);
+    if (speed == null) {
+      throw new IllegalStateException(toString() + ", no speed found for: " + highwayValue + ", tags: " + way);
     }
 
     return speed;
@@ -200,22 +173,21 @@ public class BusFlagEncoder extends AbstractFlagEncoder {
       return edgeFlags;
     }
 
-    // get assumed speed from highway type
-    double speed = getSpeed(way);
-    speed = applyMaxSpeed(way, speed);
+    applySpeedToWay(edgeFlags, way);
+    applyAccessToWay(edgeFlags, way);
 
-    speed = applyBadSurfaceSpeed(way, speed);
+    return edgeFlags;
+  }
 
-    setSpeed(false, edgeFlags, speed);
-    if (speedTwoDirections)
-      setSpeed(true, edgeFlags, speed);
-
+  private void applyAccessToWay(IntsRef edgeFlags, ReaderWay way) {
     boolean isRoundabout = roundaboutEnc.getBool(false, edgeFlags);
     if (isOneway(way) || isRoundabout) {
-      if (isForwardOneway(way))
+      if (isForwardOneway(way)) {
         accessEnc.setBool(false, edgeFlags, true);
-      if (isBackwardOneway(way))
+      }
+      if (isBackwardOneway(way)) {
         accessEnc.setBool(true, edgeFlags, true);
+      }
     } else {
       accessEnc.setBool(false, edgeFlags, true);
       accessEnc.setBool(true, edgeFlags, true);
@@ -227,8 +199,15 @@ public class BusFlagEncoder extends AbstractFlagEncoder {
       accessEnc.setBool(true, edgeFlags, false);
       accessEnc.setBool(false, edgeFlags, false);
     }
+  }
 
-    return edgeFlags;
+  private void applySpeedToWay(IntsRef edgeFlags, ReaderWay way) {
+    double speed = applyMaxSpeed(way, getSpeed(way));
+
+    setSpeed(false, edgeFlags, speed);
+    if (speedTwoDirections) {
+      setSpeed(true, edgeFlags, speed);
+    }
   }
 
   /**
@@ -259,18 +238,6 @@ public class BusFlagEncoder extends AbstractFlagEncoder {
            || way.hasTag("vehicle:forward")
            || way.hasTag("motor_vehicle:backward")
            || way.hasTag("motor_vehicle:forward");
-  }
-
-  /**
-   * @param way   needed to retrieve tags
-   * @param speed speed guessed e.g. from the road type or other tags
-   * @return The assumed speed
-   */
-  protected double applyBadSurfaceSpeed(ReaderWay way, double speed) {
-    // limit speed if bad surface
-    if (badSurfaceSpeed > 0 && speed > badSurfaceSpeed && way.hasTag("surface", badSurfaceSpeedMap))
-      speed = badSurfaceSpeed;
-    return speed;
   }
 
   @Override
