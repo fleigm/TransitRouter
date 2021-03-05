@@ -10,8 +10,11 @@
              class="px-2 rounded-full text-white inline-block">
           {{ evaluation.feed.name }}
         </div>
-        <div>
-          <el-button @click="remove(evaluation)" size="mini" circle icon="el-icon-close"></el-button>
+        <div class="relative">
+          <div class="rounded-full bg-white w-7 h-7 flex items-center justify-center" v-if="evaluation.loading">
+            <v-spinner></v-spinner>
+          </div>
+          <el-button v-else @click="remove(evaluation)" size="mini" circle icon="el-icon-close"></el-button>
         </div>
       </div>
     </div>
@@ -104,6 +107,7 @@ export default {
         id: feed.id,
         feed: feed,
         color: this.availableColors.pop(),
+        loading: false,
       });
     },
 

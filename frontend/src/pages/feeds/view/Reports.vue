@@ -110,6 +110,9 @@ export default {
         return;
       }
 
+      //this.$events.emit('report:loading', evaluation.id);
+      evaluation.loading = true;
+
       this.loading.push(evaluation.id);
       this.$http.get(`feeds/${evaluation.id}/report`)
           .then(({data}) => {
@@ -123,6 +126,7 @@ export default {
           .finally(() => {
             const index = this.loading.indexOf(x => x.id === evaluation.id);
             this.loading.splice(index, 1);
+            evaluation.loading = false;
           });
     },
 
