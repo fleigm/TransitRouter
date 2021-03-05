@@ -4,7 +4,7 @@
     <span>Generate Feed</span>
 
     <portal>
-      <el-dialog :visible.sync="showDialog" title="Generate new feed" width="800px">
+      <el-dialog :visible.sync="showDialog" title="Generate new feed" width="800px" top="5vh">
         <el-form ref="generate-feed-form" :model="formData" :rules="rules" label-width="120px" size="mini">
           <el-form-item label="name" prop="name">
             <el-input v-model="formData.name"></el-input>
