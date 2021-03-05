@@ -9,8 +9,8 @@
       <el-dialog
           :visible.sync="showDialog"
           title="Upload GTFS feed for evaluation"
-          width="800px">
-
+          width="800px"
+          top="5vh">
         <v-generate-feed-form></v-generate-feed-form>
       </el-dialog>
     </portal>

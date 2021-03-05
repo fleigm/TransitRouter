@@ -1,5 +1,5 @@
 <template>
-  <el-tag size="mini">{{ text }}</el-tag>
+  <el-tag v-if="ext" size="mini">{{ text }}</el-tag>
 </template>
 
 <script>
@@ -22,12 +22,12 @@ export default {
   },
 
   computed: {
-    extensions() {
-      return extensions[this.extension] || {text: ''}
+    ext() {
+      return extensions[this.extension]
     },
 
     text() {
-      return this.extensions.text
+      return this.ext.text
     }
 
 
