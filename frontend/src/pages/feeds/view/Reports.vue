@@ -116,7 +116,7 @@ export default {
             this.cache.push({
               id: evaluation.id,
               name: evaluation.feed.name,
-              entries: data.entries,
+              entries: Object.freeze(data.entries),
               color: evaluation.color
             })
           })
