@@ -105,6 +105,9 @@ export default {
         }, {
           value: 'bus_fastest_turn',
           label: 'fastest path with turn restrictions',
+        }, {
+          value: 'rail',
+          label: 'rail,'
         }
       ],
       rules: {

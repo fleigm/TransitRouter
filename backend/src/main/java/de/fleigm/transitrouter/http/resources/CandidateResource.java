@@ -43,11 +43,12 @@ public class CandidateResource {
   public Response findCandidates(
       @QueryParam("lat") double latitude,
       @QueryParam("lon") double longitude,
-      @QueryParam("radius") double radius) {
+      @QueryParam("radius") double radius,
+      @QueryParam("profile") String profile) {
 
     LocationIndexTree locationIndex = (LocationIndexTree) hopper.getLocationIndex();
 
-    FlagEncoder flagEncoder = hopper.getEncodingManager().getEncoder("bus");
+    FlagEncoder flagEncoder = hopper.getEncodingManager().getEncoder(profile);
 
     List<Snap> candidates = locationIndex.findNClosest(
         latitude,

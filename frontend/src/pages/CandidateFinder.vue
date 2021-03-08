@@ -48,7 +48,7 @@ export default {
   methods: {
     findCandidates(event) {
       console.log(event);
-      this.$http(`candidates`, {params: {lat: event.latlng.lat, lon: event.latlng.lng, radius: 25}})
+      this.$http(`candidates`, {params: {lat: event.latlng.lat, lon: event.latlng.lng, radius: 25, profile: 'rail'}})
           .then(({data}) => {
             this.candidates = data;
           })
