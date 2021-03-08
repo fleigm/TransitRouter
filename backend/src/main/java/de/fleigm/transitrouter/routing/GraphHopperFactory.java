@@ -26,9 +26,11 @@ public class GraphHopperFactory {
       @ConfigProperty(name = "app.storage") Path storagePath,
       @ConfigProperty(name = "app.gh.clean") boolean cleanTemporaryFiles) {
 
+    Path osmStoragePath = storagePath.resolve(osmFile.getFileName());
+
     if (cleanTemporaryFiles) {
       try {
-        FileUtils.deleteDirectory(storagePath.resolve("gh").toFile());
+        FileUtils.deleteDirectory(osmStoragePath.toFile());
       } catch (IOException e) {
         e.printStackTrace();
       }
@@ -48,7 +50,7 @@ public class GraphHopperFactory {
 
     GraphHopper graphHopper = new GraphHopperOSM()
         .forServer()
-        .setGraphHopperLocation(storagePath.resolve("gh").toString())
+        .setGraphHopperLocation(osmStoragePath.toString())
         .setEncodingManager(encodingManager)
         .setProfiles(
             new Profile("bus_fastest").setVehicle("bus").setWeighting("fastest").setTurnCosts(false),
