@@ -195,7 +195,7 @@ public class BusFlagEncoder extends AbstractFlagEncoder {
 
     // allow designated ways only if they a part of a bus route
     boolean busRouteNetwork = getBooleanEncodedValue(BusRouteNetwork.KEY).getBool(true, edgeFlags);
-    if (way.hasTag("motor_vehicle", "destination") && !busRouteNetwork) {
+    if (way.hasTag(List.of("vehicle", "motor_vehicle"), List.of("destination")) && !busRouteNetwork) {
       accessEnc.setBool(true, edgeFlags, false);
       accessEnc.setBool(false, edgeFlags, false);
     }
@@ -218,7 +218,8 @@ public class BusFlagEncoder extends AbstractFlagEncoder {
            || way.hasTag("vehicle:forward", "no")
            || way.hasTag("motor_vehicle:forward", "no")
            || way.hasTag("busway")
-           || way.hasTag("oneway:psv", "no");
+           || way.hasTag("oneway:psv", "no")
+           || way.hasTag("oneway:bus", "no");
   }
 
   /**
@@ -229,7 +230,9 @@ public class BusFlagEncoder extends AbstractFlagEncoder {
            && !way.hasTag("vehicle:forward", "no")
            && !way.hasTag("motor_vehicle:forward", "no")
            || way.hasTag("busway")
-           || way.hasTag("bus:forward", "yes", "designated");
+           || way.hasTag("bus:forward", "yes", "designated")
+           || way.hasTag("oneway:psv", "no")
+           || way.hasTag("oneway:bus", "no");
   }
 
   protected boolean isOneway(ReaderWay way) {
