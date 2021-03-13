@@ -1,15 +1,20 @@
 package de.fleigm.transitrouter.http.json;
 
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.databind.SerializerProvider;
+import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 import com.graphhopper.util.EdgeIteratorState;
 
-import javax.json.bind.serializer.JsonbSerializer;
-import javax.json.bind.serializer.SerializationContext;
-import javax.json.stream.JsonGenerator;
+import java.io.IOException;
 
-public class EdgeIteratorStateSerializer implements JsonbSerializer<EdgeIteratorState> {
+public class EdgeIteratorStateSerializer extends StdSerializer<EdgeIteratorState> {
+
+  public EdgeIteratorStateSerializer() {
+    super(EdgeIteratorState.class);
+  }
 
   @Override
-  public void serialize(EdgeIteratorState obj, JsonGenerator generator, SerializationContext ctx) {
-    generator.write(obj.getEdge());
+  public void serialize(EdgeIteratorState value, JsonGenerator gen, SerializerProvider serializers) throws IOException {
+    gen.writeNumber(value.getEdge());
   }
 }

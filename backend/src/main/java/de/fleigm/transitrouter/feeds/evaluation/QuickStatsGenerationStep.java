@@ -1,11 +1,11 @@
 package de.fleigm.transitrouter.feeds.evaluation;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import de.fleigm.transitrouter.feeds.GeneratedFeed;
 import de.fleigm.transitrouter.feeds.process.Step;
 import org.slf4j.Logger;
 
-import javax.json.Json;
-import javax.json.JsonObject;
 import java.util.DoubleSummaryStatistics;
 import java.util.HashMap;
 import java.util.Map;
@@ -35,17 +35,18 @@ public class QuickStatsGenerationStep implements Step {
     logger.info("Finished quick stats step.");
   }
 
-  private JsonObject buildStatsFor(Report report, ToDoubleFunction<Report.Entry> mapper) {
+  private ObjectNode buildStatsFor(Report report, ToDoubleFunction<Report.Entry> mapper) {
     DoubleSummaryStatistics stats = report.entries()
         .stream()
         .mapToDouble(mapper)
         .summaryStatistics();
 
-    return Json.createObjectBuilder()
-        .add("min", stats.getMin())
-        .add("max", stats.getMax())
-        .add("average", stats.getAverage())
-        .build();
+    ObjectMapper objectMapper = new ObjectMapper();
+
+    return objectMapper.createObjectNode()
+        .put("min", stats.getMin())
+        .put("max", stats.getMax())
+        .put("average", stats.getAverage());
   }
 
   private double[] computeAccuracy(Report report) {

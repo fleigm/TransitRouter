@@ -1,5 +1,9 @@
 package de.fleigm.transitrouter.data;
 
+import com.fasterxml.jackson.annotation.JsonAnyGetter;
+import com.fasterxml.jackson.annotation.JsonAnySetter;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -11,6 +15,7 @@ import java.util.function.Supplier;
  */
 public class Extensions {
 
+  @JsonIgnore
   private final Map<Class<?>, Extension> extensions;
 
   /**
@@ -84,7 +89,13 @@ public class Extensions {
    *
    * @return raw extensions.
    */
+  @JsonAnyGetter
   public Map<Class<?>, Extension> unwrap() {
     return new HashMap<>(extensions);
+  }
+
+  @JsonAnySetter
+  public void _jacksonAdd(String key, Extension extension) {
+    add(extension);
   }
 }

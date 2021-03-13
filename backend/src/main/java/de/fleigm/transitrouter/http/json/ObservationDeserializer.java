@@ -1,23 +1,29 @@
 package de.fleigm.transitrouter.http.json;
 
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.TreeNode;
+import com.fasterxml.jackson.databind.DeserializationContext;
+import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
+import com.fasterxml.jackson.databind.node.DoubleNode;
 import com.graphhopper.util.shapes.GHPoint;
 import de.fleigm.transitrouter.routing.Observation;
 
-import javax.json.JsonArray;
-import javax.json.bind.serializer.DeserializationContext;
-import javax.json.bind.serializer.JsonbDeserializer;
-import javax.json.stream.JsonParser;
-import java.lang.reflect.Type;
+import java.io.IOException;
 
-public class ObservationDeserializer implements JsonbDeserializer<Observation> {
+public class ObservationDeserializer extends StdDeserializer<Observation> {
+
+  public ObservationDeserializer() {
+    super(Observation.class);
+  }
 
   @Override
-  public Observation deserialize(JsonParser jsonParser, DeserializationContext deserializationContext, Type type) {
-    JsonArray array = jsonParser.getArray();
-
+  public Observation deserialize(JsonParser parser, DeserializationContext ctxt) throws IOException, JsonProcessingException {
+    TreeNode treeNode = parser.readValueAsTree();
     GHPoint point = new GHPoint(
-        array.getJsonNumber(0).doubleValue(),
-        array.getJsonNumber(1).doubleValue());
+        ((DoubleNode) treeNode.get(0)).doubleValue(),
+        ((DoubleNode) treeNode.get(1)).doubleValue()
+    );
 
     return new Observation(point);
   }

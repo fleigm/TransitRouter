@@ -1,24 +1,29 @@
 package de.fleigm.transitrouter.http.json;
 
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.databind.SerializerProvider;
+import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 import com.graphhopper.util.PointList;
 
-import javax.json.bind.serializer.JsonbSerializer;
-import javax.json.bind.serializer.SerializationContext;
-import javax.json.stream.JsonGenerator;
+import java.io.IOException;
 
-public class PointListSerializer implements JsonbSerializer<PointList> {
+public class PointListSerializer extends StdSerializer<PointList> {
+
+  public PointListSerializer() {
+    super(PointList.class);
+  }
 
   @Override
-  public void serialize(PointList points, JsonGenerator json, SerializationContext serializationContext) {
-    json.writeStartArray();
+  public void serialize(PointList value, JsonGenerator gen, SerializerProvider provider) throws IOException {
+    gen.writeStartArray();
 
-    for (int i = 0; i < points.size(); i++) {
-      json.writeStartArray();
-      json.write(points.getLatitude(i));
-      json.write(points.getLongitude(i));
-      json.writeEnd();
+    for (int i = 0; i < value.size(); i++) {
+      gen.writeStartArray();
+      gen.writeNumber(value.getLatitude(i));
+      gen.writeNumber(value.getLongitude(i));
+      gen.writeEndArray();
     }
 
-    json.writeEnd();
+    gen.writeEndArray();
   }
 }

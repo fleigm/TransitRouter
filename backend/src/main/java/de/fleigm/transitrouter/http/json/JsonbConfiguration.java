@@ -1,29 +1,37 @@
 package de.fleigm.transitrouter.http.json;
 
-import io.quarkus.jsonb.JsonbConfigCustomizer;
+import com.conveyal.gtfs.model.Entity;
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.PropertyAccessor;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.module.SimpleModule;
+import com.graphhopper.util.shapes.GHPoint;
+import de.fleigm.transitrouter.routing.Observation;
+import io.quarkus.jackson.ObjectMapperCustomizer;
 
 import javax.inject.Singleton;
-import javax.json.bind.JsonbConfig;
 
 @Singleton
-public class JsonbConfiguration implements JsonbConfigCustomizer {
+public class JsonbConfiguration implements ObjectMapperCustomizer {
 
   @Override
-  public void customize(JsonbConfig config) {
-    config.withSerializers(new PointListSerializer())
-        .withSerializers(new LineStringSerializer())
-        .withSerializers(new PathSerializer())
-        .withSerializers(new EdgeIteratorStateSerializer())
-        .withSerializers(new GHPointSerializer())
-        .withSerializers(new ObservationSerializer())
-        .withSerializers(new StateSerializer())
-        .withSerializers(new ViewSerializer())
-        .withSerializers(new ExtensionsSerializer());
+  public void customize(ObjectMapper objectMapper) {
+    objectMapper.registerModule(new SimpleModule()
+        .addSerializer(new PointListSerializer())
+        .addSerializer(new LineStringSerializer())
+        .addSerializer(new PathSerializer())
+        .addSerializer(new EdgeIteratorStateSerializer())
+        .addSerializer(new GHPointSerializer())
+        .addSerializer(new ObservationSerializer())
+        .addDeserializer(GHPoint.class, new GHPointDeserializer())
+        .addDeserializer(Observation.class, new ObservationDeserializer()));
 
-    config.withDeserializers(new GHPointDeserializer())
-        .withDeserializers(new ObservationDeserializer())
-        .withDeserializers(new ExtensionsDeserializer());
 
-    config.withPropertyVisibilityStrategy(new PrivateVisibilityStrategy());
+    objectMapper
+        .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+        .addMixIn(Entity.class, ConveyalIgnoreIdMixin.class)
+        .setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY)
+        .setVisibility(PropertyAccessor.GETTER, JsonAutoDetect.Visibility.NONE);
   }
 }

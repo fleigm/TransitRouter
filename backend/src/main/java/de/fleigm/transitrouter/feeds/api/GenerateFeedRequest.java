@@ -1,5 +1,8 @@
 package de.fleigm.transitrouter.feeds.api;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import de.fleigm.transitrouter.feeds.Parameters;
 import de.fleigm.transitrouter.gtfs.Type;
 import lombok.AllArgsConstructor;
@@ -7,8 +10,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.jboss.resteasy.annotations.providers.multipart.PartType;
 
-import javax.json.bind.Jsonb;
-import javax.json.bind.JsonbBuilder;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.FormParam;
@@ -16,7 +17,6 @@ import javax.ws.rs.core.MediaType;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 @Data
 @AllArgsConstructor
@@ -36,6 +36,7 @@ public class GenerateFeedRequest {
   @FormParam("parameters")
   @NotBlank
   private String parameters;
+  //private Map<Type, Parameters> parameters;
 
   @FormParam("withEvaluation")
   private boolean withEvaluation = true;
@@ -45,12 +46,14 @@ public class GenerateFeedRequest {
   }
 
   public Map<Type, Parameters> getParameters() {
-    Jsonb jsonb = JsonbBuilder.create();
-    Map<String, Parameters> params = jsonb.fromJson(parameters, new HashMap<String, Parameters>(){}.getClass().getGenericSuperclass());
+    ObjectMapper objectMapper = new ObjectMapper();
+    TypeReference<HashMap<Type, Parameters>> typeRef = new TypeReference<>() {};
 
-    return params.entrySet().stream()
-        .map(entry -> Map.entry(Type.valueOf(entry.getKey()),  entry.getValue()))
-        .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+    try {
+      return objectMapper.readValue(parameters, typeRef);
+    } catch (JsonProcessingException e) {
+      throw new RuntimeException(e);
+    }
   }
 
 
@@ -84,9 +87,14 @@ public class GenerateFeedRequest {
     }
 
     public GenerateFeedRequest build() {
-      Jsonb jsonb = JsonbBuilder.create();
+      ObjectMapper objectMapper = new ObjectMapper();
+      try {
+        String params = objectMapper.writeValueAsString(parameters);
+        return new GenerateFeedRequest(gtfsFeed, name, params, withEvaluation);
+      } catch (JsonProcessingException e) {
+        throw new RuntimeException(e);
+      }
 
-      return new GenerateFeedRequest(gtfsFeed, name, jsonb.toJson(parameters), withEvaluation);
     }
   }
 }

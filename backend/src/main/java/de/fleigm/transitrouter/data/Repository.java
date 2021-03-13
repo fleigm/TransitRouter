@@ -1,15 +1,13 @@
 package de.fleigm.transitrouter.data;
 
-import de.fleigm.transitrouter.http.json.ExtensionsDeserializer;
-import de.fleigm.transitrouter.http.json.ExtensionsSerializer;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.io.FileUtils;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.json.bind.Jsonb;
-import javax.json.bind.JsonbBuilder;
-import javax.json.bind.JsonbConfig;
+import javax.enterprise.inject.spi.CDI;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -34,7 +32,7 @@ public abstract class Repository<T extends Entity> {
   protected String entityFileName = "entity.json";
 
   private Path storageLocation;
-  private Jsonb jsonb;
+  private ObjectMapper objectMapper;
 
   private final HashMap<UUID, T> storage = new HashMap<>();
 
@@ -47,6 +45,7 @@ public abstract class Repository<T extends Entity> {
    * @param storageLocation storage location.
    */
   public Repository(@ConfigProperty(name = "app.storage") Path storageLocation) {
+    this.objectMapper = CDI.current().select(ObjectMapper.class).get();
     init(storageLocation);
   }
 
@@ -59,10 +58,6 @@ public abstract class Repository<T extends Entity> {
   protected void init(Path storageLocation) {
     logger.info("init repo for {}", entityClass());
     this.storageLocation = storageLocation;
-    this.jsonb = JsonbBuilder.create(new JsonbConfig()
-        .withSerializers(new ExtensionsSerializer())
-        .withDeserializers(new ExtensionsDeserializer())
-        .withFormatting(true));
 
     ensureStorageLocationExists(storageLocation);
 
@@ -167,7 +162,11 @@ public abstract class Repository<T extends Entity> {
    * @return json representation of entity.
    */
   public String toJson(T entity) {
-    return jsonb.toJson(entity);
+    try {
+      return objectMapper.writeValueAsString(entity);
+    } catch (JsonProcessingException e) {
+      throw new RuntimeException(e);
+    }
   }
 
   /**
@@ -177,7 +176,11 @@ public abstract class Repository<T extends Entity> {
    * @return deserialized entity
    */
   public T fromJson(String jsonEntity) {
-    return jsonb.fromJson(jsonEntity, entityClass());
+    try {
+      return objectMapper.readValue(jsonEntity, entityClass());
+    } catch (JsonProcessingException e) {
+      throw new RuntimeException(e);
+    }
   }
 
   /**

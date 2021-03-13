@@ -1,20 +1,22 @@
 package de.fleigm.transitrouter.feeds.api;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import de.fleigm.transitrouter.feeds.GeneratedFeed;
 import de.fleigm.transitrouter.feeds.GeneratedFeedRepository;
 import de.fleigm.transitrouter.feeds.Parameters;
 import de.fleigm.transitrouter.feeds.Status;
 import de.fleigm.transitrouter.gtfs.Type;
 import io.quarkus.test.junit.QuarkusTest;
+import io.restassured.RestAssured;
+import io.restassured.config.ObjectMapperConfig;
 import io.restassured.response.Response;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
 import javax.inject.Inject;
-import javax.json.bind.Jsonb;
-import javax.json.bind.JsonbBuilder;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -33,13 +35,19 @@ public class EvaluationEndpointTest {
   @Inject
   GeneratedFeedRepository generatedFeedRepository;
 
-  private Jsonb jsonb = JsonbBuilder.create();
+  @Inject
+  ObjectMapper objectMapper;
+
+  @BeforeEach
+  void beforeEach() {
+    RestAssured.config = RestAssured.config().objectMapperConfig(new ObjectMapperConfig().jackson2ObjectMapperFactory((type, s) -> objectMapper));
+  }
 
   @Test
   void send_evaluation_request() throws IOException {
     String resourceAsStream = getClass().getClassLoader().getResource("test_feed.zip").getFile();
 
-    String params = jsonb.toJson(Map.of("BUS", Parameters.defaultParameters()));
+    String params = objectMapper.writeValueAsString(Map.of("BUS", Parameters.defaultParameters()));
 
     Response response = given()
         .multiPart("feed", new File(resourceAsStream))

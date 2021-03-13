@@ -1,5 +1,8 @@
 package de.fleigm.transitrouter.gtfs;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import de.fleigm.transitrouter.feeds.evaluation.Shapevl;
 import de.fleigm.transitrouter.util.Unzip;
 import de.fleigm.transitrouter.util.ValidateGtfsFeed;
@@ -7,8 +10,6 @@ import lombok.Data;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 
-import javax.json.bind.annotation.JsonbCreator;
-import javax.json.bind.annotation.JsonbProperty;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
@@ -23,8 +24,8 @@ import java.nio.file.Path;
 public class Feed {
   private final Path path;
 
-  @JsonbCreator
-  public Feed(@JsonbProperty("path") Path path) {
+  @JsonCreator
+  public Feed(@JsonProperty("path") Path path) {
     this.path = path;
   }
 
@@ -76,6 +77,7 @@ public class Feed {
   /**
    * @return path to GTFS feed folder (for {@link Shapevl}).
    */
+  @JsonIgnore
   public Path getFolder() {
     return Path.of(FilenameUtils.removeExtension(path.toString()));
   }

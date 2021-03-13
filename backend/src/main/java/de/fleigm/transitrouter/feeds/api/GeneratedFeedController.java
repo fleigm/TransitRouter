@@ -3,11 +3,11 @@ package de.fleigm.transitrouter.feeds.api;
 import de.fleigm.transitrouter.feeds.GeneratedFeed;
 import de.fleigm.transitrouter.feeds.GeneratedFeedRepository;
 import de.fleigm.transitrouter.gtfs.FeedDetails;
+import de.fleigm.transitrouter.http.views.View;
 import de.fleigm.transitrouter.presets.PresetRepository;
 import org.jboss.resteasy.annotations.providers.multipart.MultipartForm;
 
 import javax.inject.Inject;
-import javax.json.Json;
 import javax.validation.Valid;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -81,9 +81,7 @@ public class GeneratedFeedController {
 
     if (feedInfo.isPending()) {
       return Response.status(Response.Status.CONFLICT)
-          .entity(Json.createObjectBuilder()
-              .add("message", "Can only delete finished or failed evaluations.")
-              .build())
+          .entity(new View().add("message", "Can only delete finished or failed evaluations."))
           .build();
     }
 

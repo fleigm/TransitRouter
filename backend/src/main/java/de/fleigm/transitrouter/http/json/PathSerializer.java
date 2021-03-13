@@ -1,15 +1,20 @@
 package de.fleigm.transitrouter.http.json;
 
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.databind.SerializerProvider;
+import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 import com.graphhopper.routing.Path;
 
-import javax.json.bind.serializer.JsonbSerializer;
-import javax.json.bind.serializer.SerializationContext;
-import javax.json.stream.JsonGenerator;
+import java.io.IOException;
 
-public class PathSerializer implements JsonbSerializer<Path> {
+public class PathSerializer extends StdSerializer<Path> {
+
+  public PathSerializer() {
+    super(Path.class);
+  }
 
   @Override
-  public void serialize(Path path, JsonGenerator generator, SerializationContext ctx) {
-    ctx.serialize(path.calcPoints(), generator);
+  public void serialize(Path value, JsonGenerator gen, SerializerProvider provider) throws IOException {
+    provider.defaultSerializeValue(value.calcPoints(), gen);
   }
 }
