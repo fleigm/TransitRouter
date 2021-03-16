@@ -9,6 +9,7 @@ import de.fleigm.transitrouter.util.StopWatch;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
@@ -45,11 +46,18 @@ public class FeedEvaluationStep implements Step {
 
     stopWatch.stop();
 
+
     evaluation.setStatus(shapevlResult.hasFailed() ? Status.FAILED : Status.FINISHED);
     evaluation.setShapevlCommand(shapevlResult.getCommand());
     evaluation.setShapevlOutput(shapevlResult.getMessage());
     evaluation.setReport(info.getFileStoragePath().resolve(Evaluation.SHAPEVL_REPORT));
     evaluation.setExecutionTime(Duration.of(stopWatch.getMillis(), ChronoUnit.MILLIS));
+
+    try {
+      MinifyShapevlReport.minify(evaluation.getReport());
+    } catch (IOException e) {
+      logger.error("Could not minify shapevl report", e);
+    }
 
     info.getOrCreateExtension(ExecutionTime.class, ExecutionTime::new)
         .add("feed_evaluation", Duration.of(stopWatch.getNanos(), ChronoUnit.NANOS));
