@@ -11,9 +11,16 @@ import de.fleigm.transitrouter.routing.Observation;
 import io.quarkus.jackson.ObjectMapperCustomizer;
 
 import javax.inject.Singleton;
+import java.text.SimpleDateFormat;
 
 @Singleton
-public class JsonbConfiguration implements ObjectMapperCustomizer {
+public class ObjectMapperConfiguration implements ObjectMapperCustomizer {
+
+  public static ObjectMapper get() {
+    ObjectMapper objectMapper = new ObjectMapper();
+    new ObjectMapperConfiguration().customize(objectMapper);
+    return objectMapper;
+  }
 
   @Override
   public void customize(ObjectMapper objectMapper) {
@@ -29,6 +36,7 @@ public class JsonbConfiguration implements ObjectMapperCustomizer {
 
 
     objectMapper
+        .setDateFormat(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss"))
         .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
         .addMixIn(Entity.class, ConveyalIgnoreIdMixin.class)
         .setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY)
