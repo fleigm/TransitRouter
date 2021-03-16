@@ -7,7 +7,6 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.enterprise.inject.spi.CDI;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -44,8 +43,9 @@ public abstract class Repository<T extends Entity> {
    *
    * @param storageLocation storage location.
    */
-  public Repository(@ConfigProperty(name = "app.storage") Path storageLocation) {
-    this.objectMapper = CDI.current().select(ObjectMapper.class).get();
+  public Repository(@ConfigProperty(name = "app.storage") Path storageLocation,
+                    ObjectMapper objectMapper) {
+    this.objectMapper = objectMapper;
     init(storageLocation);
   }
 

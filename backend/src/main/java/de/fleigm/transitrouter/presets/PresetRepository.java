@@ -1,5 +1,6 @@
 package de.fleigm.transitrouter.presets;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import de.fleigm.transitrouter.data.Repository;
 import de.fleigm.transitrouter.feeds.GeneratedFeed;
 import de.fleigm.transitrouter.feeds.GeneratedFeedRepository;
@@ -22,8 +23,9 @@ public class PresetRepository extends Repository<Preset> {
 
   @Inject
   public PresetRepository(@ConfigProperty(name = "app.storage") Path storageLocation,
+                          ObjectMapper objectMapper,
                           GeneratedFeedRepository generatedFeeds) {
-    super(storageLocation.resolve("presets"));
+    super(storageLocation.resolve("presets"), objectMapper);
     this.generatedFeeds = generatedFeeds;
   }
 
