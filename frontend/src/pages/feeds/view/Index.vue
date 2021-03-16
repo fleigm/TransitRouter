@@ -91,7 +91,7 @@ export default {
 
     deletePreset() {
       PresetService
-          .deleteEvaluation(this.id)
+          .deletePreset(this.id)
           .then(() => this.$router.push({name: 'presets.index'}))
     },
 
