@@ -260,12 +260,19 @@ public class DefaultTransitRouter implements TransitRouter {
                 to.outgoingEdge().getEdge());
 
             if (path.isFound()) {
-              double probability = probabilities.transitionLogProbability(path.getDistance(), linearDistance);
+              path.setDistance(path.getDistance() - to.outgoingEdge().getDistance());
+
+              int last = path.getEdges().get(path.getEdgeCount() - 1);
+              int secondLast = path.getEdges().get(path.getEdgeCount() - 2);
+              if (last == secondLast) {
+                //path.setDistance(1.2 * path.getDistance());
+                path.setDistance(path.getDistance() + to.outgoingEdge().getDistance());
+              }
 
               path.getEdges().remove(path.getEdgeCount() - 1);
               path.setEndNode(to.outgoingEdge().getBaseNode());
-              path.setDistance(path.getDistance() - to.outgoingEdge().getDistance());
 
+              double probability = probabilities.transitionLogProbability(path.getDistance(), linearDistance);
               hmmStep.addTransition(from, to, path, probability);
             }
           }
