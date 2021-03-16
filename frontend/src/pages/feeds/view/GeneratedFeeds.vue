@@ -16,7 +16,7 @@
 
           <el-table-column label="Parameters" width="250">
             <template slot-scope="scope">
-              <div class="flex gap-2">
+              <div class="flex gap-1">
                 <el-popover v-for="(params, type) in scope.row.parameters" :key="type" trigger="hover" placement="top">
                   <h3>{{ type }}</h3>
                   <p>Profile: {{ params.profile }}</p>
@@ -42,7 +42,7 @@
 
           <el-table-column label="Extensions">
             <template slot-scope="scope">
-              <div>
+              <div class="flex gap-1">
                 <v-feed-extension-tag v-for="(ext, name) in scope.row.extensions" :key="`${scope.row.id}:${name}`"
                                       :extension="name"></v-feed-extension-tag>
               </div>
@@ -168,6 +168,7 @@ export default {
 
     showEvaluationOfSelectedFeeds() {
       this.selectedFeeds
+          .filter(Filters.isFinished)
           .filter(Filters.hasEvaluation)
           .forEach(this.showEvaluation);
     },

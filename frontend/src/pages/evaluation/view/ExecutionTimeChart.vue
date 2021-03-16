@@ -80,12 +80,12 @@ export default {
 
       return Object.entries(durations)
           .filter(([key]) => key !== 'total')
-          .map(([key, duration]) => [key, moment.duration(duration).asMinutes()])
+          .map(([key, duration]) => [key, moment.duration(duration, 's').asMinutes()])
     }
     ,
 
     total() {
-      return moment.duration(this.extension.durations.total).asMinutes();
+      return moment.duration(this.extension.durations.total, 's').asMinutes();
     },
 
     rest() {

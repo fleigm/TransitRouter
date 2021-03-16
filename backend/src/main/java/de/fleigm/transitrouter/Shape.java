@@ -2,6 +2,7 @@ package de.fleigm.transitrouter;
 
 import com.conveyal.gtfs.model.ShapePoint;
 import com.graphhopper.util.DistancePlaneProjection;
+import com.graphhopper.util.DouglasPeucker;
 import com.graphhopper.util.PointList;
 import de.fleigm.transitrouter.routing.RoutingResult;
 import lombok.Data;
@@ -65,6 +66,10 @@ public class Shape {
     }
 
     return shapePoints;
+  }
+
+  public void simplify() {
+    new DouglasPeucker().simplify(points);
   }
 
 }

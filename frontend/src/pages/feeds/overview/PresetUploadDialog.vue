@@ -86,10 +86,14 @@ export default {
     async submit() {
       this.$events.$once('preset:createdRequest', this.displayUploadNotification)
 
-      this.$refs['preset-upload-form'].validate()
-          .then(() => PresetService.createPreset(this.formData))
-          .finally(this.resetForm)
+      this.$refs['preset-upload-form'].validate((valid) => {
+        if (!valid) {
+          return false
+        }
 
+        PresetService.createPreset(this.formData);
+        this.resetForm();
+      });
     },
 
     displayUploadNotification(event) {

@@ -5,24 +5,23 @@ import com.conveyal.gtfs.model.Route;
 import com.conveyal.gtfs.model.ShapePoint;
 import com.conveyal.gtfs.model.Trip;
 import de.fleigm.transitrouter.gtfs.TransitFeed;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.mapdb.Fun;
 
-import java.nio.file.Path;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
 public class GenerateTestFeed {
 
-  //@Test
-  void only_bus_with_one_trip_and_shape_per_pattern() {
+  @Test
+  void only_one_trip_and_shape_per_pattern() {
     TransitFeed transitFeed = new TransitFeed("../../files/stuttgart.zip");
     GTFSFeed feed = transitFeed.internal();
 
-    List<Pattern> patterns = transitFeed.busRoutes().values().stream()
-        .flatMap((Route route) -> transitFeed.findPatterns(route).stream())
+    List<Pattern> patterns = transitFeed.routes().values().stream()
+        .flatMap((Route route) -> transitFeed.findPatterns(route).stream().sorted(Comparator.comparingInt(pattern -> pattern.stops().size())).limit(5))
         .collect(Collectors.toList());
 
     List<Trip> trips = patterns.stream()
@@ -53,25 +52,6 @@ public class GenerateTestFeed {
     stopTimes.forEach(stopTime -> feed.stop_times.put(stopTime.getKey(), stopTime.getValue()));
     shapes.forEach(shape -> feed.shape_points.put(shape.getKey(), shape.getValue()));
 
-    feed.toFile("../../files/stuttgart_bus_only.zip");
-  }
-
-  @Disabled
-  @Test
-  void convert_distance_unit() {
-    Path path = Path.of(System.getProperty("user.home"), "uni/bachelor/project/files");
-    GTFSFeed feed = GTFSFeed.fromFile(path.resolve("vg.zip").toString());
-
-    feed.shape_points.forEach((key, value) -> {
-      value.shape_dist_traveled *= 1000;
-      feed.shape_points.replace(key, value);
-    });
-
-    feed.stop_times.forEach((key, value) -> {
-      value.shape_dist_traveled *= 1000;
-      feed.stop_times.replace(key, value);
-    });
-
-    feed.toFile(path.resolve("vg_converted.zip").toString());
+    feed.toFile("../../files/stuttgart_min.zip");
   }
 }
