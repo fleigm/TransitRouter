@@ -1,7 +1,7 @@
 <template>
   <div class="p-2 flex flex-col items-center">
     <div>
-      <span :class="[valueSize, 'font-thin']">{{ value }}</span>
+      <span :class="[valueSize, 'font-thin']"><slot>{{ value }}</slot></span>
       <span class="text-sm">{{ unit }}</span>
     </div>
     <div class="text-secondary font-thin">{{ title }}</div>
