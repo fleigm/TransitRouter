@@ -60,9 +60,8 @@ public class BusFlagEncoder extends AbstractFlagEncoder {
 
     potentialBarriers.add("gate");
     potentialBarriers.add("lift_gate");
-    potentialBarriers.add("kissing_gate");
     potentialBarriers.add("swing_gate");
-    potentialBarriers.add("cattle_grid");
+    potentialBarriers.add("block");
 
     absoluteBarriers.add("fence");
     absoluteBarriers.add("bollard");
@@ -70,7 +69,6 @@ public class BusFlagEncoder extends AbstractFlagEncoder {
     absoluteBarriers.add("turnstile");
     absoluteBarriers.add("cycle_barrier");
     absoluteBarriers.add("motorcycle_barrier");
-    absoluteBarriers.add("block");
     absoluteBarriers.add("sump_buster");
 
     // bus lanes
