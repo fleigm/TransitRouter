@@ -1,14 +1,14 @@
 package de.fleigm.transitrouter.http;
 
 import de.fleigm.transitrouter.http.pagination.Page;
-import de.fleigm.transitrouter.http.pagination.Paged;
+import de.fleigm.transitrouter.http.pagination.Pagination;
 import de.fleigm.transitrouter.http.search.SearchFilter;
 import de.fleigm.transitrouter.http.search.SearchQuery;
 import de.fleigm.transitrouter.http.search.StreamSearchHelper;
 import de.fleigm.transitrouter.http.sort.SortQuery;
 import de.fleigm.transitrouter.http.sort.StreamSortHelper;
 
-import javax.ws.rs.core.UriInfo;
+import java.net.URI;
 import java.util.Comparator;
 import java.util.List;
 import java.util.function.Function;
@@ -19,12 +19,12 @@ public class ResourcePageBuilder<T> {
   private final StreamSearchHelper<T> searchHelper = new StreamSearchHelper<>();
   private final StreamSortHelper<T> sortHelper = new StreamSortHelper<>();
 
-  private Paged pagination;
+  private Pagination pagination;
   private SearchQuery searchQuery;
   private SortQuery sortQuery;
-  private UriInfo uriInfo;
+  private URI path;
 
-  public ResourcePageBuilder<T> pagination(Paged pagination) {
+  public ResourcePageBuilder<T> pagination(Pagination pagination) {
     this.pagination = pagination;
     return this;
   }
@@ -39,8 +39,8 @@ public class ResourcePageBuilder<T> {
     return this;
   }
 
-  public ResourcePageBuilder<T> uriInfo(UriInfo uriInfo) {
-    this.uriInfo = uriInfo;
+  public ResourcePageBuilder<T> path(URI path) {
+    this.path = path;
     return this;
   }
 
@@ -55,28 +55,19 @@ public class ResourcePageBuilder<T> {
   }
 
   public Page<T> build(List<T> resource) {
-    Stream<T> resourceStream = resource.stream();
-    resourceStream = searchHelper.apply(searchQuery, resourceStream);
-    resourceStream = sortHelper.apply(sortQuery, resourceStream);
-
-    List<T> searchedAndSortedResource = resourceStream.collect(Collectors.toList());
-
-    return Page.<T>builder()
-        .currentPage(pagination.getPage())
-        .perPage(pagination.getLimit())
-        .total(searchedAndSortedResource.size())
-        .uri(uriInfo.getAbsolutePath())
-        .data(searchedAndSortedResource.stream()
-            .skip(pagination.getOffset())
-            .limit(pagination.getLimit())
-            .collect(Collectors.toList()))
-        .build();
+    return build(resource, Function.identity());
   }
 
   public <R> Page<R> build(List<T> resource, Function<T, R> mapper) {
     Stream<T> resourceStream = resource.stream();
-    resourceStream = searchHelper.apply(searchQuery, resourceStream);
-    resourceStream = sortHelper.apply(sortQuery, resourceStream);
+
+    if (searchQuery != null) {
+      resourceStream = searchHelper.apply(searchQuery, resourceStream);
+    }
+
+    if (sortQuery != null) {
+      resourceStream = sortHelper.apply(sortQuery, resourceStream);
+    }
 
     List<T> searchedAndSortedResource = resourceStream.collect(Collectors.toList());
 
@@ -84,7 +75,7 @@ public class ResourcePageBuilder<T> {
         .currentPage(pagination.getPage())
         .perPage(pagination.getLimit())
         .total(searchedAndSortedResource.size())
-        .uri(uriInfo.getAbsolutePath())
+        .uri(path)
         .data(searchedAndSortedResource.stream()
             .skip(pagination.getOffset())
             .limit(pagination.getLimit())

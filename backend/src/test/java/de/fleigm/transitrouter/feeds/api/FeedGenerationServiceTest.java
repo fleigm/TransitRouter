@@ -100,8 +100,6 @@ public class FeedGenerationServiceTest {
         .build();
 
     assertThrows(IllegalArgumentException.class, () -> feedGenerationService.create(request));
-
-    // TODO: find a way to test if the folder was deleted. We do not know the folder name / id
   }
 
   @Test

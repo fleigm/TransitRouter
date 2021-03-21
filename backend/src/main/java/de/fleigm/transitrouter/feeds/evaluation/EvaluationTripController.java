@@ -6,13 +6,12 @@ import com.conveyal.gtfs.model.Trip;
 import com.vividsolutions.jts.geom.LineString;
 import de.fleigm.transitrouter.feeds.GeneratedFeed;
 import de.fleigm.transitrouter.feeds.GeneratedFeedRepository;
-import de.fleigm.transitrouter.feeds.Status;
 import de.fleigm.transitrouter.gtfs.TransitFeed;
 import de.fleigm.transitrouter.gtfs.TransitFeedService;
 import de.fleigm.transitrouter.gtfs.Type;
 import de.fleigm.transitrouter.http.ResourcePageBuilder;
 import de.fleigm.transitrouter.http.pagination.Page;
-import de.fleigm.transitrouter.http.pagination.Paged;
+import de.fleigm.transitrouter.http.pagination.Pagination;
 import de.fleigm.transitrouter.http.search.SearchCriteria;
 import de.fleigm.transitrouter.http.search.SearchQuery;
 import de.fleigm.transitrouter.http.sort.SortQuery;
@@ -56,43 +55,42 @@ public class EvaluationTripController {
   @Path("{tripId}")
   @Produces(MediaType.APPLICATION_JSON)
   public Response show(@PathParam("id") UUID id, @PathParam("tripId") String tripId) {
+    GeneratedFeed feed = generatedFeedRepository.findOrFail(id);
 
-    return generatedFeedRepository.find(id)
-        .filter(GeneratedFeed::hasFinished)
-        .map(info -> {
-          TransitFeed originalFeed = transitFeedService.get(info.getOriginalFeed().getPath());
-          TransitFeed generatedFeed = transitFeedService.get(info.getFeed().getPath());
+    if (!feed.getStatus().finished()) {
+      return Response.status(Response.Status.NOT_FOUND).build();
+    }
 
-          Trip trip = generatedFeed.internal().trips.get(tripId);
-          Route route = generatedFeed.getRouteForTrip(tripId);
-          List<Stop> stops = originalFeed.getOrderedStopsForTrip(tripId);
-          LineString originalShape = originalFeed.internal().getTripGeometry(tripId);
-          LineString generatedShape = generatedFeed.internal().getTripGeometry(tripId);
+    TransitFeed originalFeed = transitFeedService.get(feed.getOriginalFeed().getPath());
+    TransitFeed generatedFeed = transitFeedService.get(feed.getFeed().getPath());
 
-          View view = new View()
-              .add("trip", trip)
-              .add("route", route)
-              .add("stops", stops)
-              .add("originalShape", originalShape)
-              .add("generatedShape", generatedShape);
+    Trip trip = generatedFeed.internal().trips.get(tripId);
+    Route route = generatedFeed.getRouteForTrip(tripId);
+    List<Stop> stops = originalFeed.getOrderedStopsForTrip(tripId);
+    LineString originalShape = originalFeed.internal().getTripGeometry(tripId);
+    LineString generatedShape = generatedFeed.internal().getTripGeometry(tripId);
 
-          return Response.ok(view);
-        })
-        .orElse(Response.status(Response.Status.NOT_FOUND))
-        .build();
+    View view = new View()
+        .add("trip", trip)
+        .add("route", route)
+        .add("stops", stops)
+        .add("originalShape", originalShape)
+        .add("generatedShape", generatedShape);
+
+    return Response.ok(view).build();
   }
 
   @GET
   @Produces(MediaType.APPLICATION_JSON)
   public Response index(@PathParam("id") UUID id,
                         @Context UriInfo uriInfo,
-                        @BeanParam Paged paged,
+                        @BeanParam Pagination pagination,
                         @QueryParam("search") @DefaultValue("") String search,
                         @QueryParam("sort") @DefaultValue("") String sort) {
 
     GeneratedFeed info = generatedFeedRepository.findOrFail(id);
 
-    if (info.getStatus() != Status.FINISHED) {
+    if (!info.getStatus().finished()) {
       return Response.status(Response.Status.NOT_FOUND).build();
     }
 
@@ -100,8 +98,8 @@ public class EvaluationTripController {
     List<Entry> entries;
 
     ResourcePageBuilder<Entry> resultBuilder = new ResourcePageBuilder<Entry>()
-        .uriInfo(uriInfo)
-        .pagination(paged)
+        .path(uriInfo.getAbsolutePath())
+        .pagination(pagination)
         .searchQuery(SearchQuery.parse(search))
         .sortQuery(SortQuery.parse(sort.isBlank() ? "_none_:asc" : sort))
         .addSearch("type", this::typeFilter)

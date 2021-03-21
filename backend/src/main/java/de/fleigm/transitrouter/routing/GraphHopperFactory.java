@@ -4,6 +4,7 @@ import com.graphhopper.GraphHopper;
 import com.graphhopper.config.Profile;
 import com.graphhopper.reader.osm.GraphHopperOSM;
 import com.graphhopper.routing.util.EncodingManager;
+import com.graphhopper.routing.util.parsers.OSMTurnRelationParser;
 import com.graphhopper.util.PMap;
 import com.graphhopper.util.Parameters;
 import io.quarkus.runtime.Startup;
@@ -14,6 +15,7 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Produces;
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.List;
 
 @ApplicationScoped
 public class GraphHopperFactory {
@@ -38,7 +40,7 @@ public class GraphHopperFactory {
 
     BusFlagEncoder busFlagEncoder = new BusFlagEncoder(new PMap()
         .putObject(Parameters.Routing.TURN_COSTS, true)
-        .putObject("block_barriers", false));
+        .putObject("block_barriers", true));
 
     RailFlagEncoder railFlagEncoder = new RailFlagEncoder(new PMap());
 
@@ -46,6 +48,7 @@ public class GraphHopperFactory {
         .add(busFlagEncoder)
         .add(railFlagEncoder)
         .addRelationTagParser(new BusNetworkRelationTagParser())
+        .addTurnCostParser(new OSMTurnRelationParser("bus", 1, List.of("bus", "motorcar", "psv", "motor_vehicle", "vehicle", "access")))
         .build();
 
     GraphHopper graphHopper = new GraphHopperOSM()

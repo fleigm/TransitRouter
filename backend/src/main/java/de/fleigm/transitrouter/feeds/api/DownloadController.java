@@ -29,7 +29,7 @@ public class DownloadController {
   public Response downloadGeneratedFeed(@PathParam("id") UUID id) {
     GeneratedFeed generatedFeed = generatedFeedRepository.findOrFail(id);
 
-    if (!generatedFeed.hasFinished()) {
+    if (!generatedFeed.getStatus().finished()) {
       return Response.status(Response.Status.NOT_FOUND).build();
     }
 

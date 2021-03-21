@@ -94,7 +94,7 @@ public class PresetController {
   @Path("{id}/generated-feeds")
   @Consumes(MediaType.APPLICATION_JSON)
   @Produces(MediaType.APPLICATION_JSON)
-  public Response generateFeed(@PathParam("id") UUID id, @NotNull @Valid GenerateFeedRequest generateFeedRequest) {
+  public Response generateFeed(@PathParam("id") UUID id, GenerateFeedRequest generateFeedRequest) {
     Preset preset = presets.findOrFail(id);
 
     FeedGenerationResponse feedGenerationResponse = feedGenerationService.createFromPreset(

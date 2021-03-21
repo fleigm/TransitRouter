@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.graphhopper.util.shapes.GHPoint;
 import de.fleigm.transitrouter.routing.Observation;
 import io.quarkus.jackson.ObjectMapperCustomizer;
@@ -36,6 +37,7 @@ public class ObjectMapperConfiguration implements ObjectMapperCustomizer {
 
 
     objectMapper
+        .registerModule(new JavaTimeModule())
         .setDateFormat(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss"))
         .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
         .addMixIn(Entity.class, ConveyalIgnoreIdMixin.class)

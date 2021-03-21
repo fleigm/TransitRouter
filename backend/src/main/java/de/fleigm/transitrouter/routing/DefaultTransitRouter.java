@@ -20,16 +20,11 @@ package de.fleigm.transitrouter.routing;
 import com.bmw.hmm.SequenceState;
 import com.bmw.hmm.ViterbiAlgorithm;
 import com.graphhopper.GraphHopper;
-import com.graphhopper.config.LMProfile;
 import com.graphhopper.config.Profile;
 import com.graphhopper.matching.HmmProbabilities;
-import com.graphhopper.routing.AStarBidirection;
 import com.graphhopper.routing.BidirRoutingAlgorithm;
 import com.graphhopper.routing.DijkstraBidirectionRef;
 import com.graphhopper.routing.Path;
-import com.graphhopper.routing.lm.LMApproximator;
-import com.graphhopper.routing.lm.LandmarkStorage;
-import com.graphhopper.routing.lm.PrepareLandmarks;
 import com.graphhopper.routing.querygraph.QueryGraph;
 import com.graphhopper.routing.util.DefaultEdgeFilter;
 import com.graphhopper.routing.util.TraversalMode;
@@ -43,7 +38,6 @@ import com.graphhopper.util.EdgeIterator;
 import com.graphhopper.util.EdgeIteratorState;
 import com.graphhopper.util.GHUtility;
 import com.graphhopper.util.PMap;
-import com.graphhopper.util.Parameters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -53,72 +47,31 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class DefaultTransitRouter implements TransitRouter {
-  private static final String DEFAULT_PROFILE = "bus_custom_shortest";
-
   private final Logger logger = LoggerFactory.getLogger(getClass());
 
   private final Graph graph;
-  private final PrepareLandmarks landmarks;
   private final LocationIndexTree locationIndex;
-  private final int maxVisitedNodes;
   private final DistanceCalc distanceCalc = new DistancePlaneProjection();
   private final Weighting weighting;
 
   private final double candidateSearchRadius;
   private final double sigma;
   private final double beta;
+  private final HmmProbabilities probabilities;
 
   public DefaultTransitRouter(GraphHopper graphHopper, PMap hints) {
     this.locationIndex = (LocationIndexTree) graphHopper.getLocationIndex();
 
-    Profile profile = graphHopper.getProfile(hints.getString("profile", DEFAULT_PROFILE));
+    Profile profile = graphHopper.getProfile(hints.getString("profile", ""));
 
-    boolean disableLM = hints.getBool(Parameters.Landmark.DISABLE, false);
-    if (graphHopper.getLMPreparationHandler().isEnabled() && disableLM && !graphHopper.getRouterConfig().isLMDisablingAllowed())
-      throw new IllegalArgumentException("Disabling LM is not allowed");
-
-    boolean disableCH = hints.getBool(Parameters.CH.DISABLE, false);
-    if (graphHopper.getCHPreparationHandler().isEnabled() && disableCH && !graphHopper.getRouterConfig().isCHDisablingAllowed())
-      throw new IllegalArgumentException("Disabling CH is not allowed");
-
-    // see map-matching/#177: both ch.disable and lm.disable can be used to force Dijkstra which is the better
-    // (=faster) choice when the observations are close to each other
-    boolean useDijkstra = disableLM || disableCH;
-
-    landmarks = prepareLandmarks(graphHopper, profile, useDijkstra);
     graph = graphHopper.getGraphHopperStorage();
     weighting = graphHopper.createWeighting(profile, hints, hints.getBool("disable_turn_costs", false));
-    maxVisitedNodes = hints.getInt(Parameters.Routing.MAX_VISITED_NODES, Integer.MAX_VALUE);
 
     candidateSearchRadius = hints.getDouble("candidate_search_radius", 25);
     sigma = hints.getDouble("measurement_error_sigma", 25);
     beta = hints.getDouble("transitions_beta_probability", 25);
-  }
 
-  private PrepareLandmarks prepareLandmarks(GraphHopper graphHopper, Profile profile, boolean useDijkstra) {
-    final PrepareLandmarks landmarks;
-    if (graphHopper.getLMPreparationHandler().isEnabled() && !useDijkstra) {
-      // using LM because u-turn prevention does not work properly with (node-based) CH
-      List<String> lmProfileNames = new ArrayList<>();
-      PrepareLandmarks lmPreparation = null;
-      for (LMProfile lmProfile : graphHopper.getLMPreparationHandler().getLMProfiles()) {
-        lmProfileNames.add(lmProfile.getProfile());
-        if (lmProfile.getProfile().equals(profile.getName())) {
-          lmPreparation = graphHopper.getLMPreparationHandler().getPreparation(
-              lmProfile.usesOtherPreparation() ? lmProfile.getPreparationProfile() : lmProfile.getProfile()
-          );
-        }
-      }
-      if (lmPreparation == null) {
-        throw new IllegalArgumentException("Cannot find LM preparation for the requested profile: '" + profile.getName() + "'" +
-                                           "\nYou can try disabling LM using " + Parameters.Landmark.DISABLE + "=true" +
-                                           "\navailable LM profiles: " + lmProfileNames);
-      }
-      landmarks = lmPreparation;
-    } else {
-      landmarks = null;
-    }
-    return landmarks;
+    probabilities = new HmmProbabilities(sigma, beta);
   }
 
   @Override
@@ -153,14 +106,17 @@ public class DefaultTransitRouter implements TransitRouter {
     List<ObservationWithCandidates> timeSteps = createTimeSteps(observations, splitsPerObservation, queryGraph);
 
     // Compute the most likely sequence of map matching candidates:
-    List<SequenceState<DirectedCandidate, Observation, Path>> seq = computeViterbiSequence(timeSteps, queryGraph);
+    List<SequenceState<DirectedCandidate, Observation, Path>> sequence = computeViterbiSequence(timeSteps, queryGraph);
 
-    Path path = buildPathFromSequence(seq, queryGraph, weighting);
+    Path path = buildPathFromSequence(sequence, queryGraph, weighting);
+    List<Path> pathSegments = sequence.stream()
+        .filter(x -> x.transitionDescriptor != null)
+        .map(x -> x.transitionDescriptor)
+        .collect(Collectors.toList());
 
-    // TODO return directed candidates instead of split / snap points
     return RoutingResult.builder()
         .path(path)
-        .pathSegments(seq.stream().filter(x -> x.transitionDescriptor != null).map(x -> x.transitionDescriptor).collect(Collectors.toList()))
+        .pathSegments(pathSegments)
         .distance(path.getDistance())
         .time(path.getTime())
         .candidates(splitsPerObservation.stream()
@@ -223,20 +179,14 @@ public class DefaultTransitRouter implements TransitRouter {
       List<ObservationWithCandidates> timeSteps,
       QueryGraph queryGraph) {
 
-    final HmmProbabilities probabilities = new HmmProbabilities(sigma, beta);
-    final ViterbiAlgorithm<DirectedCandidate, Observation, Path> viterbi = new ViterbiAlgorithm<>(true);
+    final ViterbiAlgorithm<DirectedCandidate, Observation, Path> viterbi = new ViterbiAlgorithm<>();
 
     int timeStepCounter = 0;
     ObservationWithCandidates prevTimeStep = null;
     for (ObservationWithCandidates timeStep : timeSteps) {
       HMMStep hmmStep = new HMMStep();
 
-      // compute emission probabilities
-      for (DirectedCandidate candidate : timeStep.candidates()) {
-        // distance from observation to road in meters
-        final double distance = candidate.snap().getQueryDistance();
-        hmmStep.addEmissionProbability(candidate, probabilities.emissionLogProbability(distance));
-      }
+      computeEmissionProbabilities(timeStep, hmmStep);
 
       if (prevTimeStep == null) {
         viterbi.startWithInitialObservation(
@@ -244,39 +194,7 @@ public class DefaultTransitRouter implements TransitRouter {
             timeStep.candidates(),
             hmmStep.emissionProbabilities());
       } else {
-        final double linearDistance = distanceCalc.calcDist(
-            prevTimeStep.observation().lat(),
-            prevTimeStep.observation().lon(),
-            timeStep.observation().lat(),
-            timeStep.observation().lon());
-
-        for (DirectedCandidate from : prevTimeStep.candidates()) {
-          for (DirectedCandidate to : timeStep.candidates()) {
-
-            final Path path = createRouter(queryGraph).calcPath(
-                from.snap().getClosestNode(),
-                to.outgoingEdge().getAdjNode(),
-                from.outgoingEdge().getEdge(),
-                to.outgoingEdge().getEdge());
-
-            if (path.isFound()) {
-              path.setDistance(path.getDistance() - to.outgoingEdge().getDistance());
-
-              int last = path.getEdges().get(path.getEdgeCount() - 1);
-              int secondLast = path.getEdges().get(path.getEdgeCount() - 2);
-              if (last == secondLast) {
-                //path.setDistance(1.2 * path.getDistance());
-                path.setDistance(path.getDistance() + to.outgoingEdge().getDistance());
-              }
-
-              path.getEdges().remove(path.getEdgeCount() - 1);
-              path.setEndNode(to.outgoingEdge().getBaseNode());
-
-              double probability = probabilities.transitionLogProbability(path.getDistance(), linearDistance);
-              hmmStep.addTransition(from, to, path, probability);
-            }
-          }
-        }
+        computeTransitionProbabilities(queryGraph, prevTimeStep, timeStep, hmmStep);
 
         viterbi.nextStep(
             timeStep.observation(),
@@ -296,30 +214,61 @@ public class DefaultTransitRouter implements TransitRouter {
     return viterbi.computeMostLikelySequence();
   }
 
-  private BidirRoutingAlgorithm createRouter(QueryGraph queryGraph) {
-    BidirRoutingAlgorithm router;
-    if (landmarks != null) {
-      AStarBidirection algo = new AStarBidirection(queryGraph, weighting, TraversalMode.EDGE_BASED) {
-        @Override
-        protected void initCollections(int size) {
-          super.initCollections(50);
+  private void computeTransitionProbabilities(QueryGraph queryGraph,
+                                              ObservationWithCandidates prevTimeStep,
+                                              ObservationWithCandidates timeStep,
+                                              HMMStep hmmStep) {
+
+    final double linearDistance = distanceCalc.calcDist(
+        prevTimeStep.observation().lat(),
+        prevTimeStep.observation().lon(),
+        timeStep.observation().lat(),
+        timeStep.observation().lon());
+
+    for (DirectedCandidate from : prevTimeStep.candidates()) {
+      for (DirectedCandidate to : timeStep.candidates()) {
+
+        final Path path = createRouter(queryGraph).calcPath(
+            from.snap().getClosestNode(),
+            to.outgoingEdge().getAdjNode(),
+            from.outgoingEdge().getEdge(),
+            to.outgoingEdge().getEdge());
+
+        if (path.isFound()) {
+          path.setDistance(path.getDistance() - to.outgoingEdge().getDistance());
+
+          int last = path.getEdges().get(path.getEdgeCount() - 1);
+          int secondLast = path.getEdges().get(path.getEdgeCount() - 2);
+          if (last == secondLast) {
+            //path.setDistance(1.2 * path.getDistance());
+            path.setDistance(path.getDistance() + to.outgoingEdge().getDistance());
+          }
+
+          path.getEdges().remove(path.getEdgeCount() - 1);
+          path.setEndNode(to.outgoingEdge().getBaseNode());
+
+          double probability = probabilities.transitionLogProbability(path.getDistance(), linearDistance);
+          hmmStep.addTransition(from, to, path, probability);
         }
-      };
-      LandmarkStorage lms = landmarks.getLandmarkStorage();
-      int activeLM = Math.min(8, lms.getLandmarkCount());
-      algo.setApproximation(LMApproximator.forLandmarks(queryGraph, lms, activeLM));
-      algo.setMaxVisitedNodes(maxVisitedNodes);
-      router = algo;
-    } else {
-      router = new DijkstraBidirectionRef(queryGraph, weighting, TraversalMode.EDGE_BASED) {
-        @Override
-        protected void initCollections(int size) {
-          super.initCollections(50);
-        }
-      };
-      router.setMaxVisitedNodes(maxVisitedNodes);
+      }
     }
-    return router;
+  }
+
+  private void computeEmissionProbabilities(ObservationWithCandidates timeStep, HMMStep hmmStep) {
+    for (DirectedCandidate candidate : timeStep.candidates()) {
+      // distance from observation to road in meters
+      final double distance = candidate.snap().getQueryDistance();
+      hmmStep.addEmissionProbability(candidate, probabilities.emissionLogProbability(distance));
+    }
+  }
+
+  private BidirRoutingAlgorithm createRouter(QueryGraph queryGraph) {
+    return new DijkstraBidirectionRef(queryGraph, weighting, TraversalMode.EDGE_BASED) {
+      @Override
+      protected void initCollections(int size) {
+        super.initCollections(50);
+      }
+    };
   }
 
   private Path buildPathFromSequence(

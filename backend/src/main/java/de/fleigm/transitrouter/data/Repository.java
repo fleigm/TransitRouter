@@ -61,8 +61,12 @@ public abstract class Repository<T extends Entity> {
 
     ensureStorageLocationExists(storageLocation);
 
-    storage.clear();
+    loadEntities();
+  }
+
+  protected void loadEntities() {
     Map<UUID, T> reloadedEntities = loadFromDisk();
+    storage.clear();
     storage.putAll(reloadedEntities);
   }
 
@@ -143,7 +147,7 @@ public abstract class Repository<T extends Entity> {
    * @param entity entity to be deleted.
    */
   public void delete(T entity) {
-    find(entity.getId()).ifPresent(this::removeExistingEntity);
+    delete(entity.getId());
   }
 
   private void removeExistingEntity(T entity) {

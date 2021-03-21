@@ -2,14 +2,13 @@ package de.fleigm.transitrouter.http.search;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.function.Consumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class SearchQuery {
   public static final Pattern SEARCH_CRITERIA_PATTERN = Pattern.compile("(\\w+|\\w+\\.\\w+|\\w+\\.\\w+\\.\\w+)([:~<>])(.+)");
 
-  private Map<String, SearchCriteria> criteria;
+  private final Map<String, SearchCriteria> criteria;
 
   private SearchQuery() {
     this(new HashMap<>());
@@ -23,39 +22,8 @@ public class SearchQuery {
     return criteria.containsKey(key);
   }
 
-  public boolean has(SearchCriteria searchCriteria) {
-    return criteria.containsValue(searchCriteria);
-  }
-
   public SearchCriteria get(String key) {
     return criteria.get(key);
-  }
-
-  public void computeIfPresent(String key, Consumer<SearchCriteria> func) {
-    SearchCriteria searchCriteria = get(key);
-    if (searchCriteria != null) {
-      func.accept(searchCriteria);
-    }
-  }
-
-  public SearchQuery only(String... keys) {
-    Map<String, SearchCriteria> criteria = new HashMap<>();
-
-    for (String key : keys) {
-      this.criteria.computeIfPresent(key, (s, searchCriteria) -> criteria.put(key, searchCriteria));
-    }
-
-    this.criteria = criteria;
-
-    return this;
-  }
-
-  public SearchQuery reject(String... keys) {
-    for (String key : keys) {
-      criteria.remove(key);
-    }
-
-    return this;
   }
 
   public SearchQuery add(String key, Operation operation, String value) {

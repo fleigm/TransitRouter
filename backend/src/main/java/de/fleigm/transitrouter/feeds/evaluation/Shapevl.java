@@ -50,13 +50,14 @@ public class Shapevl {
   }
 
   protected String[] buildCommand(Path feed, Path groundTruth, Path reportFolder, Type ...types) {
+    // specifying mot does not work atm. This is a bug in shapevl
     String mot = Arrays.stream(types)
         .map(type -> String.valueOf(type.value()))
         .collect(Collectors.joining(","));
 
     return new String[]{
         shapevlCommandPath.toString(),
-        //"-m", mot,
+        //"-m", "mot",
         "-f", reportFolder.toString(),
         "-g", groundTruth.toString(),
         feed.toString()

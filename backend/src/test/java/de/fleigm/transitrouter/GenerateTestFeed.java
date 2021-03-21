@@ -5,6 +5,7 @@ import com.conveyal.gtfs.model.Route;
 import com.conveyal.gtfs.model.ShapePoint;
 import com.conveyal.gtfs.model.Trip;
 import de.fleigm.transitrouter.gtfs.TransitFeed;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.mapdb.Fun;
 
@@ -15,6 +16,7 @@ import java.util.stream.Collectors;
 
 public class GenerateTestFeed {
 
+  @Disabled
   @Test
   void only_one_trip_and_shape_per_pattern() {
     TransitFeed transitFeed = new TransitFeed("../../files/stuttgart.zip");

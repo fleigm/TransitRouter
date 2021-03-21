@@ -2,14 +2,12 @@ package de.fleigm.transitrouter.feeds;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.fleigm.transitrouter.data.Repository;
-import lombok.extern.slf4j.Slf4j;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.nio.file.Path;
 
-@Slf4j
 @Singleton
 public class GeneratedFeedRepository extends Repository<GeneratedFeed> {
 

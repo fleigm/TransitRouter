@@ -79,7 +79,7 @@ public class GeneratedFeedController {
     GeneratedFeed feedInfo = generatedFeedRepository.findOrFail(id);
 
 
-    if (feedInfo.isPending()) {
+    if (feedInfo.getStatus().pending()) {
       return Response.status(Response.Status.CONFLICT)
           .entity(new View().add("message", "Can only delete finished or failed evaluations."))
           .build();
@@ -88,6 +88,5 @@ public class GeneratedFeedController {
     generatedFeedRepository.delete(id);
 
     return Response.noContent().build();
-
   }
 }

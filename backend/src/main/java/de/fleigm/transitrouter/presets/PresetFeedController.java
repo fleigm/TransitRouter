@@ -11,7 +11,7 @@ import de.fleigm.transitrouter.gtfs.TransitFeedService;
 import de.fleigm.transitrouter.gtfs.Type;
 import de.fleigm.transitrouter.http.ResourcePageBuilder;
 import de.fleigm.transitrouter.http.pagination.Page;
-import de.fleigm.transitrouter.http.pagination.Paged;
+import de.fleigm.transitrouter.http.pagination.Pagination;
 import de.fleigm.transitrouter.http.search.SearchCriteria;
 import de.fleigm.transitrouter.http.search.SearchQuery;
 import de.fleigm.transitrouter.http.sort.SortQuery;
@@ -52,7 +52,7 @@ public class PresetFeedController {
   @GET
   public Response index(@PathParam("id") UUID id,
                         @Context UriInfo uriInfo,
-                        @BeanParam Paged paged,
+                        @BeanParam Pagination pagination,
                         @QueryParam("search") @DefaultValue("") String search,
                         @QueryParam("sort") @DefaultValue("_none_:asc") String sort) {
 
@@ -61,8 +61,8 @@ public class PresetFeedController {
     List<Pattern> patterns = cachedPatternService.getPatternsForFeed(preset.getFeed());
 
     ResourcePageBuilder<Pattern> resultBuilder = new ResourcePageBuilder<Pattern>()
-        .pagination(paged)
-        .uriInfo(uriInfo)
+        .pagination(pagination)
+        .path(uriInfo.getAbsolutePath())
         .searchQuery(SearchQuery.parse(search))
         .sortQuery(SortQuery.parse(sort.isBlank() ? "_none_:asc" : sort))
         .addSearch("type", this::typeFilter)

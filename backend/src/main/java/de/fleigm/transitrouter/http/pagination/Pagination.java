@@ -11,7 +11,7 @@ import javax.ws.rs.QueryParam;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class Paged {
+public class Pagination {
 
   @QueryParam("page")
   @DefaultValue("1")
@@ -23,8 +23,8 @@ public class Paged {
   @Min(value = 10, message = "Limit must be at least 10.")
   private int limit;
 
-  public static Paged of(int page, int limit) {
-    return new Paged(page, limit);
+  public static Pagination of(int page, int limit) {
+    return new Pagination(page, limit);
   }
 
   public int getOffset() {
