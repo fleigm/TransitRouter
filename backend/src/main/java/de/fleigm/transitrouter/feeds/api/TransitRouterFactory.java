@@ -21,8 +21,15 @@ public interface TransitRouterFactory {
   @ApplicationScoped
   class Default implements TransitRouterFactory {
 
-    @Inject
     GraphHopper graphHopper;
+
+    Default() {
+    }
+
+    @Inject
+    public Default(GraphHopper graphHopper) {
+      this.graphHopper = graphHopper;
+    }
 
     @Override
     public TransitRouter create(PMap parameters) {

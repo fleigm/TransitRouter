@@ -28,6 +28,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.hasKey;
 import static org.junit.jupiter.api.Assertions.*;
 
 @QuarkusTest
@@ -153,14 +154,11 @@ public class GeneratedFeedControllerTest {
 
     generatedFeedRepository.save(generatedFeed);
 
-    GeneratedFeed feed = given().when()
+    given().when()
         .get("feeds/" + generatedFeed.getId())
         .then()
         .statusCode(200)
-        .extract()
-        .as(GeneratedFeed.class);
-
-    assertTrue(feed.hasExtension(FeedDetails.class));
+        .body("extensions", hasKey(FeedDetails.class.getName()));
   }
 
   @Test
