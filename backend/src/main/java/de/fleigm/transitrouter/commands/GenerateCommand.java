@@ -55,6 +55,26 @@ public class GenerateCommand implements Runnable {
   GeneratedFeed generatedFeed;
 
   public GenerateCommand() {
+
+  }
+
+
+
+  @Override
+  public void run() {
+    try {
+      if (storage == null) {
+        init();
+      }
+      generateFeed();
+    } catch (IOException e) {
+      e.printStackTrace();
+      System.out.println("failed");
+      System.exit(1);
+    }
+  }
+
+  private void init() {
     try {
       storage = Files.createTempDirectory(UUID.randomUUID().toString());
     } catch (IOException e) {
@@ -62,17 +82,6 @@ public class GenerateCommand implements Runnable {
     }
     Runtime.getRuntime().addShutdownHook(new Thread(() -> FileUtils.deleteQuietly(storage.toFile())));
     System.setProperty("app.storage", storage.toString());
-  }
-
-  @Override
-  public void run() {
-    try {
-      generateFeed();
-    } catch (IOException e) {
-      e.printStackTrace();
-      System.out.println("failed");
-      System.exit(1);
-    }
   }
 
   private void generateFeed() throws IOException {
