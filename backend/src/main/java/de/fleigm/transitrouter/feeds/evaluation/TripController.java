@@ -40,7 +40,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Path("feeds/{id}/trips")
-public class EvaluationTripController {
+public class TripController {
 
   @Inject
   GeneratedFeedRepository generatedFeedRepository;
@@ -65,6 +65,11 @@ public class EvaluationTripController {
     TransitFeed generatedFeed = transitFeedService.get(feed.getFeed().getPath());
 
     Trip trip = generatedFeed.internal().trips.get(tripId);
+
+    if (trip == null) {
+      return Response.status(Response.Status.NOT_FOUND).build();
+    }
+
     Route route = generatedFeed.getRouteForTrip(tripId);
     List<Stop> stops = originalFeed.getOrderedStopsForTrip(tripId);
     LineString originalShape = originalFeed.internal().getTripGeometry(tripId);
@@ -94,17 +99,26 @@ public class EvaluationTripController {
       return Response.status(Response.Status.NOT_FOUND).build();
     }
 
-    TransitFeed transitFeed = transitFeedService.get(info.getFeed().getPath());
-    List<Entry> entries;
-
     ResourcePageBuilder<Entry> resultBuilder = new ResourcePageBuilder<Entry>()
         .path(uriInfo.getAbsolutePath())
         .pagination(pagination)
         .searchQuery(SearchQuery.parse(search))
-        .sortQuery(SortQuery.parse(sort.isBlank() ? "_none_:asc" : sort))
-        .addSearch("type", this::typeFilter)
-        .addSearch("name", this::nameFilter)
-        .addSearch(SearchCriteria.WILDCARD_KEY, this::wildCardFilter);
+        .sortQuery(SortQuery.parseNullable(sort))
+        .addSearch("type", Entry::typeFilter)
+        .addSearch("name", Entry::nameFilter)
+        .addSearch(SearchCriteria.WILDCARD_KEY, Entry::wildCardFilter)
+        .addSort("an", Comparator.comparingDouble(Entry::getAn))
+        .addSort("al", Comparator.comparingDouble(Entry::getAl))
+        .addSort("avgFd", Comparator.comparingDouble(Entry::getAvgFd));
+
+    Page<Entry> page = resultBuilder.build(getEntries(info));
+
+    return Response.ok(page).build();
+  }
+
+  private List<Entry> getEntries(GeneratedFeed info) {
+    TransitFeed transitFeed = transitFeedService.get(info.getFeed().getPath());
+    List<Entry> entries;
 
     Optional<Evaluation> evaluation = info.getExtension(Evaluation.class);
     if (evaluation.isPresent()) {
@@ -113,11 +127,6 @@ public class EvaluationTripController {
           .stream()
           .map(entry -> Entry.create(entry, transitFeed))
           .collect(Collectors.toList());
-
-      resultBuilder
-          .addSort("an", Comparator.comparingDouble(Entry::getAn))
-          .addSort("al", Comparator.comparingDouble(Entry::getAl))
-          .addSort("avgFd", Comparator.comparingDouble(Entry::getAvgFd));
     } else {
       entries = transitFeed.trips()
           .keySet()
@@ -125,29 +134,8 @@ public class EvaluationTripController {
           .map(tripId -> Entry.create(tripId, transitFeed))
           .collect(Collectors.toList());
     }
-
-
-    Page<Entry> page = resultBuilder.build(entries);
-
-    return Response.ok(page).build();
+    return entries;
   }
-
-  private boolean typeFilter(SearchCriteria searchCriteria, Entry entry) {
-    return entry.type.contains(searchCriteria.intValue());
-  }
-
-  private boolean nameFilter(SearchCriteria searchCriteria, Entry entry) {
-    return entry.routeShortName.contains(searchCriteria.value())
-           || entry.routeLongName.contains(searchCriteria.value());
-  }
-
-  private boolean wildCardFilter(SearchCriteria searchCriteria, Entry entry) {
-    return entry.tripId.contains(searchCriteria.value())
-           || entry.routeId.contains(searchCriteria.value())
-           || entry.routeShortName.contains(searchCriteria.value())
-           || entry.routeLongName.contains(searchCriteria.value());
-  }
-
 
   @Getter
   @AllArgsConstructor
@@ -188,6 +176,22 @@ public class EvaluationTripController {
           route.route_long_name
 
       );
+    }
+
+    public static boolean typeFilter(SearchCriteria searchCriteria, Entry entry) {
+      return entry.type.contains(searchCriteria.intValue());
+    }
+
+    public static boolean nameFilter(SearchCriteria searchCriteria, Entry entry) {
+      return entry.routeShortName.contains(searchCriteria.value())
+             || entry.routeLongName.contains(searchCriteria.value());
+    }
+
+    public static boolean wildCardFilter(SearchCriteria searchCriteria, Entry entry) {
+      return entry.tripId.contains(searchCriteria.value())
+             || entry.routeId.contains(searchCriteria.value())
+             || entry.routeShortName.contains(searchCriteria.value())
+             || entry.routeLongName.contains(searchCriteria.value());
     }
   }
 }

@@ -26,8 +26,10 @@ import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 import java.util.List;
@@ -35,6 +37,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Path("presets/{id}/feed")
+@Produces(MediaType.APPLICATION_JSON)
 public class PresetFeedController {
 
   @Inject
@@ -91,6 +94,11 @@ public class PresetFeedController {
     TransitFeed transitFeed = transitFeedService.get(preset.getFeed().getPath());
 
     Trip trip = transitFeed.trips().get(tripId);
+
+    if (trip == null) {
+      return Response.status(Response.Status.NOT_FOUND).build();
+    }
+
     Route route = transitFeed.routes().get(trip.route_id);
     List<Stop> stops = transitFeed.getOrderedStopsForTrip(trip);
 

@@ -32,6 +32,7 @@ class GenerateCommandTest {
   @BeforeAll
   static void setup() throws IOException {
     command = new GenerateCommand();
+    command.init();
     cmd = new CommandLine(command);
     directory = Files.createTempDirectory("generate_command_test");
     markForAutoRemoval(directory);

@@ -24,7 +24,10 @@ public final class ValidateGtfsFeed {
   private static final List<String> ALLOWED_FILES = List.of(
       "agency.txt",
       "stops.txt",
+      "stop_features.txt",
+      "linked_datasets.txt",
       "routes.txt",
+      "route_directions.txt",
       "trips.txt",
       "stop_times.txt",
       "calendar.txt",

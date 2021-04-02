@@ -74,7 +74,7 @@ public class GenerateCommand implements Runnable {
     }
   }
 
-  private void init() {
+  public void init() {
     try {
       storage = Files.createTempDirectory(UUID.randomUUID().toString());
     } catch (IOException e) {

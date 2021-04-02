@@ -17,6 +17,13 @@ public class SortQuery {
     return new SortQuery(attribute, order);
   }
 
+  public static SortQuery parseNullable(String query) {
+    if (query == null || query.isBlank()) {
+      return parse("__NONE__:asc");
+    }
+    return parse(query);
+  }
+
   public static SortQuery parse(String query) {
     Pattern pattern = Pattern.compile("(\\w+):(asc|desc)");
     Matcher matcher = pattern.matcher(query);
