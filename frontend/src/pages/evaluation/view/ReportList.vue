@@ -31,13 +31,13 @@
           </template>
         </el-table-column>
         <el-table-column align="right" width="">
-          <template slot="header" slot-scope="scope">
+          <template slot="header">
             <div class="el-input el-input--mini">
               <input type="text"
                      autocomplete="off"
                      placeholder="Type to search"
                      class="el-input__inner"
-                     v-model="searchQuery"
+                     :value="searchQuery"
                      @change="search(searchQuery)">
             </div>
           </template>

@@ -1,3 +1,4 @@
+import './index.css';
 import './installVueCompositionApi';
 import Vue from 'vue';
 import VueRouter from "vue-router";

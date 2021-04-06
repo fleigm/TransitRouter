@@ -5,19 +5,18 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <link rel="stylesheet" href="app.css">
-
-    <title>ptmm</title>
+    <title><%= htmlWebpackPlugin.options.title %></title>
 </head>
 <body class="h-screen font-sans">
-
+<noscript>
+    <strong>We're sorry but <%= htmlWebpackPlugin.options.title %> doesn't work properly without JavaScript enabled. Please enable it to continue.</strong>
+</noscript>
 <app></app>
 
 <div id="portal-target">
     <!-- our `<portal>` should move stuff here -->
 </div>
 
-<script src="app.js"></script>
 
 </body>
 </html>

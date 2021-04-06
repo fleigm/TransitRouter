@@ -1,7 +1,7 @@
 version: '3.5'
 services:
   app:
-    container_name: michael-fleig-project
+    container_name: michael-fleig-project-backend
     build:
       context: .
       dockerfile: Dockerfile

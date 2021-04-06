@@ -23,9 +23,9 @@
                   <p>Sigma: {{ params.sigma }}</p>
                   <p>Beta: {{ params.beta }}</p>
                   <p>CSR: {{ params.candidateSearchRadius }}</p>
-                  <p>Router: {{ params.useGraphHopperMapMatching ? 'GHMM' : 'TR'}}</p>
+                  <p>Router: {{ params.useGraphHopperMapMatching ? 'GHMM' : 'TR' }}</p>
                   <div slot="reference" class="name-wrapper">
-                    <el-tag  size="mini">{{ type }}</el-tag>
+                    <el-tag size="mini">{{ type }}</el-tag>
                   </div>
                 </el-popover>
               </div>
@@ -57,13 +57,15 @@
           </el-table-column>
 
           <el-table-column width="" align="right">
-            <template slot="header" slot-scope="scope">
-              <el-button @click="showEvaluationOfSelectedFeeds" :disabled="!selectedFeeds.length" icon="el-icon-s-data" circle size="mini"></el-button>
+            <template slot="header">
+              <el-button @click="showEvaluationOfSelectedFeeds" :disabled="!selectedFeeds.length" icon="el-icon-s-data"
+                         circle size="mini"></el-button>
               <el-popconfirm cancel-button-text='No, Thanks'
                              confirm-button-text='Yes'
                              title="Are you sure to delete all selected feeds?"
                              @confirm="deleteSelectedFeeds">
-                <el-button slot="reference" :disabled="!selectedFeeds.length" icon="el-icon-delete" circle size="mini"></el-button>
+                <el-button slot="reference" :disabled="!selectedFeeds.length" icon="el-icon-delete" circle
+                           size="mini"></el-button>
               </el-popconfirm>
             </template>
             <template slot-scope="scope">
@@ -77,7 +79,8 @@
                              confirm-button-text='Yes'
                              title="Are you sure to delete this feed?"
                              @confirm="deleteFeed(scope.row.id)">
-                <el-button slot="reference" icon="el-icon-delete" circle size="mini" :disabled="scope.row.status === 'PENDING'"></el-button>
+                <el-button slot="reference" icon="el-icon-delete" circle size="mini"
+                           :disabled="scope.row.status === 'PENDING'"></el-button>
               </el-popconfirm>
             </template>
           </el-table-column>
@@ -92,8 +95,6 @@
 </template>
 
 <script>
-import VReports from "./Reports";
-import VAccuracyChart from "./AccuracyChart";
 import VFeedStatusTag from "./FeedStatusTag";
 import VFeedExtensionTag from "./FeedExtensionTag";
 import VFeedEvaluations from "./FeedEvaluations";
@@ -102,7 +103,9 @@ const Filters = {
   isFinished: (feed) => feed.status === 'FINISHED',
   isPending: (feed) => feed.status === 'PENDING',
   hasFailed: (feed) => feed.status === 'FAILED',
-  hasEvaluation: (feed) => feed.extensions.hasOwnProperty('de.fleigm.transitrouter.feeds.evaluation.Evaluation'),
+  hasEvaluation: (feed) => Object.hasOwnProperty.call(
+      feed.extensions,
+      'de.fleigm.transitrouter.feeds.evaluation.Evaluation'),
 }
 
 const sortByDate = (a, b) => new Date(a.createdAt) - new Date(b.createdAt);
@@ -110,7 +113,7 @@ const sortByDate = (a, b) => new Date(a.createdAt) - new Date(b.createdAt);
 
 export default {
   name: "GeneratedFeeds",
-  components: {VFeedEvaluations, VFeedExtensionTag, VFeedStatusTag, VAccuracyChart, VReports},
+  components: {VFeedEvaluations, VFeedExtensionTag, VFeedStatusTag},
   props: {
     presetId: {
       required: true,

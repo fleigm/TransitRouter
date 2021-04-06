@@ -8,6 +8,7 @@
     <artifactId>transitrouter-parent</artifactId>
     <version>1.0-SNAPSHOT</version>
     <modules>
+        <module>frontend</module>
         <module>backend</module>
     </modules>
     <packaging>pom</packaging>

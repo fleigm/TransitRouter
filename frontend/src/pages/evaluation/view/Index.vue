@@ -48,8 +48,6 @@
 </template>
 
 <script>
-import Config from '../../../config';
-import VReportList from "./ReportList";
 import VFinishedView from "./FinishedView";
 import VFailedView from "./FailedView";
 import GeneratedFeedService from "../GeneratedFeedService";
@@ -57,7 +55,7 @@ import GeneratedFeedService from "../GeneratedFeedService";
 export default {
   name: "Index",
 
-  components: {VFailedView, VFinishedView, VReportList},
+  components: {VFailedView, VFinishedView},
 
   data() {
     return {
@@ -87,10 +85,10 @@ export default {
     },
 
     downloadLinkFull() {
-      return `${Config.apiEndpoint}/feeds/${this.id}/download`;
+      return `${process.env.VUE_APP_BACKEND_ENDPOINT}/feeds/${this.id}/download`;
     },
     downloadLinkGeneratedFeed() {
-      return `${Config.apiEndpoint}/feeds/${this.id}/download/generated`;
+      return `${process.env.VUE_APP_BACKEND_ENDPOINT}/feeds/${this.id}/download/generated`;
     }
   },
 

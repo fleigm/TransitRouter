@@ -75,12 +75,9 @@ export default {
 
   components: {
     VFeedEvaluation,
-    ErrorCard,
-    VAccuracyChart,
     EvaluationCard,
     ExecutionTimeChart,
-    HistogramLengthMismatchedHopSegments,
-    HistogramMismatchedHopSegments, HistogramAverageFrechetDistance, VReportList
+    VReportList
   },
 
   props: {
@@ -101,7 +98,7 @@ export default {
     },
 
     hasFeedDetails() {
-      return this.feed.extensions.hasOwnProperty('de.fleigm.transitrouter.gtfs.FeedDetails');
+      return Object.hasOwnProperty.call(this.feed.extensions, 'de.fleigm.transitrouter.gtfs.FeedDetails');
     },
 
     feedDetails() {

@@ -9,7 +9,7 @@
     </div>
 
     <div>
-      <v-preset-card v-for="preset in presets" :key="presets.id" :preset="preset"></v-preset-card>
+      <v-preset-card v-for="preset in presets" :key="preset.id" :preset="preset"></v-preset-card>
     </div>
 
     <div v-if="!isLoading && !presets.length">

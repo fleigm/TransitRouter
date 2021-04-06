@@ -5,12 +5,11 @@
 </template>
 
 <script>
-import EvaluationCard from "./EvaluationCard";
 import ErrorCard from "./ErrorCard";
 
 export default {
   name: "v-failed-view",
-  components: {ErrorCard, EvaluationCard},
+  components: {ErrorCard},
   props: {
     info: {
       type: Object,
@@ -20,7 +19,7 @@ export default {
 
   computed: {
     errors() {
-      return this.info.errors.reverse();
+      return this.info.errors;
     }
   }
 }

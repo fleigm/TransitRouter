@@ -1,8 +1,7 @@
 import axios from "axios/index";
-import Config from "../config";
 
 export const http = axios.create( {
-    baseURL: Config.apiEndpoint,
+    baseURL: process.env.VUE_APP_BACKEND_ENDPOINT,
     crossdomain: true,
 });
 

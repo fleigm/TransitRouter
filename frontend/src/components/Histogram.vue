@@ -31,7 +31,7 @@ export default {
 
   props: {
     dataSets: {
-      type: Array | Object,
+      type: [Array, Object],
       required: true,
     },
     convertFromD3js: {

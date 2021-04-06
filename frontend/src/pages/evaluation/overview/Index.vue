@@ -83,24 +83,20 @@
 </template>
 
 <script>
-import VGenerateFeedForm from "./GenerateFeedForm";
 import VGenerateFeedDialog from "./GenerateFeedDialog";
 import GeneratedFeedService from "../GeneratedFeedService";
 import VFeedStatusTag from "../../feeds/view/FeedStatusTag";
 import VFeedExtensionTag from "../../feeds/view/FeedExtensionTag";
 import VFeedTableExpand from "./FeedTableExpand";
-import VFeedEvaluationInfo from "./FeedEvaluationInfo";
 
 export default {
   name: "Overview",
 
   components: {
-    VFeedEvaluationInfo,
     VFeedTableExpand,
     VFeedExtensionTag,
     VFeedStatusTag,
     VGenerateFeedDialog,
-    VGenerateFeedForm
   },
 
   computed: {

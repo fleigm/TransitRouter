@@ -1,3 +1,24 @@
+@import url('https://rsms.me/inter/inter.css');
+
+
+@tailwind base;
+
+@tailwind components;
+
+@tailwind utilities;
+
+.el-loading-spinner {
+@apply flex justify-center;
+}
+
+.leaflet-default-icon-path {
+  background-image: url('/images/vendor/leaflet/dist/marker-icon.png');
+}
+
+.leaflet-default-shadow-path {
+  background-image: none
+}
+
 .slide-left-enter-active,
 .slide-left-leave-active,
 .slide-right-enter-active,

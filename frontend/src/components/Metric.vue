@@ -13,7 +13,7 @@ export default {
   name: "v-metric",
 
   props: {
-    value: String | Number | Object,
+    value: [String, Number, Object],
     unit: String,
     title: String,
     size: {

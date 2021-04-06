@@ -19,9 +19,10 @@
         ></l-circle>
 
         <template v-for="(candidate, i) in candidates">
-          <l-animated-polyline v-for="(direction) in candidate.directions"
-                      :lat-lngs="direction"
-                      :options="{offset: i, opacity: 0.5, delay: 5000}"
+          <l-animated-polyline v-for="(direction, k) in candidate.directions"
+                               :key="'dir'+k"
+                               :lat-lngs="direction"
+                               :options="{offset: i, opacity: 0.5, delay: 5000}"
           ></l-animated-polyline>
         </template>
 

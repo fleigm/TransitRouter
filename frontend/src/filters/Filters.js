@@ -87,7 +87,7 @@ const routeTypes = {
 
 export function routeTypeToString(type) {
     type = Number(type);
-    if (routeTypes.hasOwnProperty(type)) {
+    if (Object.hasOwnProperty.call(routeTypes, type)) {
         return routeTypes[type];
     }
     return 'unknown';

@@ -53,7 +53,6 @@
 </template>
 
 <script>
-import Config from '../../../config';
 import PresetService from "../PresetService";
 import FeedDetails from "../overview/FeedDetails";
 import VGenerateFeedDialog from "./GenerateFeedDialog";
@@ -80,7 +79,7 @@ export default {
     },
 
     downloadLink() {
-      return `${Config.apiEndpoint}/presets/${this.id}/download`;
+      return `${process.env.VUE_APP_BACKEND_ENDPOINT}/presets/${this.id}/download`;
     },
   },
 

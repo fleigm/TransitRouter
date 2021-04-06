@@ -32,14 +32,13 @@
 
 <script>
 import EvaluationCard from "../EvaluationCard";
-import HistogramAverageFrechetDistance from "../HistogramAverageFrechetDistance";
 import HasEvaluation from "./HasEvaluation";
 import HistogramMismatchedHopSegments from "../HistogramMismatchedHopSegments";
 
 export default {
   name: "AnEvaluationCard",
 
-  components: {HistogramMismatchedHopSegments, HistogramAverageFrechetDistance, EvaluationCard},
+  components: {HistogramMismatchedHopSegments, EvaluationCard},
 
   mixins: [HasEvaluation],
 
