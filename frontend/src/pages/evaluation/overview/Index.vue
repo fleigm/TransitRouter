@@ -3,7 +3,6 @@
     <div class="my-8 flex justify-between">
       <div></div>
       <div class="">
-        <el-button size="mini" @click="clearCache">Clear Cache</el-button>
         <v-generate-feed-dialog></v-generate-feed-dialog>
       </div>
     </div>

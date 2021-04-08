@@ -4,6 +4,7 @@ import de.fleigm.transitrouter.Pattern;
 import de.fleigm.transitrouter.gtfs.Feed;
 import de.fleigm.transitrouter.gtfs.TransitFeed;
 import de.fleigm.transitrouter.gtfs.TransitFeedService;
+import io.quarkus.cache.CacheInvalidate;
 import io.quarkus.cache.CacheResult;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -24,5 +25,9 @@ public class CachedPatternService {
     return transitFeed.routes().values().stream()
         .flatMap(route -> transitFeed.findPatterns(route).stream())
         .collect(Collectors.toList());
+  }
+
+  @CacheInvalidate(cacheName = "patterns")
+  public void clearCache(){
   }
 }

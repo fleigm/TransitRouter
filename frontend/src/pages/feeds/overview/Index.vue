@@ -4,7 +4,6 @@
       <div></div>
       <div class="">
         <v-preset-upload-dialog></v-preset-upload-dialog>
-        <el-button size="mini">Clear Cache</el-button>
       </div>
     </div>
 

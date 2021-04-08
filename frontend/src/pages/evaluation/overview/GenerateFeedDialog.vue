@@ -2,7 +2,7 @@
 
   <el-button plain size="mini" type="primary" @click="open">
     <span>
-    Evaluate GTFS Feed <i class="el-icon-upload el-icon-right"></i>
+    Generate GTFS Feed <i class="el-icon-upload el-icon-right"></i>
     </span>
 
     <portal>

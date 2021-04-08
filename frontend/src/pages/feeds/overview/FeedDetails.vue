@@ -1,7 +1,7 @@
 <template>
   <div class="flex gap-x-4 w-full" v-if="hasFeedDetails">
     <div class="w-1/3">
-        <v-metric title="Agency" :value="feedDetails.agencies[0].agency_name"></v-metric>
+        <v-metric title="Agency" :value="feedDetails.agencies[0].agency_name" size="small"></v-metric>
         <v-metric title="Website" size="mini">
           <a :href="feedDetails.agencies[0].agency_url" target="_blank"><i class="el-icon-link"></i></a>
         </v-metric>
