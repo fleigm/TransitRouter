@@ -40,12 +40,11 @@
         <failsafe-plugin.version>2.22.2</failsafe-plugin.version>
         <checkstyle-plugin.version>3.1.1</checkstyle-plugin.version>
         <checkstyle-plugin.config>google_checks.xml</checkstyle-plugin.config>
-
     </properties>
 
     <build>
+        <finalName>TransitRouter</finalName>
         <plugins>
-
             <plugin>
                 <artifactId>maven-resources-plugin</artifactId>
                 <version>3.2.0</version>
@@ -70,8 +69,8 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.8.1</version>
             </plugin>
-
             <plugin>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>${surefire-plugin.version}</version>
@@ -83,7 +82,6 @@
                     </systemPropertyVariables>
                 </configuration>
             </plugin>
-
             <plugin>
                 <groupId>io.quarkus</groupId>
                 <artifactId>quarkus-maven-plugin</artifactId>

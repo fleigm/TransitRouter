@@ -27,4 +27,4 @@ EXPOSE 8080
 
 ENV APP_RESOURCES='/app/resources'
 
-ENTRYPOINT [ "./run-java.sh" ]
+ENTRYPOINT [ "./run-java.sh", "serve"]

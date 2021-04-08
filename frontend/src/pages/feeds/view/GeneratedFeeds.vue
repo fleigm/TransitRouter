@@ -103,7 +103,7 @@ const Filters = {
   isFinished: (feed) => feed.status === 'FINISHED',
   isPending: (feed) => feed.status === 'PENDING',
   hasFailed: (feed) => feed.status === 'FAILED',
-  hasEvaluation: (feed) => Object.hasOwnProperty.call(
+  hasEvaluation: (feed) => Object.prototype.hasOwnProperty.call(
       feed.extensions,
       'de.fleigm.transitrouter.feeds.evaluation.Evaluation'),
 }

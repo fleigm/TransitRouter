@@ -95,7 +95,7 @@ export default {
 
   methods: {
     add(feed) {
-      if (!feed.extensions.hasOwnProperty('de.fleigm.transitrouter.feeds.evaluation.Evaluation')) {
+      if (!Object.prototype.hasOwnProperty.call(feed.extensions, 'de.fleigm.transitrouter.feeds.evaluation.Evaluation')) {
         console.log('Generated feed has no evaluation.');
         return;
       }

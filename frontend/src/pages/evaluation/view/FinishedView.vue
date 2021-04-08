@@ -98,7 +98,7 @@ export default {
     },
 
     hasFeedDetails() {
-      return Object.hasOwnProperty.call(this.feed.extensions, 'de.fleigm.transitrouter.gtfs.FeedDetails');
+      return Object.prototype.hasOwnProperty.call(this.feed.extensions, 'de.fleigm.transitrouter.gtfs.FeedDetails');
     },
 
     feedDetails() {

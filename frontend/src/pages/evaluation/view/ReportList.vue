@@ -38,6 +38,7 @@
                      placeholder="Type to search"
                      class="el-input__inner"
                      :value="searchQuery"
+                     @input="searchQuery = $event.target.value"
                      @change="search(searchQuery)">
             </div>
           </template>

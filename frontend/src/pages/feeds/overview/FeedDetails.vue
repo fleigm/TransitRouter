@@ -36,7 +36,7 @@ export default {
 
   computed: {
     hasFeedDetails() {
-      return this.preset.extensions.hasOwnProperty('de.fleigm.transitrouter.gtfs.FeedDetails');
+      return Object.prototype.hasOwnProperty.call(this.preset.extensions, 'de.fleigm.transitrouter.gtfs.FeedDetails');
     },
 
     feedDetails() {

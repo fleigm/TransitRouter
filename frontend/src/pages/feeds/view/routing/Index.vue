@@ -44,6 +44,7 @@
                            placeholder="Type to search"
                            class="el-input__inner"
                            :value="searchQuery"
+                           @input="searchQuery = $event.target.value"
                            @change="search(searchQuery)">
                     <HelperTooltip content="Test Content" title="Search helper" class="text-lg">
                       <p>free text - search for name</p>
