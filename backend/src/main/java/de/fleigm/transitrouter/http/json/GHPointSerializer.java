@@ -14,7 +14,8 @@ public class GHPointSerializer extends StdSerializer<GHPoint> {
   }
 
   @Override
-  public void serialize(GHPoint value, JsonGenerator gen, SerializerProvider provider) throws IOException {
+  public void serialize(GHPoint value, JsonGenerator gen, SerializerProvider provider)
+      throws IOException {
       gen.writeStartArray();
       gen.writeNumber(value.lat);
       gen.writeNumber(value.lon);

@@ -34,9 +34,12 @@ public class DownloadController {
     }
 
     return Response
-            .ok(generatedFeed.getFileStoragePath().resolve(GeneratedFeed.GENERATED_GTFS_FEED).toFile())
-            .header("Content-Disposition", "attachment;filename=" + generatedFeed.getName() + "." + GeneratedFeed.GENERATED_GTFS_FEED)
-            .build();
+        .ok(generatedFeed.getFileStoragePath().resolve(GeneratedFeed.GENERATED_GTFS_FEED).toFile())
+        .header("Content-Disposition",
+            String.format("attachment;filename=%s.%s",
+                generatedFeed.getName(),
+                GeneratedFeed.GENERATED_GTFS_FEED))
+        .build();
   }
 
   @GET

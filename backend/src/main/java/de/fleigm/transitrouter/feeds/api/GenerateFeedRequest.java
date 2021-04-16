@@ -36,7 +36,6 @@ public class GenerateFeedRequest {
   @FormParam("parameters")
   @NotBlank
   private String parameters;
-  //private Map<Type, Parameters> parameters;
 
   @FormParam("withEvaluation")
   private boolean withEvaluation = true;
@@ -60,7 +59,7 @@ public class GenerateFeedRequest {
   public static class GenerateFeedRequestBuilder {
     private InputStream gtfsFeed;
     private String name;
-    private Map<Type, Parameters> parameters = new HashMap<>();
+    private final Map<Type, Parameters> parameters = new HashMap<>();
     private boolean withEvaluation;
 
     GenerateFeedRequestBuilder() {

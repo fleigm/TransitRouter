@@ -11,7 +11,7 @@ import java.util.List;
 @ToString
 @AllArgsConstructor
 @Accessors(fluent = true)
-class ObservationWithCandidates {
+class TimeStep {
   private final Observation observation;
   private final List<DirectedCandidate> candidates;
 }

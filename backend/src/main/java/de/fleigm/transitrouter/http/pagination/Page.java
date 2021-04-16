@@ -7,6 +7,11 @@ import java.net.URI;
 import java.util.List;
 
 
+/**
+ * Paginated result object.
+ *
+ * @param <T>
+ */
 @Data
 public class Page<T> {
 
@@ -35,7 +40,7 @@ public class Page<T> {
   }
 
   public static <T> PageBuilder<T> builder() {
-    return new PageBuilder<T>();
+    return new PageBuilder<>();
   }
 
 
@@ -97,11 +102,7 @@ public class Page<T> {
     }
 
     public Page<T> build() {
-      return new Page<T>(uri, currentPage, perPage, total, data);
-    }
-
-    public String toString() {
-      return "Page.PageBuilder(uri=" + this.uri + ", currentPage=" + this.currentPage + ", perPage=" + this.perPage + ", total=" + this.total + ", data=" + this.data + ")";
+      return new Page<>(uri, currentPage, perPage, total, data);
     }
   }
 }

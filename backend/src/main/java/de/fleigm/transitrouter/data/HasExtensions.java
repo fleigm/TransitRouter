@@ -23,7 +23,8 @@ public interface HasExtensions {
   /**
    * @see Extensions#getOrCreate(Class, Supplier)
    */
-  default <T extends Extension> T getOrCreateExtension(Class<T> extension, Supplier<T> defaultSupplier) {
+  default <T extends Extension> T getOrCreateExtension(Class<T> extension,
+                                                       Supplier<T> defaultSupplier) {
     return extensions().getOrCreate(extension, defaultSupplier);
   }
 

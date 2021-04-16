@@ -6,6 +6,9 @@ import com.fasterxml.jackson.annotation.JsonAnySetter;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Helper class for return composed json responses.
+ */
 public class View {
   private final Map<String, Object> bag = new HashMap<>();
 

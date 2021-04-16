@@ -8,6 +8,10 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * Removes the shapes from the report.
+ * We do not need them in our application.
+ */
 public interface MinifyShapevlReport {
 
   static void minify(Path path) throws IOException {

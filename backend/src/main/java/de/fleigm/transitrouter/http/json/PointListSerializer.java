@@ -14,7 +14,8 @@ public class PointListSerializer extends StdSerializer<PointList> {
   }
 
   @Override
-  public void serialize(PointList value, JsonGenerator gen, SerializerProvider provider) throws IOException {
+  public void serialize(PointList value, JsonGenerator gen, SerializerProvider provider)
+      throws IOException {
     gen.writeStartArray();
 
     for (int i = 0; i < value.size(); i++) {

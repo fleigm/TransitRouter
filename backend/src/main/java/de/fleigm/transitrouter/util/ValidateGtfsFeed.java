@@ -53,7 +53,9 @@ public final class ValidateGtfsFeed {
    */
   public static boolean validate(Path path) {
     try (ZipFile archive = new ZipFile(path.toFile())) {
-      List<String> entries = archive.stream().map(ZipEntry::getName).collect(Collectors.toList());
+      List<String> entries = archive.stream()
+              .map(ZipEntry::getName)
+              .collect(Collectors.toList());
 
       if (!ALLOWED_FILES.containsAll(entries)) {
         return false;

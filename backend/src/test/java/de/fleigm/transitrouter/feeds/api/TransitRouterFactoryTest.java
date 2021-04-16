@@ -1,8 +1,8 @@
 package de.fleigm.transitrouter.feeds.api;
 
 import de.fleigm.transitrouter.feeds.Parameters;
-import de.fleigm.transitrouter.routing.FallbackTransitRouter;
-import de.fleigm.transitrouter.routing.GraphHopperTransitRouter;
+import de.fleigm.transitrouter.routing.SafeTransitRouterMapMatching;
+import de.fleigm.transitrouter.routing.GraphHopperMapMatching;
 import io.quarkus.test.junit.QuarkusTest;
 import org.junit.jupiter.api.Test;
 
@@ -20,10 +20,10 @@ class TransitRouterFactoryTest {
   void can_switch_between_GHMM_and_TransitRouter() {
     Parameters parameters = Parameters.defaultParameters();
 
-    assertEquals(FallbackTransitRouter.class, factory.create(parameters).getClass());
+    assertEquals(SafeTransitRouterMapMatching.class, factory.create(parameters).getClass());
 
     parameters.setUseGraphHopperMapMatching(true);
-    assertEquals(GraphHopperTransitRouter.class, factory.create(parameters).getClass());
+    assertEquals(GraphHopperMapMatching.class, factory.create(parameters).getClass());
   }
 
 

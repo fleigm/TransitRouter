@@ -1,22 +1,32 @@
 package de.fleigm.transitrouter.http.sort;
 
-import java.util.Objects;
+import lombok.Data;
+import lombok.experimental.Accessors;
+
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+/**
+ * Sort query for HTTP requests.
+ */
+@Data
+@Accessors(fluent = true)
 public class SortQuery {
   private final String attribute;
   private final SortOrder order;
-
-  private SortQuery(String attribute, SortOrder order) {
-    this.attribute = attribute;
-    this.order = order;
-  }
 
   public static SortQuery of(String attribute, SortOrder order) {
     return new SortQuery(attribute, order);
   }
 
+  /**
+   * Creates a {@link SortQuery} from its string representation.
+   * The format is [ATTRIBUTE]:asc or [ATTRIBUTE]:desc.
+   * If query is null or blank a {@link SortQuery} object with __NONE__:asc is created.
+   *
+   * @param query query string
+   * @return sort query object
+   */
   public static SortQuery parseNullable(String query) {
     if (query == null || query.isBlank()) {
       return parse("__NONE__:asc");
@@ -24,6 +34,13 @@ public class SortQuery {
     return parse(query);
   }
 
+  /**
+   * Creates a {@link SortQuery} from its string representation.
+   * The format is [ATTRIBUTE]:asc or [ATTRIBUTE]:desc
+   *
+   * @param query query string
+   * @return sort query object
+   */
   public static SortQuery parse(String query) {
     Pattern pattern = Pattern.compile("(\\w+):(asc|desc)");
     Matcher matcher = pattern.matcher(query);
@@ -36,28 +53,7 @@ public class SortQuery {
         SortOrder.valueOf(matcher.group(2).trim().toUpperCase()));
   }
 
-  public String attribute() {
-    return attribute;
-  }
-
-  public SortOrder order() {
-    return order;
-  }
-
-  @Override
-  public boolean equals(Object o) {
-    if (this == o) return true;
-    if (!(o instanceof SortQuery)) return false;
-    SortQuery sortQuery = (SortQuery) o;
-    return Objects.equals(attribute, sortQuery.attribute) && order == sortQuery.order;
-  }
-
-  @Override
-  public int hashCode() {
-    return Objects.hash(attribute, order);
-  }
-
-  public static enum SortOrder {
+  public enum SortOrder {
     ASC, DESC
   }
 }

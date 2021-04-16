@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import de.fleigm.transitrouter.feeds.GeneratedFeed;
 import de.fleigm.transitrouter.feeds.process.Step;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.DoubleSummaryStatistics;
 import java.util.HashMap;
@@ -15,7 +16,7 @@ import java.util.function.ToDoubleFunction;
  * Generate evaluation quick stats from {@link Report}
  */
 public class QuickStatsGenerationStep implements Step {
-  private static final Logger logger = org.slf4j.LoggerFactory.getLogger(QuickStatsGenerationStep.class);
+  private static final Logger logger = LoggerFactory.getLogger(QuickStatsGenerationStep.class);
 
   @Override
   public void run(GeneratedFeed info) {

@@ -11,7 +11,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-class FeedGenerationStepTest {
+class ShapeGenerationStepTest {
 
 
   @Test
@@ -24,7 +24,7 @@ class FeedGenerationStepTest {
 
     Pattern pattern = new Pattern(route, stops, List.of(trip));
 
-    FeedGenerationStep.RoutedPattern routedPattern = FeedGenerationStep.RoutedPattern.of(pattern);
+    ShapeGenerationStep.RoutedPattern routedPattern = ShapeGenerationStep.RoutedPattern.of(pattern);
 
     assertEquals(stops.size(), routedPattern.getDistances().length);
   }

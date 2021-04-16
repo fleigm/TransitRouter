@@ -39,19 +39,21 @@
               <el-table-column align="right" width="">
                 <template slot="header">
                   <div class="el-input el-input--mini flex gap-2 items-center">
-                    <input type="text"
-                           autocomplete="off"
-                           placeholder="Type to search"
-                           class="el-input__inner"
-                           :value="searchQuery"
-                           @input="searchQuery = $event.target.value"
-                           @change="search(searchQuery)">
-                    <HelperTooltip content="Test Content" title="Search helper" class="text-lg">
-                      <p>free text - search for name</p>
-                      <p>name:&lt;NAME&gt; - search for name</p>
-                      <p>type:&lt;1-4&gt; - search for type</p>
-                      <p>search query delimiter - ;</p>
-                    </HelperTooltip>
+                    <div class="flex gap-2 w-full">
+                      <input type="text"
+                             autocomplete="off"
+                             placeholder="Type to search"
+                             class="el-input__inner"
+                             :value="searchQuery"
+                             @input="searchQuery = $event.target.value"
+                             @change="search(searchQuery)">
+                      <HelperTooltip content="Test Content" title="Search helper" class="text-lg">
+                        <p>free text - search for name</p>
+                        <p>name:&lt;NAME&gt; - search for name</p>
+                        <p>type:&lt;1-4&gt; - search for type</p>
+                        <p>search query delimiter - ;</p>
+                      </HelperTooltip>
+                    </div>
                   </div>
                 </template>
                 <template slot-scope="scope">

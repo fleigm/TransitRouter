@@ -8,6 +8,9 @@ import javax.validation.constraints.Min;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.QueryParam;
 
+/**
+ * HTTP pagination request object.
+ */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

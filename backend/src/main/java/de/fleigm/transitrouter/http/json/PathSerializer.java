@@ -14,7 +14,8 @@ public class PathSerializer extends StdSerializer<Path> {
   }
 
   @Override
-  public void serialize(Path value, JsonGenerator gen, SerializerProvider provider) throws IOException {
+  public void serialize(Path value, JsonGenerator gen, SerializerProvider provider)
+      throws IOException {
     provider.defaultSerializeValue(value.calcPoints(), gen);
   }
 }

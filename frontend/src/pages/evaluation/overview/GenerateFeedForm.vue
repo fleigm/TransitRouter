@@ -100,10 +100,10 @@ export default {
     return {
       availableProfiles: [
         {
-          value: 'bus_shortest_turn',
+          value: 'bus_shortest',
           label: 'bus - shortest path'
         }, {
-          value: 'bus_fastest_turn',
+          value: 'bus_fastest',
           label: 'bus - fastest path',
         }, {
           value: 'rail',
@@ -158,7 +158,7 @@ export default {
             _enabled: true,
           },
           BUS: {
-            profile: 'bus_fastest_turn',
+            profile: 'bus_fastest',
             sigma: 25.0,
             beta: 2.0,
             candidateSearchRadius: 25.0,

@@ -17,16 +17,9 @@ import java.util.Map;
 
 /**
  * Vehicle profile optimized for public transport via bus.
- * This is based on the {@link com.graphhopper.routing.util.CarFlagEncoder} from GraphHopper.
  */
 public class BusFlagEncoder extends AbstractFlagEncoder {
   private boolean speedTwoDirections;
-
-  /**
-   * A map which associates string to speed. Get some impression:
-   * http://www.itoworld.com/map/124#fullscreen
-   * http://wiki.openstreetmap.org/wiki/OSM_tags_for_routing/Maxspeed
-   */
   protected final Map<String, Integer> defaultSpeedMap = new HashMap<>();
 
   public BusFlagEncoder(PMap properties) {

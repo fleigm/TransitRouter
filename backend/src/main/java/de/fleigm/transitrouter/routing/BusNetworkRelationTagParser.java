@@ -10,39 +10,44 @@ import com.graphhopper.storage.IntsRef;
 
 import java.util.List;
 
+/**
+ * Add bus route network encoding to ways based on route relation.
+ */
 public class BusNetworkRelationTagParser implements RelationTagParser {
 
-  private final SimpleBooleanEncodedValue transformerRouteRelEnc;
-  private final SimpleBooleanEncodedValue busRouteNetworkEncoding;
+  private final SimpleBooleanEncodedValue routeTransformerEncoding;
+  private final SimpleBooleanEncodedValue busRouteEncoding;
 
   public BusNetworkRelationTagParser() {
-    transformerRouteRelEnc = new SimpleBooleanEncodedValue("bus_route_network_relation", true);
-    busRouteNetworkEncoding = BusRouteNetwork.create();
+    routeTransformerEncoding = new SimpleBooleanEncodedValue("bus_route_relation");
+    busRouteEncoding = BusRouteNetwork.create();
   }
 
   @Override
-  public void createRelationEncodedValues(EncodedValueLookup lookup, List<EncodedValue> registerNewEncodedValue) {
-    registerNewEncodedValue.add(transformerRouteRelEnc);
+  public void createRelationEncodedValues(EncodedValueLookup lookup,
+                                          List<EncodedValue> registerNewEncodedValue) {
+    registerNewEncodedValue.add(routeTransformerEncoding);
   }
 
   @Override
   public IntsRef handleRelationTags(IntsRef relFlags, ReaderRelation relation) {
-    if (relation.hasTag("route", "bus")) {
-      transformerRouteRelEnc.setBool(true, relFlags, true);
-    }
-
+    routeTransformerEncoding.setBool(false, relFlags, relation.hasTag("route", "bus"));
     return relFlags;
   }
 
   @Override
-  public void createEncodedValues(EncodedValueLookup lookup, List<EncodedValue> registerNewEncodedValue) {
-    registerNewEncodedValue.add(busRouteNetworkEncoding);
+  public void createEncodedValues(EncodedValueLookup lookup,
+                                  List<EncodedValue> registerNewEncodedValue) {
+    registerNewEncodedValue.add(busRouteEncoding);
   }
 
   @Override
-  public IntsRef handleWayTags(IntsRef edgeFlags, ReaderWay way, boolean ferry, IntsRef relationFlags) {
-    boolean value = transformerRouteRelEnc.getBool(true, relationFlags);
-    busRouteNetworkEncoding.setBool(true, edgeFlags, value);
+  public IntsRef handleWayTags(IntsRef edgeFlags,
+                               ReaderWay way,
+                               boolean ferry,
+                               IntsRef relationFlags) {
+    boolean value = routeTransformerEncoding.getBool(false, relationFlags);
+    busRouteEncoding.setBool(false, edgeFlags, value);
     return edgeFlags;
   }
 }

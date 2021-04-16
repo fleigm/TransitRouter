@@ -20,7 +20,6 @@
               <el-link :underline="false" :href="downloadLink">
                 Download<i class="el-icon-download el-icon--right"></i>
               </el-link>
-
             </el-button>
 
             <el-popconfirm

@@ -41,21 +41,11 @@ import com.graphhopper.routing.weighting.Weighting;
 import com.graphhopper.storage.Graph;
 import com.graphhopper.storage.index.LocationIndexTree;
 import com.graphhopper.storage.index.Snap;
-import com.graphhopper.util.DistanceCalc;
-import com.graphhopper.util.DistancePlaneProjection;
-import com.graphhopper.util.EdgeIterator;
-import com.graphhopper.util.EdgeIteratorState;
-import com.graphhopper.util.GHUtility;
-import com.graphhopper.util.PMap;
-import com.graphhopper.util.Parameters;
+import com.graphhopper.util.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -76,7 +66,7 @@ import java.util.stream.Collectors;
  * @author Stefan Holder
  * @author kodonnell
  */
-public class GraphHopperTransitRouter implements TransitRouter {
+public class GraphHopperMapMatching implements TransitRouter {
 
   private final Logger logger = LoggerFactory.getLogger(getClass());
 
@@ -93,7 +83,7 @@ public class GraphHopperTransitRouter implements TransitRouter {
   private double measurementErrorSigma = 50.0;
   private double transitionProbabilityBeta = 2.0;
 
-  public GraphHopperTransitRouter(GraphHopper graphHopper, PMap hints) {
+  public GraphHopperMapMatching(GraphHopper graphHopper, PMap hints) {
     this.locationIndex = (LocationIndexTree) graphHopper.getLocationIndex();
 
     if (hints.has("vehicle"))

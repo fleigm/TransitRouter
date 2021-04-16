@@ -25,14 +25,17 @@ Set the *app.evaluation-tool* property to *shapevl* located in your project root
 - GTFS Feed Stuttgart: [download](https://www.openvvs.de/dataset/e66f03e4-79f2-41d0-90f1-166ca609e491/resource/bfbb59c7-767c-4bca-bbb2-d8d32a3e0378/download/vvs_gtfs.zip)
 
 The tests currently require the osm file of Baden-Württemberg. This will (hopefully) change in the near future.
-At the moment the app is not very well tested (shame on me)
 
+## Build project
+run `./mvnw clean package` to build the frontend and backend module
+
+The frontend will be served by our quarkus backend. During the build the dist folder of the frontend is copied to the backend resource target folder.
 
 ## Development
+
 run `./mvnw clean quarkus:dev` to start the quarkus backend. The API is available via localhost:8080
 
-run `npm run hot` inside the frontend module to. You can visit the site via localhost:9000
-Inside *frontend/src/Config.js* set *apiEndpoint* to http://localhost:8080
+run `npm run hot` inside the frontend module to. You can visit the site via localhost:8081
 
 
 ## Production

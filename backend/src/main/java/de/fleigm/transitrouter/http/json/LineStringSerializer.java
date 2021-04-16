@@ -15,7 +15,8 @@ public class LineStringSerializer extends StdSerializer<LineString> {
   }
 
   @Override
-  public void serialize(LineString value, JsonGenerator gen, SerializerProvider provider) throws IOException {
+  public void serialize(LineString value, JsonGenerator gen, SerializerProvider provider)
+      throws IOException {
     gen.writeStartArray();
 
     for (int i = 0; i < value.getNumPoints(); i++) {

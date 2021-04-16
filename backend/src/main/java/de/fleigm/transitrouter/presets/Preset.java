@@ -4,11 +4,7 @@ import de.fleigm.transitrouter.data.Entity;
 import de.fleigm.transitrouter.data.Extensions;
 import de.fleigm.transitrouter.data.HasExtensions;
 import de.fleigm.transitrouter.gtfs.Feed;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.nio.file.Path;
 

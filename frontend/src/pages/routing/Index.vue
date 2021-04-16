@@ -97,13 +97,13 @@ export default {
           value: 'bus_shortest',
           label: 'shortest path',
         }, {
-          value: 'bus_shortest_turn',
+          value: 'bus_shortest',
           label: 'shortest path with turn restrictions'
         }, {
           value: 'bus_fastest',
           label: 'fastest path',
         }, {
-          value: 'bus_fastest_turn',
+          value: 'bus_fastest',
           label: 'fastest path with turn restrictions',
         }, {
           value: 'rail',

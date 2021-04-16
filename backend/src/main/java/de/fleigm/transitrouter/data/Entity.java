@@ -26,7 +26,7 @@ public abstract class Entity {
 
   /**
    * Directory where all entities of that type are stored.
-   * Combine this with {@link Entity#entityStorageRoot()}.
+   * Combine this with {@link Entity#storageRoot()}.
    *
    * @return entity storage root
    */

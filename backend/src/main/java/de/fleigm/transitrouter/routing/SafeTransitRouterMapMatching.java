@@ -5,13 +5,17 @@ import com.graphhopper.util.PMap;
 
 import java.util.List;
 
-public class FallbackTransitRouter implements TransitRouter {
+/**
+ * Implementation of the TransitRouterMapMatching (TRMM) that retries to find a route
+ * with turn restrictions disabled if the markov chain is broken.
+ */
+public class SafeTransitRouterMapMatching implements TransitRouter {
   private final TransitRouter transitRouter;
   private final TransitRouter fallbackTransitRouter;
 
-  public FallbackTransitRouter(GraphHopper graphHopper, PMap parameters) {
-    transitRouter = new DefaultTransitRouter(graphHopper, parameters);
-    fallbackTransitRouter = new DefaultTransitRouter(
+  public SafeTransitRouterMapMatching(GraphHopper graphHopper, PMap parameters) {
+    transitRouter = new TransitRouterMapMatching(graphHopper, parameters);
+    fallbackTransitRouter = new TransitRouterMapMatching(
         graphHopper,
         new PMap(parameters).putObject("disable_turn_costs", true));
   }

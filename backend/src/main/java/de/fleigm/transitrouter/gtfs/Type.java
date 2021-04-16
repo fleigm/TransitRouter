@@ -4,6 +4,10 @@ import de.fleigm.transitrouter.util.Range;
 
 import java.util.Arrays;
 
+/**
+ * GTFS vehicle / route type with support for the googles extended route types.
+ * Extended route type are matched to their base type e.g. 701 will be mapped to BUS
+ */
 public enum Type {
   TRAM(0, Range.of(900, 999)),
   SUBWAY(1),
@@ -18,7 +22,7 @@ public enum Type {
   private final int value;
   private final Range[] ranges;
 
-  Type(int value, Range ... ranges) {
+  Type(int value, Range... ranges) {
     this.value = value;
     this.ranges = ranges;
   }

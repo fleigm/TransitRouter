@@ -14,7 +14,8 @@ public class ObservationSerializer extends StdSerializer<Observation> {
   }
 
   @Override
-  public void serialize(Observation value, JsonGenerator gen, SerializerProvider provider) throws IOException {
+  public void serialize(Observation value, JsonGenerator gen, SerializerProvider provider)
+      throws IOException {
     gen.writeStartArray();
     gen.writeNumber(value.lat());
     gen.writeNumber(value.lon());

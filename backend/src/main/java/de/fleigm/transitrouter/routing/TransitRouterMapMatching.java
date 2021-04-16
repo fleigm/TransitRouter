@@ -32,12 +32,7 @@ import com.graphhopper.routing.weighting.Weighting;
 import com.graphhopper.storage.Graph;
 import com.graphhopper.storage.index.LocationIndexTree;
 import com.graphhopper.storage.index.Snap;
-import com.graphhopper.util.DistanceCalc;
-import com.graphhopper.util.DistancePlaneProjection;
-import com.graphhopper.util.EdgeIterator;
-import com.graphhopper.util.EdgeIteratorState;
-import com.graphhopper.util.GHUtility;
-import com.graphhopper.util.PMap;
+import com.graphhopper.util.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,7 +41,18 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class DefaultTransitRouter implements TransitRouter {
+/**
+ * Implementation of the TRMM approach with support for turn restrictions
+ * and inter hop turn restrictions.
+ * <p>
+ * Configuration parameters:
+ * - profile
+ * - disable_turn_costs
+ * - candidate_search_radius
+ * - measurement_error_sigma
+ * - transitions_beta_probability
+ */
+public class TransitRouterMapMatching implements TransitRouter {
   private final Logger logger = LoggerFactory.getLogger(getClass());
 
   private final Graph graph;
@@ -55,58 +61,38 @@ public class DefaultTransitRouter implements TransitRouter {
   private final Weighting weighting;
 
   private final double candidateSearchRadius;
-  private final double sigma;
-  private final double beta;
   private final HmmProbabilities probabilities;
 
-  public DefaultTransitRouter(GraphHopper graphHopper, PMap hints) {
+  public TransitRouterMapMatching(GraphHopper graphHopper, PMap hints) {
     this.locationIndex = (LocationIndexTree) graphHopper.getLocationIndex();
 
     Profile profile = graphHopper.getProfile(hints.getString("profile", ""));
 
     graph = graphHopper.getGraphHopperStorage();
-    weighting = graphHopper.createWeighting(profile, hints, hints.getBool("disable_turn_costs", false));
+    weighting = graphHopper.createWeighting(
+        profile, hints, hints.getBool("disable_turn_costs", false));
 
-    candidateSearchRadius = hints.getDouble("candidate_search_radius", 25);
-    sigma = hints.getDouble("measurement_error_sigma", 25);
-    beta = hints.getDouble("transitions_beta_probability", 25);
-
+    candidateSearchRadius = hints.getDouble("candidate_search_radius", 10);
+    double sigma = hints.getDouble("measurement_error_sigma", 10);
+    double beta = hints.getDouble("transitions_beta_probability", 1);
     probabilities = new HmmProbabilities(sigma, beta);
   }
 
   @Override
   public RoutingResult route(List<Observation> observations) {
-    // Snap observations to links. Generates multiple candidate snaps per observation.
-    // In the next step, we will turn them into splits, but we already call them splits now
-    // because they are modified in place.
-    List<Collection<Snap>> splitsPerObservation = observations.stream()
-        .map(o -> locationIndex.findNClosest(
-            o.lat(),
-            o.lon(),
-            DefaultEdgeFilter.allEdges(weighting.getFlagEncoder()), candidateSearchRadius))
+    List<Collection<Snap>> snapsPerObservation = observations.stream()
+        .map(this::findObservationSnaps)
         .collect(Collectors.toList());
 
-    // Create the query graph, containing split edges so that all the places where an observation might have happened
-    // are a node. This modifies the Snap objects and puts the new node numbers into them.
     QueryGraph queryGraph = QueryGraph.create(
         graph,
-        splitsPerObservation.stream()
+        snapsPerObservation.stream()
             .flatMap(Collection::stream)
             .collect(Collectors.toList()));
 
-    // Due to how LocationIndex/QueryGraph is implemented, we can get duplicates when a point is snapped
-    // directly to a tower node instead of creating a split / virtual node. No problem, but we still filter
-    // out the duplicates for performance reasons.
-    splitsPerObservation = splitsPerObservation.stream()
-        .map(this::deduplicate)
-        .collect(Collectors.toList());
+    List<TimeStep> timeSteps = createTimeSteps(observations, snapsPerObservation, queryGraph);
 
-    // Creates candidates from the Snaps of all observations (a candidate is basically a
-    // Snap + direction).
-    List<ObservationWithCandidates> timeSteps = createTimeSteps(observations, splitsPerObservation, queryGraph);
-
-    // Compute the most likely sequence of map matching candidates:
-    List<SequenceState<DirectedCandidate, Observation, Path>> sequence = computeViterbiSequence(timeSteps, queryGraph);
+    var sequence = computeViterbiSequence(timeSteps, queryGraph);
 
     Path path = buildPathFromSequence(sequence, queryGraph, weighting);
     List<Path> pathSegments = sequence.stream()
@@ -119,7 +105,7 @@ public class DefaultTransitRouter implements TransitRouter {
         .pathSegments(pathSegments)
         .distance(path.getDistance())
         .time(path.getTime())
-        .candidates(splitsPerObservation.stream()
+        .candidates(snapsPerObservation.stream()
             .flatMap(Collection::stream)
             .map(Snap::getSnappedPoint)
             .collect(Collectors.toList()))
@@ -127,63 +113,71 @@ public class DefaultTransitRouter implements TransitRouter {
         .build();
   }
 
-  private Collection<Snap> deduplicate(Collection<Snap> splits) {
-    // Only keep one split per node number. Let's say the last one.
-    return splits.stream()
-        .collect(Collectors.toMap(Snap::getClosestNode, s -> s, (s1, s2) -> s2))
-        .values();
+  private List<Snap> findObservationSnaps(Observation o) {
+    return locationIndex.findNClosest(
+        o.lat(),
+        o.lon(),
+        DefaultEdgeFilter.allEdges(weighting.getFlagEncoder()), candidateSearchRadius);
   }
 
   /**
-   * Creates TimeSteps with candidates for the GPX entries but does not create emission or
-   * transition probabilities. Creates directed candidates for virtual nodes and undirected
-   * candidates for real nodes.
+   * Creates a {@link TimeStep} with directed candidates for each observations
    */
-  private List<ObservationWithCandidates> createTimeSteps(List<Observation> observations,
-                                                          List<Collection<Snap>> splitsPerObservation,
-                                                          QueryGraph queryGraph) {
+  private List<TimeStep> createTimeSteps(
+      List<Observation> observations,
+      List<Collection<Snap>> snapsPerObservation,
+      QueryGraph queryGraph) {
 
-    if (splitsPerObservation.size() != observations.size()) {
-      throw new IllegalArgumentException(
-          "filteredGPXEntries and queriesPerEntry must have same size.");
-    }
-
-    final List<ObservationWithCandidates> timeSteps = new ArrayList<>();
+    List<TimeStep> timeSteps = new ArrayList<>();
     for (int i = 0; i < observations.size(); i++) {
       Observation observation = observations.get(i);
-      Collection<Snap> splits = splitsPerObservation.get(i);
-      List<DirectedCandidate> candidates = new ArrayList<>();
-      for (Snap split : splits) {
-        EdgeIterator edgeIterator = queryGraph.createEdgeExplorer().setBaseNode(split.getClosestNode());
-        while (edgeIterator.next()) {
-          EdgeIteratorState edge = queryGraph.getEdgeIteratorState(edgeIterator.getEdge(), edgeIterator.getAdjNode());
-          DirectedCandidate directedCandidate = DirectedCandidate.builder()
-              .observation(observation)
-              .snap(split)
-              .outgoingEdge(edge)
-              .build();
+      Collection<Snap> snaps = snapsPerObservation.get(i);
+      List<DirectedCandidate> candidates = createCandidates(queryGraph, observation, snaps);
 
-          candidates.add(directedCandidate);
-        }
-      }
-
-      timeSteps.add(new ObservationWithCandidates(observation, candidates));
+      timeSteps.add(new TimeStep(observation, candidates));
     }
     return timeSteps;
+  }
+
+  private List<DirectedCandidate> createCandidates(QueryGraph queryGraph,
+                                                   Observation observation,
+                                                   Collection<Snap> snaps) {
+
+    List<DirectedCandidate> candidates = new ArrayList<>();
+    for (Snap split : snaps) {
+      EdgeIterator edgeIterator = queryGraph
+          .createEdgeExplorer()
+          .setBaseNode(split.getClosestNode());
+
+      while (edgeIterator.next()) {
+        EdgeIteratorState edge = queryGraph.getEdgeIteratorState(
+            edgeIterator.getEdge(),
+            edgeIterator.getAdjNode());
+
+        DirectedCandidate directedCandidate = DirectedCandidate.builder()
+            .observation(observation)
+            .snap(split)
+            .outgoingEdge(edge)
+            .build();
+
+        candidates.add(directedCandidate);
+      }
+    }
+    return candidates;
   }
 
   /**
    * Computes the most likely state sequence for the observations.
    */
   private List<SequenceState<DirectedCandidate, Observation, Path>> computeViterbiSequence(
-      List<ObservationWithCandidates> timeSteps,
+      List<TimeStep> timeSteps,
       QueryGraph queryGraph) {
 
-    final ViterbiAlgorithm<DirectedCandidate, Observation, Path> viterbi = new ViterbiAlgorithm<>();
+    ViterbiAlgorithm<DirectedCandidate, Observation, Path> viterbi = new ViterbiAlgorithm<>();
 
     int timeStepCounter = 0;
-    ObservationWithCandidates prevTimeStep = null;
-    for (ObservationWithCandidates timeStep : timeSteps) {
+    TimeStep prevTimeStep = null;
+    for (TimeStep timeStep : timeSteps) {
       HMMStep hmmStep = new HMMStep();
 
       computeEmissionProbabilities(timeStep, hmmStep);
@@ -204,7 +198,11 @@ public class DefaultTransitRouter implements TransitRouter {
             hmmStep.roadPaths());
       }
       if (viterbi.isBroken()) {
-        throw BrokenSequenceException.create(timeStepCounter, prevTimeStep, timeStep, distanceCalc);
+        throw BrokenSequenceException.create(
+            timeStepCounter,
+            prevTimeStep,
+            timeStep,
+            distanceCalc);
       }
 
       timeStepCounter++;
@@ -215,8 +213,8 @@ public class DefaultTransitRouter implements TransitRouter {
   }
 
   private void computeTransitionProbabilities(QueryGraph queryGraph,
-                                              ObservationWithCandidates prevTimeStep,
-                                              ObservationWithCandidates timeStep,
+                                              TimeStep prevTimeStep,
+                                              TimeStep timeStep,
                                               HMMStep hmmStep) {
 
     final double linearDistance = distanceCalc.calcDist(
@@ -254,10 +252,10 @@ public class DefaultTransitRouter implements TransitRouter {
     }
   }
 
-  private void computeEmissionProbabilities(ObservationWithCandidates timeStep, HMMStep hmmStep) {
+  private void computeEmissionProbabilities(TimeStep timeStep, HMMStep hmmStep) {
     for (DirectedCandidate candidate : timeStep.candidates()) {
       // distance from observation to road in meters
-      final double distance = candidate.snap().getQueryDistance();
+      double distance = candidate.snap().getQueryDistance();
       hmmStep.addEmissionProbability(candidate, probabilities.emissionLogProbability(distance));
     }
   }
@@ -284,7 +282,9 @@ public class DefaultTransitRouter implements TransitRouter {
     return buildPathFromTraveledEdges(traveledEdges, graph, weighting);
   }
 
-  private Path buildPathFromTraveledEdges(List<EdgeIteratorState> traveledEdges, Graph graph, Weighting weighting) {
+  private Path buildPathFromTraveledEdges(List<EdgeIteratorState> traveledEdges,
+                                          Graph graph,
+                                          Weighting weighting) {
     Path path = new Path(graph);
 
     int prevEdge = EdgeIterator.NO_EDGE;
@@ -303,5 +303,4 @@ public class DefaultTransitRouter implements TransitRouter {
 
     return path;
   }
-
 }

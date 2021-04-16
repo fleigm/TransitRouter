@@ -14,7 +14,8 @@ public class EdgeIteratorStateSerializer extends StdSerializer<EdgeIteratorState
   }
 
   @Override
-  public void serialize(EdgeIteratorState value, JsonGenerator gen, SerializerProvider serializers) throws IOException {
+  public void serialize(EdgeIteratorState value, JsonGenerator gen, SerializerProvider serializers)
+      throws IOException {
     gen.writeNumber(value.getEdge());
   }
 }

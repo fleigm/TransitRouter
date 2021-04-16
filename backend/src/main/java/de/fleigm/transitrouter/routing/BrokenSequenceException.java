@@ -24,8 +24,8 @@ public class BrokenSequenceException extends RuntimeException {
    * @return BrokenSequenceException
    */
   public static BrokenSequenceException create(int timeStepCounter,
-                                               ObservationWithCandidates prevTimeStep,
-                                               ObservationWithCandidates timeStep,
+                                               TimeStep prevTimeStep,
+                                               TimeStep timeStep,
                                                DistanceCalc distanceCalc) {
     String likelyReasonStr = "";
     if (prevTimeStep != null) {

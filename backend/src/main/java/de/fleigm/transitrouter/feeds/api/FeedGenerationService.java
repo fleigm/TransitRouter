@@ -7,14 +7,15 @@ import de.fleigm.transitrouter.feeds.Status;
 import de.fleigm.transitrouter.feeds.evaluation.FeedEvaluationStep;
 import de.fleigm.transitrouter.feeds.evaluation.QuickStatsGenerationStep;
 import de.fleigm.transitrouter.feeds.process.FeedDetailsGenerationStep;
-import de.fleigm.transitrouter.feeds.process.FeedGenerationStep;
 import de.fleigm.transitrouter.feeds.process.Process;
+import de.fleigm.transitrouter.feeds.process.ShapeGenerationStep;
 import de.fleigm.transitrouter.gtfs.Feed;
 import de.fleigm.transitrouter.gtfs.TransitFeedService;
 import de.fleigm.transitrouter.gtfs.Type;
 import de.fleigm.transitrouter.presets.Preset;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -23,7 +24,7 @@ import java.util.Map;
 
 @ApplicationScoped
 public class FeedGenerationService {
-  private static final Logger logger = org.slf4j.LoggerFactory.getLogger(FeedGenerationService.class);
+  private static final Logger logger = LoggerFactory.getLogger(FeedGenerationService.class);
 
   @ConfigProperty(name = "app.evaluation-tool")
   Path evaluationTool;
@@ -50,7 +51,7 @@ public class FeedGenerationService {
             request.getGtfsFeed()));
 
     Process process = new Process(generatedFeedRepository)
-        .addStep(new FeedGenerationStep(transitRouterFactory))
+        .addStep(new ShapeGenerationStep(transitRouterFactory))
         .addStep(new FeedDetailsGenerationStep(transitFeedService));
 
     if (request.isWithEvaluation()) {
@@ -81,7 +82,7 @@ public class FeedGenerationService {
 
   private FeedGenerationResponse run(GeneratedFeed generatedFeed, boolean withEvaluation) {
     Process process = new Process(generatedFeedRepository)
-        .addStep(new FeedGenerationStep(transitRouterFactory));
+        .addStep(new ShapeGenerationStep(transitRouterFactory));
 
     if (withEvaluation) {
       process.addStep(new FeedEvaluationStep(evaluationTool))

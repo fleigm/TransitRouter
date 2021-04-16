@@ -1,7 +1,6 @@
 package de.fleigm.transitrouter.http.json;
 
 import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.TreeNode;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
@@ -18,7 +17,8 @@ public class ObservationDeserializer extends StdDeserializer<Observation> {
   }
 
   @Override
-  public Observation deserialize(JsonParser parser, DeserializationContext ctxt) throws IOException, JsonProcessingException {
+  public Observation deserialize(JsonParser parser, DeserializationContext ctxt)
+      throws IOException {
     TreeNode treeNode = parser.readValueAsTree();
     GHPoint point = new GHPoint(
         ((DoubleNode) treeNode.get(0)).doubleValue(),

@@ -20,6 +20,14 @@ import java.util.List;
 @ApplicationScoped
 public class GraphHopperFactory {
 
+  /**
+   * Create a new GraphHopper instance from a given OSM file.
+   *
+   * @param osmFile             osm file
+   * @param storagePath         storage file for GraphHopper cache
+   * @param cleanTemporaryFiles clear old cache and reprocess osm file.
+   * @return GraphHopper instance
+   */
   @Produces
   @Startup
   @ApplicationScoped
@@ -44,11 +52,16 @@ public class GraphHopperFactory {
 
     RailFlagEncoder railFlagEncoder = new RailFlagEncoder(new PMap());
 
+    OSMTurnRelationParser osmTurnRelationParser = new OSMTurnRelationParser(
+        "bus",
+        1,
+        List.of("bus", "motorcar", "psv", "motor_vehicle", "vehicle", "access"));
+
     EncodingManager encodingManager = EncodingManager.start()
         .add(busFlagEncoder)
         .add(railFlagEncoder)
         .addRelationTagParser(new BusNetworkRelationTagParser())
-        .addTurnCostParser(new OSMTurnRelationParser("bus", 1, List.of("bus", "motorcar", "psv", "motor_vehicle", "vehicle", "access")))
+        .addTurnCostParser(osmTurnRelationParser)
         .build();
 
     GraphHopper graphHopper = new GraphHopperOSM()
@@ -56,11 +69,18 @@ public class GraphHopperFactory {
         .setGraphHopperLocation(osmStoragePath.toString())
         .setEncodingManager(encodingManager)
         .setProfiles(
-            new Profile("bus_fastest").setVehicle("bus").setWeighting("fastest").setTurnCosts(false),
-            new Profile("bus_fastest_turn").setVehicle("bus").setWeighting("fastest").setTurnCosts(true),
-            new Profile("bus_shortest_turn").setVehicle("bus").setWeighting("shortest").setTurnCosts(true),
-            new Profile("bus_shortest").setVehicle("bus").setWeighting("shortest").setTurnCosts(false),
-            new Profile("rail").setVehicle("rail").setWeighting("shortest").setTurnCosts(false)
+            new Profile("bus_fastest")
+                .setVehicle("bus")
+                .setWeighting("fastest")
+                .setTurnCosts(true),
+            new Profile("bus_shortest")
+                .setVehicle("bus")
+                .setWeighting("shortest")
+                .setTurnCosts(true),
+            new Profile("rail")
+                .setVehicle("rail")
+                .setWeighting("shortest")
+                .setTurnCosts(false)
         );
 
     graphHopper.setDataReaderFile(osmFile.toString());

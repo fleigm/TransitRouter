@@ -16,6 +16,9 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * Contains helper methods that dont fit anywhere else.
+ */
 public abstract class Helper {
 
   /**
@@ -42,7 +45,11 @@ public abstract class Helper {
    */
   public static void buildZipFile(OutputStream output, List<Path> filePaths) throws IOException {
     try (var archive = new ZipArchiveOutputStream(output)) {
-      List<File> files = filePaths.stream().map(Path::toFile).collect(Collectors.toList());
+
+      List<File> files = filePaths.stream()
+              .map(Path::toFile)
+              .collect(Collectors.toList());
+
       for (File file : files) {
         ArchiveEntry entry = new ZipArchiveEntry(file, file.getName());
         archive.putArchiveEntry(entry);

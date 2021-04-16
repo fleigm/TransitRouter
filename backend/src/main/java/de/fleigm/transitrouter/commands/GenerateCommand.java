@@ -8,7 +8,7 @@ import de.fleigm.transitrouter.feeds.api.TransitRouterFactory;
 import de.fleigm.transitrouter.feeds.evaluation.Evaluation;
 import de.fleigm.transitrouter.feeds.evaluation.FeedEvaluationStep;
 import de.fleigm.transitrouter.feeds.evaluation.Shapevl;
-import de.fleigm.transitrouter.feeds.process.FeedGenerationStep;
+import de.fleigm.transitrouter.feeds.process.ShapeGenerationStep;
 import de.fleigm.transitrouter.gtfs.Feed;
 import de.fleigm.transitrouter.gtfs.Type;
 import de.fleigm.transitrouter.http.json.ObjectMapperConfiguration;
@@ -42,7 +42,8 @@ public class GenerateCommand implements Runnable {
   @Option(names = {"-r", "--router"}, defaultValue = "tr", description = "router")
   String router;
 
-  @Option(names = {"-m", "--mot"}, defaultValue = "all", split = ",", description = "means of transportation. Default: ${DEFAULT-VALUE}")
+  @Option(names = {"-m", "--mot"}, defaultValue = "all", split = ",",
+      description = "means of transportation. Default: ${DEFAULT-VALUE}")
   String[] mot;
 
   @Option(names = {"-e", "--evaluate"}, description = "evaluate results")
@@ -53,11 +54,6 @@ public class GenerateCommand implements Runnable {
 
   Path storage;
   GeneratedFeed generatedFeed;
-
-  public GenerateCommand() {
-
-  }
-
 
 
   @Override
@@ -80,7 +76,8 @@ public class GenerateCommand implements Runnable {
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
-    Runtime.getRuntime().addShutdownHook(new Thread(() -> FileUtils.deleteQuietly(storage.toFile())));
+    Runtime.getRuntime().addShutdownHook(new Thread(() ->
+        FileUtils.deleteQuietly(storage.toFile())));
     System.setProperty("app.storage", storage.toString());
   }
 
@@ -88,8 +85,9 @@ public class GenerateCommand implements Runnable {
     Feed feed = prepareFeed(gtfsFeed);
 
     GraphHopper graphHopper = new GraphHopperFactory().create(osmFile, storage, false);
-    TransitRouterFactory.Default transitRouterFactory = new TransitRouterFactory.Default(graphHopper);
-    Shapevl shapevl = new Shapevl(ConfigProvider.getConfig().getValue("app.evaluation-tool", Path.class));
+    TransitRouterFactory transitRouterFactory = new TransitRouterFactory.Default(graphHopper);
+    Shapevl shapevl = new Shapevl(
+        ConfigProvider.getConfig().getValue("app.evaluation-tool", Path.class));
 
     generatedFeed = GeneratedFeed.builder()
         .name("")
@@ -97,14 +95,18 @@ public class GenerateCommand implements Runnable {
         .parameters(buildParameterMap())
         .build();
 
-    GeneratedFeedRepository generatedFeeds = new GeneratedFeedRepository(storage, ObjectMapperConfiguration.get());
+    GeneratedFeedRepository generatedFeeds = new GeneratedFeedRepository(
+        storage,
+        ObjectMapperConfiguration.get());
+
     generatedFeeds.save(generatedFeed);
 
-    new FeedGenerationStep(transitRouterFactory).run(generatedFeed);
+    new ShapeGenerationStep(transitRouterFactory).run(generatedFeed);
 
     Files.copy(
         generatedFeed.getFeed().getPath(),
-        gtfsFeed.resolveSibling(FilenameUtils.removeExtension(gtfsFeed.getFileName().toString()) + ".generated.zip"));
+        gtfsFeed.resolveSibling(
+            FilenameUtils.removeExtension(gtfsFeed.getFileName().toString()) + ".generated.zip"));
 
     if (evaluate) {
       new FeedEvaluationStep(shapevl).run(generatedFeed);
@@ -152,7 +154,7 @@ public class GenerateCommand implements Runnable {
 
     if (mot.contains("3") || mot.contains("bus") || mot.contains("all")) {
       params.put(Type.BUS, Parameters.builder()
-          .profile("bus_fastest_turn")
+          .profile("bus_fastest")
           .sigma(sigma)
           .candidateSearchRadius(sigma)
           .beta(beta)

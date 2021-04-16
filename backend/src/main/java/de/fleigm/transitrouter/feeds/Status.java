@@ -1,5 +1,8 @@
 package de.fleigm.transitrouter.feeds;
 
+/**
+ * Status of a {@link GeneratedFeed}
+ */
 public enum Status {
   PENDING {
     @Override

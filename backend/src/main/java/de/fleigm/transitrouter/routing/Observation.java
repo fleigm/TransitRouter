@@ -4,9 +4,6 @@ import com.graphhopper.util.shapes.GHPoint;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 
-/**
- *
- */
 @ToString
 @EqualsAndHashCode
 public class Observation {

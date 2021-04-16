@@ -13,6 +13,9 @@ import com.graphhopper.util.PMap;
 import java.util.List;
 import java.util.Set;
 
+/**
+ * Flag encoder for rail vehicles like tram, subway, and trains.
+ */
 public class RailFlagEncoder extends AbstractFlagEncoder {
 
   private static final Set<String> allowedWays = Set.of("tram", "subway", "rail", "light_rail");
@@ -54,7 +57,10 @@ public class RailFlagEncoder extends AbstractFlagEncoder {
   }
 
   @Override
-  public void createEncodedValues(List<EncodedValue> registerNewEncodedValue, String prefix, int index) {
+  public void createEncodedValues(List<EncodedValue> registerNewEncodedValue,
+                                  String prefix,
+                                  int index) {
+
     // first two bits are reserved for route handling in superclass
     super.createEncodedValues(registerNewEncodedValue, prefix, index);
 

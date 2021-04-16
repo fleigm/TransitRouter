@@ -32,6 +32,7 @@ public class Events {
    * @param <T>        event type.
    * @return CompletionStage for async events.
    */
+  @SuppressWarnings("unchecked")
   public <T> CompletionStage<T> fire(T event, Annotation... qualifiers) {
     Event<T> cdiEvent = eventBus.select((Class<T>) event.getClass(), qualifiers);
 

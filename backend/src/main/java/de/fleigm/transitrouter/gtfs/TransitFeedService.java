@@ -11,7 +11,7 @@ import javax.enterprise.context.ApplicationScoped;
 import java.nio.file.Path;
 
 /**
- *
+ * Caches {@link TransitFeed}s.
  */
 @ApplicationScoped
 public class TransitFeedService {

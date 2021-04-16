@@ -9,15 +9,11 @@ import com.graphhopper.storage.index.Snap;
 import com.graphhopper.util.EdgeIterator;
 import com.graphhopper.util.EdgeIteratorState;
 import com.graphhopper.util.FetchMode;
-import com.graphhopper.util.PMap;
 import com.graphhopper.util.PointList;
 import com.graphhopper.util.shapes.GHPoint;
-import de.fleigm.transitrouter.routing.DefaultTransitRouter;
-import de.fleigm.transitrouter.routing.TransitRouter;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
-import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -31,13 +27,6 @@ public class CandidateResource {
 
   @Inject
   GraphHopper hopper;
-
-  TransitRouter transitRouter;
-
-  @PostConstruct
-  public void init() {
-    transitRouter = new DefaultTransitRouter(hopper, new PMap().putObject("profile", "bus_fastest"));
-  }
 
   @GET
   public Response findCandidates(

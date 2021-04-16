@@ -6,6 +6,9 @@ import com.graphhopper.routing.Path;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Helper class for storing the probabilities of a time step in an HMM
+ */
 class HMMStep {
 
   private final Map<DirectedCandidate, Double> emissionProbabilities;
@@ -18,18 +21,16 @@ class HMMStep {
     roadPaths = new HashMap<>();
   }
 
+  /**
+   * add emission probability to a candidate.
+   */
   public void addEmissionProbability(DirectedCandidate candidate, double probability) {
     emissionProbabilities.put(candidate, probability);
   }
 
-  public void addTransitionProbability(DirectedCandidate from, DirectedCandidate to, double probability) {
-    transitionProbabilities.put(new Transition<>(from, to), probability);
-  }
-
-  public void addRoadPath(DirectedCandidate from, DirectedCandidate to, Path path) {
-    roadPaths.put(new Transition<>(from, to), path);
-  }
-
+  /**
+   * add transition probability and path for a transition
+   */
   public void addTransition(DirectedCandidate from, DirectedCandidate to, Path path, double probability) {
     Transition<DirectedCandidate> transition = new Transition<>(from, to);
     roadPaths.put(transition, path);

@@ -18,8 +18,9 @@ import de.fleigm.transitrouter.routing.TransitRouter;
 import de.fleigm.transitrouter.util.Helper;
 import de.fleigm.transitrouter.util.StopWatch;
 import lombok.Value;
-import lombok.extern.slf4j.Slf4j;
 import org.mapdb.Fun;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
@@ -30,12 +31,15 @@ import java.util.stream.Collectors;
 import java.util.stream.DoubleStream;
 import java.util.stream.StreamSupport;
 
-@Slf4j
-public class FeedGenerationStep implements Step {
+/**
+ * Generate the shape files.
+ */
+public class ShapeGenerationStep implements Step {
 
+  private static final Logger LOGGER = LoggerFactory.getLogger(ShapeGenerationStep.class);
   private final TransitRouterFactory transitRouterFactory;
 
-  public FeedGenerationStep(TransitRouterFactory transitRouterFactory) {
+  public ShapeGenerationStep(TransitRouterFactory transitRouterFactory) {
     this.transitRouterFactory = transitRouterFactory;
   }
 
@@ -60,7 +64,7 @@ public class FeedGenerationStep implements Step {
     }
 
     void run() {
-      log.info("Start feed generation step.");
+      LOGGER.info("Start shape generation step.");
 
       StopWatch stopWatch = StopWatch.createAndStart();
 
@@ -82,7 +86,7 @@ public class FeedGenerationStep implements Step {
       info.getOrCreateExtension(ExecutionTime.class, ExecutionTime::new)
           .add("feed_generation", Duration.of(stopWatch.getNanos(), ChronoUnit.NANOS));
 
-      log.info("Finished feed generation step. Took {}s", stopWatch.getSeconds());
+      LOGGER.info("Finished shape generation step. Took {}s", stopWatch.getSeconds());
     }
 
     private RoutedPattern generateShape(Pattern pattern) {
@@ -98,7 +102,10 @@ public class FeedGenerationStep implements Step {
                 exception
             )
                 .addDetail("route", pattern.route())
-                .addDetail("trips", pattern.trips().stream().map(trip -> trip.trip_id).collect(Collectors.toList()))
+                .addDetail("trips", pattern.trips()
+                    .stream()
+                    .map(trip -> trip.trip_id)
+                    .collect(Collectors.toList()))
                 .addDetail("fallback", "straight line shape"));
         return RoutedPattern.of(pattern);
       }
@@ -131,7 +138,11 @@ public class FeedGenerationStep implements Step {
       var storage = transitFeed.internal().stop_times;
 
       for (Trip trip : routedPattern.pattern.trips()) {
-        List<StopTime> stopTimes = StreamSupport.stream(transitFeed.internal().getOrderedStopTimesForTrip(trip.trip_id).spliterator(), false).collect(Collectors.toList());
+        List<StopTime> stopTimes = StreamSupport
+            .stream(transitFeed.internal()
+                .getOrderedStopTimesForTrip(trip.trip_id)
+                .spliterator(), false)
+            .collect(Collectors.toList());
 
         for (int i = 0; i < stopTimes.size(); i++) {
           StopTime stopTime = stopTimes.get(i);

@@ -5,8 +5,17 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+/**
+ * Search query for HTTP requests
+ * A {@link SearchQuery} can contain multiple {@link SearchCriteria} objects.
+ * <p>
+ * A {@link SearchQuery} has the string format:
+ * [KEY][ : | ~ | < | > ][VALUE]
+ * Multiple {@link SearchCriteria} are separated by ; as a delimiter.
+ */
 public class SearchQuery {
-  public static final Pattern SEARCH_CRITERIA_PATTERN = Pattern.compile("(\\w+|\\w+\\.\\w+|\\w+\\.\\w+\\.\\w+)([:~<>])(.+)");
+  public static final Pattern SEARCH_CRITERIA_PATTERN =
+      Pattern.compile("(\\w+|\\w+\\.\\w+|\\w+\\.\\w+\\.\\w+)([:~<>])(.+)");
 
   private final Map<String, SearchCriteria> criteria;
 
@@ -43,6 +52,13 @@ public class SearchQuery {
     return this.criteria.size();
   }
 
+  /**
+   * Create a {@link SearchQuery} from its string representation.
+   * The {@link SearchCriteria} are separated by a ;
+   *
+   * @param search query
+   * @return SearchQuery
+   */
   public static SearchQuery parse(String search) {
     SearchQuery searchQuery = new SearchQuery();
 

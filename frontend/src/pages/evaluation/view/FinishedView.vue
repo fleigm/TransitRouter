@@ -3,12 +3,12 @@
     <div class="grid grid-cols-3 gap-4">
       <evaluation-card header="feed info">
         <div class="max-h-64 overflow-y-scroll" v-if="hasFeedDetails">
-            <v-metric title="Agency" :value="feedDetails.agencies[0].agency_name" size="mini"></v-metric>
-            <el-table :data="routesAndTripsPerType" size="mini" class="p-2">
-              <el-table-column prop="type" label="Type" width=""></el-table-column>
-              <el-table-column prop="routes" label="Routes" width="80"></el-table-column>
-              <el-table-column prop="trips" label="Trips" width="80"></el-table-column>
-            </el-table>
+          <v-metric title="Agency" :value="feedDetails.agencies[0].agency_name" size="mini"></v-metric>
+          <el-table :data="routesAndTripsPerType" size="mini" class="p-2">
+            <el-table-column prop="type" label="Type" width=""></el-table-column>
+            <el-table-column prop="routes" label="Routes" width="80"></el-table-column>
+            <el-table-column prop="trips" label="Trips" width="80"></el-table-column>
+          </el-table>
         </div>
         <div v-else>
           <div class="w-full text-xl text-secondary font-thin my-8 text-center">Generating feed info...</div>
@@ -17,31 +17,39 @@
 
 
       <EvaluationCard header="Parameters" class="">
-        <div class="flex justify-between gap-4 mb-4">
-          <v-metric :value="feed.parameters.profile"
-                    class=""
-                    size="small"
-                    title="Profile"
-          ></v-metric>
-          <v-metric :value="feed.parameters.useGraphHopperMapMatching ? 'GHMM' : 'TransitRouter'"
-                    class=""
-                    size="small"
-                    title="Router"
-          ></v-metric>
-        </div>
-        <div class="flex justify-between gap-4">
-          <v-metric :value="feed.parameters.beta | number('0.00')"
-                    class=""
-                    title="beta"
-          ></v-metric>
-          <v-metric :value="feed.parameters.sigma | number('0')"
-                    class=""
-                    title="sigma"
-          ></v-metric>
-          <v-metric :value="feed.parameters.candidateSearchRadius | number('0')"
-                    class=""
-                    title="CSR"
-          ></v-metric>
+        <div class="grid grid-cols-1 gap-4 max-h-64 overflow-y-scroll">
+          <div v-for="(params, type) in feed.parameters" :key="type">
+            <p>{{ type | capitalize }}</p>
+            <div class="flex">
+              <v-metric :value="params.profile"
+                        class=""
+                        size="mini"
+                        title="Profile"
+              ></v-metric>
+              <v-metric :value="params.useGraphHopperMapMatching ? 'GHMM' : 'TransitRouter'"
+                        class=""
+                        size="mini"
+                        title="Router"
+              ></v-metric>
+            </div>
+            <div class="flex gap-4">
+              <v-metric :value="params.beta | number('0.00')"
+                        class=""
+                        size="mini"
+                        title="beta"
+              ></v-metric>
+              <v-metric :value="params.sigma | number('0')"
+                        class=""
+                        size="mini"
+                        title="sigma"
+              ></v-metric>
+              <v-metric :value="params.candidateSearchRadius | number('0')"
+                        class=""
+                        size="mini"
+                        title="CSR"
+              ></v-metric>
+            </div>
+          </div>
         </div>
       </EvaluationCard>
 
@@ -60,13 +68,8 @@
 
 <script>
 import VReportList from "./ReportList";
-import HistogramAverageFrechetDistance from "./HistogramAverageFrechetDistance";
-import HistogramMismatchedHopSegments from "./HistogramMismatchedHopSegments";
-import HistogramLengthMismatchedHopSegments from "./HistogramLengthMismatchedHopSegments";
 import ExecutionTimeChart from "./ExecutionTimeChart";
 import EvaluationCard from "./EvaluationCard";
-import VAccuracyChart from "../AccuracyChart";
-import ErrorCard from "./ErrorCard";
 import VFeedEvaluation from "./evaluation/FeedEvaluation";
 import {routeTypeToString} from "../../../filters/Filters";
 
@@ -88,8 +91,7 @@ export default {
   },
 
   data() {
-    return {
-    }
+    return {}
   },
 
   computed: {
@@ -133,8 +135,7 @@ export default {
     }
   },
 
-  methods: {
-  },
+  methods: {},
 
   mounted() {
   }
