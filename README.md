@@ -32,19 +32,18 @@ run `./mvnw clean package` to build the frontend and backend module
 The frontend will be served by our quarkus backend. During the build the dist folder of the frontend is copied to the backend resource target folder.
 
 ## Development
-
 run `./mvnw clean quarkus:dev` to start the quarkus backend. The API is available via localhost:8080
 
-run `npm run hot` inside the frontend module to. You can visit the site via localhost:8081
+run `./mvnw clean package` to build the project.
+run `java -jar backend/target/TransitRouter-runner.jar serve` to start the web application. (localhost:8080)
 
+For easier frontend development you can run the frontend separately with hot reload:
+run `npm run serve` inside the frontend module to. You can visit the site via localhost:8081
 
 ## Production
 The frontend will be served by the quarkus backend.
 
-Inside *frontend/src/Config.js* set *apiEndpoint* to an empty string and run `npm run prod` inside the frontend module. This compiles and copies all files inside the backend resource folder.
-
 run `./mvnw clean package` to compile the project
-
 
 ## Docker
 compile project: `./mvnw clean package -Dmaven.test.skip=true`
@@ -55,12 +54,16 @@ bind volume in docker-compose.yaml
 run `docker-compose build` and `docker-compose up -d`
 
 ### with DockerFile
-`sudo docker build -t michael-fleig-project .`
+`docker build -t <NAME> .`
 
-`
-sudo docker run -i --rm -p 8080:8080 --name <name> <name>`
-
-make sure to set the env variables (see docker-compose.yaml)
+```
+docker run -i --rm \
+-v <RESOURCE_FOLDER>:/app/resources \
+-e APP_GH_OSM=/app/resources/<OSM_FILE> \
+-p 8080:8080 \
+--name <NAME> \
+<NAME>
+```
 
 ![](webapp.png)
  

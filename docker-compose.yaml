@@ -7,8 +7,6 @@ services:
       dockerfile: Dockerfile
     environment:
       APP_GH_OSM: '/app/resources/bw.osm.pbf'
-      APP_STORAGE: '/app/storage'
-      APP_EVALUATION_TOOL: '/app/shapevl'
     volumes:
       #- /home/michi-pc/uni/bachelor/project/dr:/app/storage
       - /home/michi-pc/uni/bachelor/project/resources:/app/resources

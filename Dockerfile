@@ -26,5 +26,7 @@ RUN chmod 777 ./shapevl
 EXPOSE 8080
 
 ENV APP_RESOURCES='/app/resources'
+ENV APP_STORAGE='/app/storage'
+ENV APP_EVALUATION_TOOL='/app/shapevl'
 
 ENTRYPOINT [ "./run-java.sh", "serve"]
