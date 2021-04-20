@@ -35,7 +35,7 @@ public class BusFlagEncoder extends AbstractFlagEncoder {
 
   public BusFlagEncoder(int speedBits, double speedFactor, int maxTurnCosts) {
     super(speedBits, speedFactor, maxTurnCosts);
-    restrictions.addAll(Arrays.asList("bus", "psv", "motorcar", "motor_vehicle", "vehicle", "access"));
+    restrictions.addAll(List.of("bus", "psv", "motorcar", "motor_vehicle", "vehicle", "access"));
 
     restrictedValues.add("agricultural");
     restrictedValues.add("forestry");
@@ -114,7 +114,9 @@ public class BusFlagEncoder extends AbstractFlagEncoder {
    * Define the place of the speedBits in the edge flags for car.
    */
   @Override
-  public void createEncodedValues(List<EncodedValue> registerNewEncodedValue, String prefix, int index) {
+  public void createEncodedValues(List<EncodedValue> registerNewEncodedValue,
+                                  String prefix,
+                                  int index) {
     // first two bits are reserved for route handling in superclass
     super.createEncodedValues(registerNewEncodedValue, prefix, index);
 
@@ -136,7 +138,8 @@ public class BusFlagEncoder extends AbstractFlagEncoder {
 
     Integer speed = defaultSpeedMap.get(highwayValue);
     if (speed == null) {
-      throw new IllegalStateException(toString() + ", no speed found for: " + highwayValue + ", tags: " + way);
+      throw new IllegalStateException(
+          toString() + ", no speed found for: " + highwayValue + ", tags: " + way);
     }
 
     return speed;
@@ -185,8 +188,8 @@ public class BusFlagEncoder extends AbstractFlagEncoder {
     }
 
     // allow designated ways only if they a part of a bus route
-    boolean busRouteNetwork = getBooleanEncodedValue(BusRouteNetwork.KEY).getBool(true, edgeFlags);
-    if (way.hasTag(List.of("vehicle", "motor_vehicle"), List.of("destination")) && !busRouteNetwork) {
+    boolean busRoute = getBooleanEncodedValue(BusRouteNetwork.KEY).getBool(true, edgeFlags);
+    if (way.hasTag(List.of("vehicle", "motor_vehicle"), List.of("destination")) && !busRoute) {
       accessEnc.setBool(true, edgeFlags, false);
       accessEnc.setBool(false, edgeFlags, false);
     }

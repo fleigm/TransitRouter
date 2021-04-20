@@ -43,7 +43,8 @@ public class FeedDetails implements Extension {
         .collect(Collectors.groupingBy(route -> route.route_type, Collectors.counting()));
 
     Map<Integer, Long> tripsPerType = transitFeed.trips().values().stream()
-        .collect(Collectors.groupingBy(trip -> feed.routes.get(trip.route_id).route_type, Collectors.counting()));
+        .collect(Collectors.groupingBy(trip ->
+            feed.routes.get(trip.route_id).route_type, Collectors.counting()));
 
     return FeedDetails.builder()
         .info(feed.getFeedInfo())
