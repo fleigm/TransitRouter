@@ -7,7 +7,7 @@
             {{ header }}
           </slot>
         </div>
-        <HelperTooltip content="Test Content" title="test"></HelperTooltip>
+<!--        <HelperTooltip content="Test Content" title="test"></HelperTooltip>-->
       </div>
     </template>
     <div class="p-2 relative">

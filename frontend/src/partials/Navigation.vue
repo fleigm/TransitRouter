@@ -36,12 +36,12 @@ export default {
           name: 'generated feeds',
           page: 'evaluation.index'
         }, {
-          name: 'Routing',
+          name: 'routing',
           page: 'routing.index'
-        }, {
+        }, /*{
           name: 'Candidate Finder',
           page: 'candidateFinder.index'
-        }
+        }*/
       ]
     }
   }

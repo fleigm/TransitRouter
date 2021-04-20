@@ -1,7 +1,7 @@
 <template>
   <EvaluationCard>
     <template #header>
-      averaged avg Frechet Distance <span class="italic">&delta;<sub>aF</sub></span>
+      average Fréchet Distance <span class="italic">&delta;<sub>aF</sub></span>
     </template>
     <div v-loading="!report.length" class="min-h-128">
       <HistogramAverageFrechetDistance v-if="report.length"
