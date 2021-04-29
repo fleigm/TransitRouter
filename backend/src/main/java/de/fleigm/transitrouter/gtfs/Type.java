@@ -10,8 +10,8 @@ import java.util.Arrays;
  */
 public enum Type {
   TRAM(0, Range.of(900, 999)),
-  SUBWAY(1),
-  RAIL(2, Range.of(100, 199), Range.of(400, 499)),
+  SUBWAY(1, Range.of(401, 402)),
+  RAIL(2, Range.of(100, 199), Range.of(403, 401)),
   BUS(3, Range.of(700, 799)),
   Ferry(4),
   CABLE_TRAM(5),
